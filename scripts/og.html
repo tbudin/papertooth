@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Papertooth social card</title>
+<!-- The social preview image (docs/og.png), drawn with papertooth itself. After npm run build, from the project root:
+     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars --window-size=1200,630
+       --virtual-time-budget=8000 --screenshot=docs/og.png "file://$PWD/scripts/og.html" -->
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Courier+Prime:wght@400;700&family=Special+Elite&family=Shippori+Mincho+B1:wght@800&display=block">
+<link rel="stylesheet" href="../dist/papertooth.min.css">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body { display: grid; place-items: center; }
+  /* 36px grid: the card is 15 cells tall, and every line of text sits on a dot row */
+  .card {
+    --pt-grid: 36px; --pt-s-body: 34px; --pt-s-h1: 104px;
+    position: relative; box-sizing: border-box; width: 1116px; height: 540px; margin: 0;
+    padding: 54px 72px;
+  }
+  .card h1 { font-size: var(--pt-s-h1); line-height: 108px; max-width: none; margin: 0 0 36px; }
+  .card p { font-size: var(--pt-s-body); line-height: 36px; max-width: 28ch; }
+  .card .pt-row { margin-top: 36px; }
+  .card .url { font-family: var(--pt-font-type); font-size: 26px; opacity: .7; }
+  .card .pt-stamp { position: absolute; right: 96px; top: 40px; --pt-rot: -8deg; }
+  .card .pt-sticky { position: absolute; right: 80px; bottom: 64px; --pt-rot: 3deg; --pt-note-w: 290px; --pt-note-h: 200px; }
+  .card .pt-sticky p { font-family: var(--pt-font-hand); font-size: 36px; line-height: 40px; max-width: none; }
+</style>
+</head>
+<body class="pt-desk pt-day">
+  <main class="pt-sheet card" data-paper="cream" data-ruling="dot" data-seed="7">
+    <h1 class="pt-wobble" data-seed="11">papertooth</h1>
+    <p>The feel of <mark class="pt-mark" data-seed="5">paper</mark>, for the web. Hand-drawn Japanese stationery in <span class="pt-anno" data-anno="circle" data-seed="9">CSS</span>.</p>
+    <div class="pt-row"><span class="url">npm i papertooth</span></div>
+    <span class="pt-stamp" data-ink="red"><svg width="126" height="135" viewBox="0 0 56 60" role="img" aria-label="Daruma"><defs><mask id="dm"><rect width="56" height="60" fill="#fff"/><ellipse cx="28" cy="27" rx="13" ry="11" fill="#000"/></mask></defs><path d="M28 5 C 43 5, 50 17, 50 31 C 50 46, 41 55, 28 55 C 15 55, 6 46, 6 31 C 6 17, 13 5, 28 5 Z" fill="currentColor" mask="url(#dm)"/><circle cx="22" cy="26" r="3.6" fill="currentColor"/><circle cx="34" cy="26" r="3.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M17 20.5 Q22 18 26 21 M30 21 Q34 18 39 20.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M21 33 Q25 30.5 28 33 Q31 30.5 35 33" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M20 46 Q28 41 36 46" fill="none" stroke="#fcfbf7" stroke-width="2" stroke-linecap="round" opacity=".9"/></svg></span>
+    <div class="pt-sticky" data-color="yellow" data-sticky="lifted"><div class="pt-sticky__paper"><p>dots, ink, highlighters, stamps &amp; washi tape</p></div></div>
+  </main>
+  <script src="../dist/papertooth.min.js"></script>
+  <script>Papertooth.init({ seed: 7, motion: 'none', lazy: false, observe: false });</script>
+</body>
+</html>
