@@ -2678,13 +2678,10 @@ textarea.pt-input:focus {
   animation: pt-draw var(--pt-draw) var(--pt-delay, 0s) var(--pt-ease) both;
 }
 .pt-motion :is(.is-drawn .pt-btn, .pt-btn.is-drawn):not(.pt-btn--outline)::before {
-  animation: pt-wipe .55s var(--pt-delay, 0s) var(--pt-ease) both;
+  animation: pt-wipe .55s var(--pt-delay, 0s) var(--pt-ease) backwards;
 }
 .pt-motion :is(.pt-rule.is-drawn, .is-drawn .pt-rule, .is-drawn .pt-flag, .pt-flag.is-drawn, .is-drawn .pt-progress, .pt-progress.is-drawn) {
-  animation: pt-wipe .8s var(--pt-delay, 0s) var(--pt-ease) both;
-}
-.pt-motion :is(.is-drawn .pt-progress, .pt-progress.is-drawn) {
-  animation-fill-mode: backwards;
+  animation: pt-wipe .8s var(--pt-delay, 0s) var(--pt-ease) backwards;
 }
 .pt-motion :is(.is-drawn .pt-progress, .pt-progress.is-drawn)[data-label]::after {
   animation: pt-fade .3s calc(var(--pt-delay, 0s) + .8s) var(--pt-ease) both;
@@ -2699,7 +2696,7 @@ textarea.pt-input:focus {
   animation: pt-thunk .42s var(--pt-delay, 0s) cubic-bezier(.2, .8, .3, 1.15) both;
 }
 .pt-motion .is-drawn .pt-diagram__svg {
-  animation: pt-wipe 1.1s var(--pt-delay, 0s) var(--pt-ease) both;
+  animation: pt-wipe 1.1s var(--pt-delay, 0s) var(--pt-ease) backwards;
 }
 .pt-motion :is(.is-drawn :is(.pt-tape, .pt-sticky, .pt-torn, .pt-ticket, .pt-photo, .pt-postage, .pt-label), :is(.pt-tape, .pt-sticky, .pt-torn, .pt-ticket, .pt-photo, .pt-postage, .pt-label).is-drawn) {
   animation: pt-stick .5s var(--pt-delay, 0s) ease-out both;

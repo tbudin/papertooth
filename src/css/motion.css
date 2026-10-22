@@ -15,16 +15,16 @@
 .pt-motion :is([data-pt-draw]:not(.is-drawn, [data-pt-draw="off"]) :is(.pt-stamp, .pt-tape, .pt-sticky, .pt-torn, .pt-ticket, .pt-photo, .pt-postage, .pt-label),
   :is(.pt-stamp, .pt-tape, .pt-sticky, .pt-torn, .pt-ticket, .pt-photo, .pt-postage, .pt-label)[data-pt-draw]:not(.is-drawn, [data-pt-draw="off"])) { opacity: 0; }
 .pt-motion .is-drawn :is(.pt-anno__ink path, .pt-draw-path) { animation: pt-draw var(--pt-draw) var(--pt-delay, 0s) var(--pt-ease) both; }
-.pt-motion :is(.is-drawn .pt-btn, .pt-btn.is-drawn):not(.pt-btn--outline)::before { animation: pt-wipe .55s var(--pt-delay, 0s) var(--pt-ease) both; }
-.pt-motion :is(.pt-rule.is-drawn, .is-drawn .pt-rule, .is-drawn .pt-flag, .pt-flag.is-drawn, .is-drawn .pt-progress, .pt-progress.is-drawn) { animation: pt-wipe .8s var(--pt-delay, 0s) var(--pt-ease) both; }
-/* a progress label sits outside the bar, where the wipe's clip would keep cutting it off: the clip goes once
-   the bar is drawn, and the label is written in after it */
-.pt-motion :is(.is-drawn .pt-progress, .pt-progress.is-drawn) { animation-fill-mode: backwards; }
+/* the wipe holds its clip until it starts (backwards) but lets it go when it ends, so nothing drawn past
+   the element's box stays cut off */
+.pt-motion :is(.is-drawn .pt-btn, .pt-btn.is-drawn):not(.pt-btn--outline)::before { animation: pt-wipe .55s var(--pt-delay, 0s) var(--pt-ease) backwards; }
+.pt-motion :is(.pt-rule.is-drawn, .is-drawn .pt-rule, .is-drawn .pt-flag, .pt-flag.is-drawn, .is-drawn .pt-progress, .pt-progress.is-drawn) { animation: pt-wipe .8s var(--pt-delay, 0s) var(--pt-ease) backwards; }
+/* a progress label sits outside the bar, so it is written in once the bar is drawn */
 .pt-motion :is(.is-drawn .pt-progress, .pt-progress.is-drawn)[data-label]::after { animation: pt-fade .3s calc(var(--pt-delay, 0s) + .8s) var(--pt-ease) both; }
 .pt-motion :is(.is-drawn .pt-link, .pt-link.is-drawn):not([data-ul="wave"], [data-ul="hl"]) { animation: pt-ul .6s var(--pt-delay, 0s) var(--pt-ease) both; }
 .pt-motion :is(.is-drawn .pt-mark, .pt-mark.is-drawn) { animation: pt-mark .6s var(--pt-delay, 0s) var(--pt-ease) both; }
 .pt-motion :is(.is-drawn .pt-stamp, .pt-stamp.is-drawn) { animation: pt-thunk .42s var(--pt-delay, 0s) cubic-bezier(.2,.8,.3,1.15) both; }
-.pt-motion .is-drawn .pt-diagram__svg { animation: pt-wipe 1.1s var(--pt-delay, 0s) var(--pt-ease) both; }
+.pt-motion .is-drawn .pt-diagram__svg { animation: pt-wipe 1.1s var(--pt-delay, 0s) var(--pt-ease) backwards; }
 .pt-motion :is(.is-drawn :is(.pt-tape, .pt-sticky, .pt-torn, .pt-ticket, .pt-photo, .pt-postage, .pt-label), :is(.pt-tape, .pt-sticky, .pt-torn, .pt-ticket, .pt-photo, .pt-postage, .pt-label).is-drawn) { animation: pt-stick .5s var(--pt-delay, 0s) ease-out both; }
 
 /* still, and on paper: everything shows in its drawn state, including blocks that never scrolled into view */
