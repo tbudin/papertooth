@@ -1,7 +1,7 @@
 // Image effects. Lithograph is an SVG filter; the printers redraw the picture at low resolution
 // with real dithering, the way a Game Boy Printer or a thermal receipt printer would.
 import { lithoFilter } from './filters.js';
-import { cssVar, hexRgb } from './core.js';
+import { cssVar, toRgb } from './core.js';
 
 /* ---------- lithograph ---------- */
 const lithoCache = new Map();
@@ -124,13 +124,18 @@ export function sourceImage(src, onReady) {
   let rec = sources.get(src);
   if (!rec) {
     const img = new Image();
-    rec = { img, ready: false, waiting: new Set() };
+    rec = { img, ready: false, failed: false, waiting: new Set() };
+    const settle = ok => { rec.ready = ok; rec.failed = !ok; rec.waiting.forEach(fn => fn()); rec.waiting.clear(); };
     img.decoding = 'async';
-    img.onload = () => { rec.ready = true; rec.waiting.forEach(fn => fn()); rec.waiting.clear(); };
+    img.onload = () => settle(true);
+    img.onerror = () => settle(false);
+    // a picture from another site can only be read back from the canvas if it was requested with CORS
+    const url = new URL(src, location.href);
+    if (url.origin !== location.origin && /^https?:$/.test(url.protocol)) img.crossOrigin = 'anonymous';
     img.src = src;
     sources.set(src, rec);
   }
-  if (!rec.ready && onReady) rec.waiting.add(onReady);
+  if (!rec.ready && !rec.failed && onReady) rec.waiting.add(onReady);
   return rec;
 }
 
@@ -150,7 +155,7 @@ export function renderPrint(el, img, p) {
   try { src = ctx.getImageData(0, 0, w, h); } catch (err) { el.classList.add('pt-print--blocked'); return false; }
   const q = dither(luminance(src.data, w, h, p), w, h, p);
   const out = ctx.createImageData(w, h), d = out.data, max = p.levels - 1;
-  const ink = hexRgb(p.ink.startsWith('#') || p.ink.startsWith('rgb') ? p.ink : '#26262a');
+  const ink = toRgb(p.ink);
   const screen = p.palette === 'screen' && p.mode === 'gameboy';
   // uneven heat: some rows print lighter, and one worn spot on the head leaves a faint streak
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;

@@ -1,4 +1,4 @@
-/* papertooth v0.2.0 | MIT */
+/*! papertooth v0.2.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 
 // src/js/core.js
 var f = (n) => String(Math.round(n * 10) / 10);
@@ -39,13 +39,23 @@ function stroke(a, b, r, over, bend) {
   const m = [(s[0] + e[0]) / 2 - uy * (r() - 0.5) * bend, (s[1] + e[1]) / 2 + ux * (r() - 0.5) * bend];
   return `M${f(s[0])} ${f(s[1])} Q${f(m[0])} ${f(m[1])} ${f(e[0])} ${f(e[1])}`;
 }
-var hexRgb = (h) => {
-  h = h.trim();
-  if (h.startsWith("rgb")) return h.match(/[\d.]+/g).slice(0, 3).map(Number);
-  if (h.length === 4) h = "#" + [...h.slice(1)].map((c) => c + c).join("");
-  return [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-};
+var probe = null;
+function toRgb(c) {
+  c = String(c).trim();
+  if (/^#[\da-f]{3,8}$/i.test(c)) {
+    const h = c.length < 7 ? [...c.slice(1, 4)].map((x) => x + x).join("") : c.slice(1, 7);
+    return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+  }
+  if (/^rgba?\([^%]*\)$/i.test(c)) return c.match(/[\d.]+/g).slice(0, 3).map(Number);
+  probe = probe || document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+  probe.clearRect(0, 0, 1, 1);
+  probe.fillStyle = "#000";
+  probe.fillStyle = c;
+  probe.fillRect(0, 0, 1, 1);
+  return Array.from(probe.getImageData(0, 0, 1, 1).data.subarray(0, 3));
+}
 var rgbHex = (c) => "#" + c.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("");
+var toHex = (c) => rgbHex(toRgb(c));
 var cssVar = (el, name) => getComputedStyle(el).getPropertyValue(name).trim();
 
 // src/js/filters.js
@@ -67,7 +77,7 @@ var DEFAULTS = {
 };
 var n2 = (v) => (+v).toFixed(2);
 function smearColour(ink, hl = "#fff04a") {
-  const y = hexRgb(hl), c = hexRgb(ink);
+  const y = toRgb(hl), c = toRgb(ink);
   return rgbHex(c.map((v, i) => (v * 0.45 + 255 * 0.55) * y[i] / 255));
 }
 var density = (k, b) => `<feColorMatrix in="blot" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  ${n2(k)} 0 0 0 ${n2(b)}" result="density"/>`;
@@ -839,17 +849,22 @@ function sourceImage(src, onReady) {
   let rec = sources.get(src);
   if (!rec) {
     const img = new Image();
-    rec = { img, ready: false, waiting: /* @__PURE__ */ new Set() };
-    img.decoding = "async";
-    img.onload = () => {
-      rec.ready = true;
+    rec = { img, ready: false, failed: false, waiting: /* @__PURE__ */ new Set() };
+    const settle = (ok) => {
+      rec.ready = ok;
+      rec.failed = !ok;
       rec.waiting.forEach((fn) => fn());
       rec.waiting.clear();
     };
+    img.decoding = "async";
+    img.onload = () => settle(true);
+    img.onerror = () => settle(false);
+    const url = new URL(src, location.href);
+    if (url.origin !== location.origin && /^https?:$/.test(url.protocol)) img.crossOrigin = "anonymous";
     img.src = src;
     sources.set(src, rec);
   }
-  if (!rec.ready && onReady) rec.waiting.add(onReady);
+  if (!rec.ready && !rec.failed && onReady) rec.waiting.add(onReady);
   return rec;
 }
 var work = null;
@@ -873,7 +888,7 @@ function renderPrint(el, img, p) {
   }
   const q = dither(luminance(src.data, w, h, p), w, h, p);
   const out = ctx2.createImageData(w, h), d = out.data, max = p.levels - 1;
-  const ink = hexRgb(p.ink.startsWith("#") || p.ink.startsWith("rgb") ? p.ink : "#26262a");
+  const ink = toRgb(p.ink);
   const screen = p.palette === "screen" && p.mode === "gameboy";
   let seed = 7;
   const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
@@ -1743,10 +1758,11 @@ PAINTERS.push(
         el.dataset.ptW = Math.abs(w - el.naturalWidth) < 1 && !el.style.width && !el.getAttribute("width") ? String(Math.round(w)) : "css";
       }
       const rec = sourceImage(el.dataset.ptSrc, () => repaint(el, true));
-      return { src: el.dataset.ptSrc, rec, ready: rec.ready, p: printParams(el) };
+      return { src: el.dataset.ptSrc, rec, ready: rec.ready, failed: rec.failed, p: printParams(el) };
     },
-    key: (m) => `${m.ready}|${m.src}|${JSON.stringify(m.p)}`,
+    key: (m) => `${m.ready}|${m.failed}|${m.src}|${JSON.stringify(m.p)}`,
     draw: (el, m) => {
+      el.classList.toggle("pt-print--blocked", !!m.failed);
       if (!m.src || !m.ready) return;
       if (el.dataset.ptW && el.dataset.ptW !== "css" && !el.style.width) el.style.width = el.dataset.ptW + "px";
       renderPrint(el, m.rec.img, m.p);
@@ -1805,7 +1821,12 @@ function createScheduler(opts) {
     if (frame) cancelAnimationFrame(frame);
     flush();
   };
-  return { request, forget, now };
+  const stop = () => {
+    cancelAnimationFrame(frame);
+    frame = 0;
+    queue.clear();
+  };
+  return { request, forget, now, stop };
 }
 function createWatchers(scheduler, opts) {
   const ro = "ResizeObserver" in window ? new ResizeObserver((entries) => {
@@ -2008,7 +2029,7 @@ var RIBBON_ASSETS = ["--pt-r-wobble", "--pt-r-double", "--pt-r-dashes", "--pt-bo
 var PEN_DEFAULT = "%23213c6b";
 var RIBBON_DEFAULT = "%2324262c";
 var templates = null;
-function readTemplates(root) {
+function readTemplates() {
   if (templates) return templates;
   const html = document.documentElement;
   templates = {};
@@ -2018,17 +2039,11 @@ function readTemplates(root) {
 function resolve(colour, el = document.documentElement) {
   if (!colour) return "";
   if (/^--/.test(colour)) return cssVar(el, colour);
-  if (/^[a-z]+(-[a-z0-9]+)+$/.test(colour) && !/^(rgb|hsl)/.test(colour)) return cssVar(el, "--pt-" + colour) || colour;
+  if (/^[a-z]+(-[a-z0-9]+)+$/.test(colour)) return cssVar(el, "--pt-" + colour) || colour;
   return colour;
 }
-var toHex = (c) => {
-  if (c.startsWith("#")) return c.length === 4 ? "#" + [...c.slice(1)].map((x) => x + x).join("") : c.slice(0, 7);
-  const m = c.match(/[\d.]+/g);
-  if (!m) return c;
-  return "#" + m.slice(0, 3).map((v) => (+v | 0).toString(16).padStart(2, "0")).join("");
-};
 function recolour(target, list, from, hex) {
-  const t = readTemplates(target), to = "%23" + hex.slice(1);
+  const t = readTemplates(), to = "%23" + hex.slice(1);
   for (const v of list) if (t[v]) target.style.setProperty(v, t[v].split(from).join(to));
 }
 function setPen(colour, target = document.documentElement) {
@@ -2268,6 +2283,7 @@ function init(options = {}) {
       has(".pt-week[data-today]").forEach((el) => week(el));
     }
     for (const [sel, fn] of DECORATORS) has(sel).forEach((el, i) => fn(el, o, i));
+    has(".pt-sheet").forEach(watchSheet);
     has(PAINT_SELECTOR).forEach((el) => {
       if (!seen.has(el)) {
         seen.add(el);
@@ -2324,7 +2340,7 @@ function init(options = {}) {
     else block.classList.add("is-drawn");
   }
   function replay(scope = root) {
-    const blocks = (scope.matches && scope.matches(o.drawSelector) ? [scope] : []).concat(Array.from(scope.querySelectorAll(o.drawSelector)));
+    const blocks = (scope.matches && scope.matches(o.drawSelector) ? [scope] : []).concat(Array.from(scope.querySelectorAll(o.drawSelector))).filter((b) => b.dataset.ptDraw !== "off");
     blocks.forEach((b) => b.classList.remove("is-drawn"));
     void document.body.offsetWidth;
     blocks.forEach((b) => {
@@ -2358,15 +2374,18 @@ function init(options = {}) {
   const onVisibility = (e) => {
     if (!e.skipped) snap();
   };
-  let booting = true;
-  scan(root);
-  booting = false;
-  sheets().forEach((s) => {
+  const watched = /* @__PURE__ */ new Set();
+  function watchSheet(s) {
+    if (watched.has(s)) return;
+    watched.add(s);
     if (sheetRO) sheetRO.observe(s);
     s.addEventListener("contentvisibilityautostatechange", onVisibility, true);
-  });
+  }
+  let booting = true, destroyed = false;
+  scan(root);
+  booting = false;
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => {
-    refresh();
+    if (!destroyed) refresh();
   });
   snap();
   if (o.observe && "MutationObserver" in window) {
@@ -2407,20 +2426,27 @@ function init(options = {}) {
     replay,
     snap,
     scan,
+    // shapes drawn into images bake their ink in, so every change of instrument redraws them
     setPen: after(setPen),
-    setPencil,
+    setPencil: after(setPencil),
     setRibbon: after(setRibbon),
     setHighlighter: after(setHighlighter),
     setFilters: (params) => injectFilters(params),
     setTypewriter: (params) => injectFilters({ typewriter: params }),
     planner: { dayHead, week, isoWeek },
     destroy() {
+      destroyed = true;
       document.removeEventListener("selectionchange", onSelection);
+      cancelAnimationFrame(selFrame);
+      cancelAnimationFrame(snapFrame);
+      scheduler.stop();
       watchers.disconnect();
       if (drawIO) drawIO.disconnect();
       if (sheetRO) sheetRO.disconnect();
       if (mo) mo.disconnect();
-      sheets().forEach((s) => s.removeEventListener("contentvisibilityautostatechange", onVisibility, true));
+      watched.forEach((s) => s.removeEventListener("contentvisibilityautostatechange", onVisibility, true));
+      watched.clear();
+      selected.forEach((el) => el.classList.remove("pt-selecting"));
       html.classList.remove("pt-motion");
     }
   };

@@ -101,7 +101,9 @@
 .pt-btn[data-hover]:not([data-hover="pass"])::after { display: none; }
 .pt-btn--outline[data-hover]:not([data-hover="pass"])::before { display: none; }
 .pt-btn--outline[data-hover]:not([data-hover="pass"]) .pt-btn__smear { display: none; }
-.pt-link[data-hover] { position: relative; background-size: var(--pt-u-size), 0% 9px !important; }
+.pt-link[data-hover] { position: relative; }
+.pt-link[data-hover]:not([data-hover="second"]):is(:hover, :focus-visible) { background-size: var(--pt-u-size), 0% 9px; }
+.pt-link[data-ul="hl"][data-hover]:not([data-hover="second"]):is(:hover, :focus-visible) { background-size: 0% 82%, 100% 9px; }
 .pt-hover-ink { position: absolute; overflow: visible; pointer-events: none; z-index: 1; }
 .pt-hover-ink path {
   fill: none; stroke: var(--pt-t-color, var(--pt-pen)); stroke-width: calc(var(--pt-t-w, 1.8) * 1px); stroke-opacity: var(--pt-t-op, 1);

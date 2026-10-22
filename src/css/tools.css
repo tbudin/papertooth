@@ -13,7 +13,7 @@
 .pt-link                         { --pt-t-kind: pen;    --pt-t-color: var(--pt-pen);    --pt-t-w: 1.7; --pt-t-op: 1; }
 .pt-btn--outline                 { --pt-t-kind: pen;    --pt-t-color: var(--pt-ink);    --pt-t-w: 1.4; --pt-t-op: .92; }
 .pt-rule                         { --pt-t-kind: pen;    --pt-t-color: var(--pt-ribbon); --pt-t-w: 1.3; --pt-t-op: .8; }
-.pt-anno                         { --pt-t-kind: pencil; --pt-t-color: var(--pt-pencil); --pt-t-w: 1.9; --pt-t-op: .95; }
+.pt-anno                         { --pt-t-kind: pencil; --pt-t-color: var(--pt-anno);  --pt-t-w: 1.9; --pt-t-op: .95; }
 .pt-anno[data-anno="hatch"]      { --pt-t-kind: graphite; --pt-t-color: var(--pt-graphite-c); --pt-t-w: 1.1; --pt-t-op: .7; }
 .pt-progress                     { --pt-t-kind: pen;    --pt-t-color: var(--pt-ink);    --pt-t-w: 1.4; --pt-t-op: .92; }
 :is(.pt-check, .pt-radio)        { --pt-t-kind: pen;    --pt-t-color: var(--pt-pen);    --pt-t-w: 2.2; --pt-t-op: 1; }
@@ -33,6 +33,6 @@
 :is(.pt-anno, .pt-diagram, .pt-check, .pt-radio):is([data-tool="graphite"], [data-tool="pencil"]) :is(.pt-anno__ink, .pt-diagram__svg, svg),
 .pt-anno:not([data-tool]) > .pt-anno__ink { filter: var(--pt-graphite, ); }
 .pt-anno[data-tool="marker"] .pt-anno__ink { mix-blend-mode: multiply; }
-.pt-diagram .pt-diagram__ink path, .pt-diagram .pt-diagram__line { stroke-width: calc(var(--pt-t-w) * 1px); }
+.pt-diagram .pt-diagram__ink path:not(.pt-diagram__thick, .pt-diagram__dotted), .pt-diagram .pt-diagram__line { stroke-width: calc(var(--pt-t-w) * 1px); }
 .pt-diagram[data-tool="ballpoint"] .pt-diagram__ink path:not(.pt-diagram__dotted) { stroke-dasharray: 38 1.1 61 .7 23 1.4; }
 .pt-diagram[data-tool="marker"] .pt-diagram__svg { mix-blend-mode: multiply; }

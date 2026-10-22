@@ -1,4 +1,4 @@
-/* papertooth v0.2.0 | MIT */
+/*! papertooth v0.2.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 /* src/css/tokens.css */
 :root {
   --pt-grid: 24px;
@@ -699,7 +699,12 @@ body:has(> .pt-sheet--page) {
 }
 .pt-link[data-hover] {
   position: relative;
-  background-size: var(--pt-u-size), 0% 9px !important;
+}
+.pt-link[data-hover]:not([data-hover=second]):is(:hover, :focus-visible) {
+  background-size: var(--pt-u-size), 0% 9px;
+}
+.pt-link[data-ul=hl][data-hover]:not([data-hover=second]):is(:hover, :focus-visible) {
+  background-size: 0% 82%, 100% 9px;
 }
 .pt-hover-ink {
   position: absolute;
@@ -1006,7 +1011,7 @@ body:has(> .pt-sheet--page) {
   display: block;
   width: 132px;
   height: 30px;
-  transform: rotate(var(--pt-rot));
+  transform: rotate(calc(var(--pt-rot) * var(--pt-tilt)));
   background:
     var(--pt-sheen),
     var(--pt-crepe),
@@ -1338,6 +1343,9 @@ body:has(> .pt-sheet--page) {
 }
 .pt-tab[data-color=orange] {
   --pt-tab: #ffbe7a;
+}
+.pt-sheet--page .pt-tabs {
+  right: 0;
 }
 @media (max-width: 860px) {
   .pt-tabs {
@@ -1892,7 +1900,7 @@ body:has(> .pt-sheet--page) {
 }
 .pt-input::placeholder {
   color: var(--pt-pencil-hb);
-  opacity: .55;
+  opacity: .9;
 }
 .pt-input:focus {
   background-size: 100% 12px, 4px 3px;
@@ -2211,7 +2219,7 @@ textarea.pt-input:focus {
   padding-left: calc(var(--pt-grid) * 1.25);
   max-width: none;
 }
-.pt-bujo li::before {
+.pt-bujo li[data-sign]::before {
   content: "";
   position: absolute;
   left: 0;
@@ -2251,7 +2259,6 @@ textarea.pt-input:focus {
   color: var(--pt-pencil);
 }
 .pt-progress {
-  --pt-value: .5;
   position: relative;
   height: var(--pt-grid);
   max-width: calc(var(--pt-grid) * 14);
@@ -2263,7 +2270,7 @@ textarea.pt-input:focus {
   left: 3px;
   top: 4px;
   bottom: 4px;
-  width: calc((100% - 6px) * var(--pt-value));
+  width: calc((100% - 6px) * var(--pt-value, .5));
   background: var(--pt-hl);
   -webkit-mask: var(--pt-mask-a) 0 0 / 100% 100% no-repeat;
   mask: var(--pt-mask-a) 0 0 / 100% 100% no-repeat;
@@ -2519,7 +2526,7 @@ textarea.pt-input:focus {
 }
 .pt-anno {
   --pt-t-kind: pencil;
-  --pt-t-color: var(--pt-pencil);
+  --pt-t-color: var(--pt-anno);
   --pt-t-w: 1.9;
   --pt-t-op: .95;
 }
@@ -2598,7 +2605,7 @@ textarea.pt-input:focus {
 .pt-anno[data-tool=marker] .pt-anno__ink {
   mix-blend-mode: multiply;
 }
-.pt-diagram .pt-diagram__ink path,
+.pt-diagram .pt-diagram__ink path:not(.pt-diagram__thick, .pt-diagram__dotted),
 .pt-diagram .pt-diagram__line {
   stroke-width: calc(var(--pt-t-w) * 1px);
 }
@@ -2633,7 +2640,7 @@ textarea.pt-input:focus {
 }
 @keyframes pt-mark {
   from {
-    background-size: 0% 88%;
+    background-size: 0% var(--pt-mark-h, 88%);
   }
 }
 @keyframes pt-thunk {
@@ -2685,7 +2692,7 @@ textarea.pt-input:focus {
 .pt-motion :is(.is-drawn :is(.pt-tape, .pt-sticky, .pt-torn, .pt-ticket, .pt-photo, .pt-postage, .pt-label), :is(.pt-tape, .pt-sticky, .pt-torn, .pt-ticket, .pt-photo, .pt-postage, .pt-label).is-drawn) {
   animation: pt-stick .5s var(--pt-delay, 0s) ease-out both;
 }
-@media (prefers-reduced-motion: reduce) {
+@media print, (prefers-reduced-motion: reduce) {
   .pt-motion *,
   .pt-motion *::before,
   .pt-motion *::after {

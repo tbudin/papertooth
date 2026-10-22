@@ -43,7 +43,7 @@
     radial-gradient(circle, var(--pt-input-line) .7px, transparent 1.1px) 0 100% / 4px 3px repeat-x;
   transition: background-size .45s var(--pt-ease);
 }
-.pt-input::placeholder { color: var(--pt-pencil-hb); opacity: .55; }
+.pt-input::placeholder { color: var(--pt-pencil-hb); opacity: .9; }
 /* in use: the line is drawn over in ink, left to right */
 .pt-input:focus { background-size: 100% 12px, 4px 3px; }
 .pt-input:focus-visible { outline: none; }

@@ -7,7 +7,7 @@
   /* masking tape is crepe paper: fine, uneven creases across the width */
   --pt-crepe: repeating-linear-gradient(90deg, rgba(120,100,60,.05) 0 1px, transparent 1px 3px, rgba(255,255,255,.12) 3px 4px, transparent 4px 7px, rgba(120,100,60,.035) 7px 8px, transparent 8px 11px);
   display: block; width: 132px; height: 30px;
-  transform: rotate(var(--pt-rot));
+  transform: rotate(calc(var(--pt-rot) * var(--pt-tilt)));
   background: var(--pt-sheen), var(--pt-crepe), var(--pt-fibre-soft, var(--pt-fibre)), #efe4c6;
   /* the paper underneath (an edge, a line) shows through slightly, as it does with real tape */
   mix-blend-mode: multiply;
@@ -144,6 +144,8 @@
 .pt-tab[data-color="mint"]   { --pt-tab: #9fdcc0; }
 .pt-tab[data-color="blue"]   { --pt-tab: #a9c9f2; }
 .pt-tab[data-color="orange"] { --pt-tab: #ffbe7a; }
+/* when the page is the paper there is no edge to stick out past, and no room for a sideways scroll */
+.pt-sheet--page .pt-tabs { right: 0; }
 @media (max-width: 860px) { .pt-tabs { display: none; } }
 
 /* ruled index card */

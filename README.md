@@ -4,7 +4,7 @@ The feel of paper, for the web. Paper-makers call the fine grain on a sheet its 
 
 Papertooth is hand-drawn stationery for the web, inspired by Japanese stationery (文房具, bunbougu). Dotted and grid paper, typewriter and fountain-pen text that sits on the grid, highlighters that start light and pool at the end, hand-drawn underlines and outlines, pencil marks, hanko stamps, washi tape, sticky notes and planner pieces.
 
-The CSS works on its own. A small optional script (about 11 KB gzipped) adds the ink textures, draws every shape at its element's real size, snaps text to the grid and times the draw-on animations.
+The CSS (about 14 KB gzipped) works on its own. An optional script (about 28 KB gzipped) adds the ink textures, draws every shape at its element's real size, snaps text to the grid and times the draw-on animations.
 
 ## Install
 
@@ -28,6 +28,8 @@ Or from a CDN, with no build step:
 
 `data-pt-auto` starts the script on load. It accepts options as JSON: `data-pt-auto='{"seed": 7}'`. The running instance is `window.Papertooth.kit`.
 
+The module does nothing when it is imported, so it is safe to import during server rendering; call `init()` in the browser (in React, from an effect).
+
 Fonts are not bundled. The defaults are Courier Prime, Special Elite and Caveat from Google Fonts, plus Shippori Mincho B1 and Zen Maru Gothic for Japanese stamps. Change them with the `--pt-font-*` settings.
 
 ## Use
@@ -50,7 +52,7 @@ Fonts are not bundled. The defaults are Courier Prime, Special Elite and Caveat 
 | Highlighter button | `.pt-btn` | `data-hover`: pass (default), underline, circle, none; `data-hl`: swipe, flick, double, low, dry, scribble; `data-color`: yellow, pink, green, orange, blue; `data-size`: fine, broad |
 | Outlined button | `.pt-btn.pt-btn--outline` | `data-outline`: sketch, double, broken, circled, corners, brackets, parens, braces, angles, kagi, lenticular; `data-tool` |
 | Inline highlight | `mark.pt-mark` | `data-hl`, `data-color`, `data-size`: fine, broad |
-| Link | `a.pt-link` | `data-ul`: wobble, slant, double, swash, marker, wave, hl. `.pt-links-mix` on a container mixes them; `data-tool`; `data-hover`: second (default), circle, none |
+| Link | `a.pt-link` | `data-ul`: wobble, slant, double, swash, marker, wave, hl. `.pt-links-mix` on a container mixes them; `data-tool`; `data-hover`: second (default), underline, circle, none |
 | Separator | `.pt-rule` | `data-rule`: wobble, double, dashes, brush, coil, scrawl, short, stars; `data-tool` |
 | Mark on text | `span.pt-anno` | `data-anno`: circle, box, strike, cross, under, hatch, hanamaru; `data-tool` (default: the marking pencil) |
 | Stamp | `.pt-stamp`, `.pt-stamp--box`, `.pt-stamp--round` | `data-ink`: red, vermilion, blue, green, pink, brown; `--pt-rot`. The playground has picture stamps (cloud, paw, daruma, Fuji, sun, thanks, tea) and a name seal with your own text to copy |
@@ -79,7 +81,9 @@ The desk turns dark with the system's dark mode while the paper stays paper; for
 
 Selected text gets a clean highlighter colour, and the ink texture steps aside while text is selected.
 
-Switches on any ancestor: `.pt-mode-hand` (handwritten instead of typed), `.pt-texture-light`, `.pt-texture-off`, `.pt-dry` (no smudge), `.pt-guides` (show baselines). What is on screen when the page opens is shown straight away; everything else draws itself on as it scrolls into view, block by block (`drawOnLoad: true` draws the first screen on as well) (`motion: 'none'` turns this off, `data-pt-draw="off"` keeps one part of the page still, and `data-pt-draw` on a block groups its marks so they draw in turn). Add `data-seed` to any drawn element to get the same shape on every visit.
+Switches on any ancestor: `.pt-mode-hand` (handwritten instead of typed), `.pt-texture-light`, `.pt-texture-off`, `.pt-dry` (no smudge), `.pt-guides` (show baselines).
+
+What is on screen when the page opens is shown straight away; everything else draws itself on as it scrolls into view, block by block. `drawOnLoad: true` draws the first screen on as well, `motion: 'none'` turns drawing on off, `data-pt-draw="off"` keeps one part of the page still, and `data-pt-draw` on a block groups its marks so they draw in turn. Add `data-seed` to any drawn element to get the same shape on every visit.
 
 ## Colours
 
@@ -87,9 +91,9 @@ The fountain pen inks are named after traditional Japanese colours (伝統色, d
 
 Anything drawn takes `data-tool`: `pen` (fountain pen), `ballpoint`, `brush`, `marker`, `graphite` or `pencil` (coloured pencil). Each instrument sets the ink, the weight and the character of the line: a ballpoint skips now and then, a brush swells, a marker is see-through, pencils catch the paper's tooth. Change an instrument's ink with `--pt-ballpoint`, `--pt-brush`, `--pt-marker`, `--pt-graphite-c` or `--pt-pen`.
 
-Nothing is rotated by default. Set `--pt-rot` on any stamp, tape, note, card, photo, label or printout to put it at an angle.
+Nothing is rotated by default. Set `--pt-rot` on any stamp, tape, note, card, photo or label to put it at an angle; `--pt-tilt` scales every angle at once.
 
-Image effects (lithograph, printer) apply to a plain `<img>`; frames (instant print, photo corners, tape, postage stamp) are separate, so any effect can go in any frame. The printer reads pixels, so pictures must come from the same site or allow CORS. Diagrams follow the ink and font variables, so changing the pen restyles them without drawing them again.
+Image effects (lithograph, printer) apply to a plain `<img>`; frames (instant print, photo corners, tape, postage stamp) are separate, so any effect can go in any frame. The printer reads pixels, so pictures must come from the same site or be served with CORS headers (the script requests pictures from other sites with `crossOrigin="anonymous"`). A picture it cannot read stays in plain greyscale and gets the class `pt-print--blocked`. Diagrams follow the ink and font variables, so changing the pen restyles them without drawing them again.
 
 ## Settings
 
@@ -109,8 +113,9 @@ Every effect is a custom property. Put them on `:root`, on a sheet, or on one el
 | `--pt-draw`, `--pt-ease` | `.75s` | Draw-on timing |
 | `--pt-font-type`, `--pt-font-hand`, `--pt-font-type-head`, `--pt-font-jp`, `--pt-font-jp-round` | | Fonts |
 | `--pt-s-body`, `--pt-s-small`, `--pt-s-h1`, `--pt-s-h2` | `20px`, `16px`, `36px`, `26px` | Sizes |
+| `--pt-page-width` | `720px` | Content width on a `.pt-sheet--page` |
 
-The palette is named after real tools: fountain pen inks `--pt-ink-sumi`, `-blueblack`, `-ai`, `-konpeki`, `-asagi`, `-wakatake`, `-fuji`, `-beni`, `-tobi`; ballpoints `--pt-bp-blue`, `-black`, `-red`; pencils `--pt-pencil-2h`, `-hb`, `-2b`, `-6b`, `-red`, `-blue`; ribbons `--pt-ribbon-black`, `-blue`, `-faded`, `-red`.
+The colour tokens are listed under [Colours](#colours).
 
 ## Script
 
@@ -129,6 +134,7 @@ const kit = init({
   lazy: true,            // draw shapes only near the screen
   lazyMargin: '600px',
   motion: 'scroll',      // 'scroll', 'load' or 'none'
+  drawSelector: '[data-pt-draw]', // blocks that draw on as a group
   drawAll: true,         // draw every mark as it comes into view, not only inside [data-pt-draw]
   drawOnLoad: false,     // also draw on what is on screen when the page opens
   stagger: .12,          // seconds between marks drawing on in one block
@@ -140,18 +146,24 @@ const kit = init({
   pen: null, pencil: null, ribbon: null, highlighter: null
 });
 
-kit.setPen('ink-beni');          // a token name or any colour
+kit.setPen('ink-beni');          // a token name or any CSS colour; redraws what the pen drew
 kit.setPencil('pencil-2b');
 kit.setRibbon('ribbon-blue');
 kit.setHighlighter('#ffc06a');
 kit.setTypewriter({ spread: .8 });
 kit.setFilters({ stamp: { wear: .8 } });
-kit.refresh();                   // after changing writing mode or layout
+kit.refresh();                   // after changing writing mode, layout or ink tokens in CSS
 kit.replay();                    // draw everything on again
-kit.destroy();
+kit.destroy();                   // stop observing; what is drawn stays drawn
 ```
 
-Also exported: `renderDiagram(source, options)`, `lithoFilter(id, params)`, `filtersMarkup(params)`, `typewriterFilter(id, params)`, `dayHead(el, date)`, `week(el, date)`, `isoWeek(date)`.
+Also exported:
+
+- `VERSION`, `DEFAULTS` (the options above), `PALETTE` (every colour as data), `FILTER_DEFAULTS`
+- `renderDiagram(source, options)`: a diagram as an SVG string
+- `filtersMarkup(params)`, `typewriterFilter(id, params)`, `lithoFilter(id, params)`, `smearColour(ink, highlighter)`
+- `setPen`, `setPencil`, `setRibbon`, `setHighlighter` (colour, target): change the ink on any element without a kit. They do not redraw what is already drawn; the kit's methods do.
+- `dayHead(el, date)`, `week(el, date)`, `isoWeek(date)`: fill planner pieces with any date
 
 ### Without the script
 
@@ -160,7 +172,6 @@ Everything still renders, with a fixed version of each shape. To get the texture
 ## Performance
 
 Load the script with `defer` so it never holds up the first paint, and load the fonts without blocking (`<link rel="preload" as="style" onload="this.rel='stylesheet'">`, or self-host them). Most of the extra work on a page comes from drawing marks on. By default only what scrolls into view is drawn on, so the first screen costs no more than a plain page; `motion: 'none'` turns drawing on off entirely, and visitors who ask for reduced motion never get it.
-
 
 - Shapes are drawn only when they come near the screen and redrawn only when their size or style changes.
 - Each frame measures everything first and writes everything after, so the page lays out once.
@@ -178,9 +189,13 @@ Current Chrome, Edge, Safari and Firefox. Uses CSS masks, `color-mix()`, `:is()`
 ```sh
 npm install
 npm run build     # dist/ and docs/
-npm run dev       # build, then serve the docs page
+npm run dev       # build, then serve the docs page on http://localhost:4173
 ```
+
+`dist/` is committed so the files can be used straight from GitHub; rebuild before committing a change to `src/`. Bump the version in both `package.json` and `src/js/index.js` (the build checks they match).
 
 ## Licence
 
-MIT
+[MIT](LICENSE) © 2026 Thomas Budin.
+
+The fonts named above are not part of the package; each comes with its own licence (SIL Open Font License, or Apache 2.0 for Special Elite).

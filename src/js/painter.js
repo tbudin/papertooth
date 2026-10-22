@@ -232,10 +232,11 @@ PAINTERS.push(
         el.dataset.ptW = Math.abs(w - el.naturalWidth) < 1 && !el.style.width && !el.getAttribute('width') ? String(Math.round(w)) : 'css';
       }
       const rec = sourceImage(el.dataset.ptSrc, () => repaint(el, true));
-      return { src: el.dataset.ptSrc, rec, ready: rec.ready, p: printParams(el) };
+      return { src: el.dataset.ptSrc, rec, ready: rec.ready, failed: rec.failed, p: printParams(el) };
     },
-    key: m => `${m.ready}|${m.src}|${JSON.stringify(m.p)}`,
+    key: m => `${m.ready}|${m.failed}|${m.src}|${JSON.stringify(m.p)}`,
     draw: (el, m) => {
+      el.classList.toggle('pt-print--blocked', !!m.failed);
       if (!m.src || !m.ready) return;
       if (el.dataset.ptW && el.dataset.ptW !== 'css' && !el.style.width) el.style.width = el.dataset.ptW + 'px';
       renderPrint(el, m.rec.img, m.p);
@@ -284,7 +285,8 @@ export function createScheduler(opts) {
   repaint = (el, fresh) => { if (fresh) last.delete(el); request(el); };
   const forget = el => last.delete(el);
   const now = () => { if (frame) cancelAnimationFrame(frame); flush(); };
-  return { request, forget, now };
+  const stop = () => { cancelAnimationFrame(frame); frame = 0; queue.clear(); };
+  return { request, forget, now, stop };
 }
 
 /* ---------- observers: paint near the viewport, repaint on resize ---------- */

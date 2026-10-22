@@ -1,5 +1,5 @@
 // SVG filters behind the textures. They are built from parameters, so every effect can be tuned.
-import { hexRgb, rgbHex } from './core.js';
+import { toRgb, rgbHex } from './core.js';
 
 export const DEFAULTS = {
   text:       { density: .7 },               // 0..1  how uneven the ribbon ink is on body text
@@ -16,7 +16,7 @@ const n2 = v => (+v).toFixed(2);
 
 /** Wet ink dissolved by a highlighter: diluted, then multiplied by the highlighter colour. */
 export function smearColour(ink, hl = '#fff04a') {
-  const y = hexRgb(hl), c = hexRgb(ink);
+  const y = toRgb(hl), c = toRgb(ink);
   return rgbHex(c.map((v, i) => (v * .45 + 255 * .55) * y[i] / 255));
 }
 

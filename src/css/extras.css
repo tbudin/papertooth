@@ -97,7 +97,7 @@
 /* bullet journal: <ul class="pt-bujo"><li data-sign="task|done|migrated|scheduled|event|note|priority"> */
 .pt-bujo { list-style: none; padding: 0; display: flex; flex-direction: column; }
 .pt-bujo li { position: relative; padding-left: calc(var(--pt-grid) * 1.25); max-width: none; }
-.pt-bujo li::before {
+.pt-bujo li[data-sign]::before {
   content: ""; position: absolute; left: 0; top: calc(var(--pt-grid) / 2 - 9px); width: 18px; height: 18px;
   background: currentColor;
   -webkit-mask: var(--pt-sign) center / contain no-repeat; mask: var(--pt-sign) center / contain no-repeat;
@@ -116,14 +116,14 @@
 /* progress: <div class="pt-progress" data-shape="bar|boxes|circles|ring|tally|sei" data-style="highlight|pencil|hatch|cross|scribble|stipple"
                 role="progressbar" aria-valuenow="62" style="--pt-value: .62">
    The script draws it with any writing instrument (data-tool); without it, a highlighter bar. */
+/* --pt-value has no default here, so the script can tell it apart from aria-valuenow */
 .pt-progress {
-  --pt-value: .5;
   position: relative; height: var(--pt-grid); max-width: calc(var(--pt-grid) * 14);
   background: var(--pt-box) 0 2px / 100% 20px no-repeat;
 }
 .pt-progress::before {
   content: ""; position: absolute; left: 3px; top: 4px; bottom: 4px;
-  width: calc((100% - 6px) * var(--pt-value));
+  width: calc((100% - 6px) * var(--pt-value, .5));
   background: var(--pt-hl);
   -webkit-mask: var(--pt-mask-a) 0 0 / 100% 100% no-repeat; mask: var(--pt-mask-a) 0 0 / 100% 100% no-repeat;
   mix-blend-mode: multiply;

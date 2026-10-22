@@ -49,11 +49,22 @@ export function stroke(a, b, r, over, bend) {
   return `M${f(s[0])} ${f(s[1])} Q${f(m[0])} ${f(m[1])} ${f(e[0])} ${f(e[1])}`;
 }
 
-export const hexRgb = h => {
-  h = h.trim();
-  if (h.startsWith('rgb')) return h.match(/[\d.]+/g).slice(0, 3).map(Number);
-  if (h.length === 4) h = '#' + [...h.slice(1)].map(c => c + c).join('');
-  return [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
-};
+let probe = null;
+/** Any CSS colour as [r, g, b]. Hex and rgb() are read directly; names, hsl(), oklch() and the rest are painted on a 1px canvas. */
+export function toRgb(c) {
+  c = String(c).trim();
+  if (/^#[\da-f]{3,8}$/i.test(c)) {
+    const h = c.length < 7 ? [...c.slice(1, 4)].map(x => x + x).join('') : c.slice(1, 7);
+    return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16));
+  }
+  if (/^rgba?\([^%]*\)$/i.test(c)) return c.match(/[\d.]+/g).slice(0, 3).map(Number);
+  probe = probe || document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+  probe.clearRect(0, 0, 1, 1);
+  probe.fillStyle = '#000';
+  probe.fillStyle = c;
+  probe.fillRect(0, 0, 1, 1);
+  return Array.from(probe.getImageData(0, 0, 1, 1).data.subarray(0, 3));
+}
 export const rgbHex = c => '#' + c.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+export const toHex = c => rgbHex(toRgb(c));
 export const cssVar = (el, name) => getComputedStyle(el).getPropertyValue(name).trim();

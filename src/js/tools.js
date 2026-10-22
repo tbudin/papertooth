@@ -1,6 +1,6 @@
 // Writing instruments. Anything drawn can be drawn with any of them: the colour, weight and
 // texture come from CSS (data-tool on the element), the character of the line from here.
-import { f, rng } from './core.js';
+import { f } from './core.js';
 
 export const TOOLS = ['pen', 'ballpoint', 'brush', 'marker', 'graphite', 'pencil'];
 
@@ -77,5 +77,3 @@ export function inkFill(d, t, opts = {}) {
   const fill = `<path d="${d}" fill="${t.color}" fill-opacity="${f(t.op * (t.kind === 'marker' ? .86 : 1) * 100) / 100}"/>`;
   return grainy(t) && !opts.noFilter ? `<g filter="url(#${opts.filterId || 'pg'})">${fill}</g>` : fill;
 }
-
-export { rng };

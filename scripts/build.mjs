@@ -6,7 +6,14 @@ import { filtersMarkup } from '../src/js/filters.js';
 
 mkdirSync('dist', { recursive: true });
 const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
-const banner = { css: `/* papertooth v${version} | MIT */`, js: `/* papertooth v${version} | MIT */` };
+// the source is published too, so VERSION is written in it rather than injected; keep the two in step
+if (!readFileSync('src/js/index.js', 'utf8').includes(`VERSION = '${version}'`)) {
+  throw new Error(`src/js/index.js VERSION does not match package.json (${version})`);
+}
+// MIT asks for the copyright line to travel with every copy, and the CDN files travel without LICENSE.
+// "/*!" keeps the comment through a user's own minifier.
+const notice = `/*! papertooth v${version} | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */`;
+const banner = { css: notice, js: notice };
 
 await Promise.all([
   build({ entryPoints: ['src/css/index.css'], bundle: true, outfile: 'dist/papertooth.css', banner, logLevel: 'warning', charset: 'ascii' }),

@@ -88,6 +88,7 @@ export function init(options = {}) {
       has('.pt-week[data-today]').forEach(el => week(el));
     }
     for (const [sel, fn] of DECORATORS) has(sel).forEach((el, i) => fn(el, o, i));
+    has('.pt-sheet').forEach(watchSheet);
     has(PAINT_SELECTOR).forEach(el => { if (!seen.has(el)) { seen.add(el); watchers.watch(el); } });
     if (o.motion !== 'none') {
       has(o.drawSelector).forEach(b => { if (b.dataset.ptDraw !== 'off') prepareDraw(b); });
@@ -133,7 +134,8 @@ export function init(options = {}) {
     if (drawIO) drawIO.observe(block); else block.classList.add('is-drawn');
   }
   function replay(scope = root) {
-    const blocks = (scope.matches && scope.matches(o.drawSelector) ? [scope] : []).concat(Array.from(scope.querySelectorAll(o.drawSelector)));
+    const blocks = (scope.matches && scope.matches(o.drawSelector) ? [scope] : []).concat(Array.from(scope.querySelectorAll(o.drawSelector)))
+      .filter(b => b.dataset.ptDraw !== 'off');
     blocks.forEach(b => b.classList.remove('is-drawn'));
     void document.body.offsetWidth;
     blocks.forEach(b => {
@@ -161,13 +163,21 @@ export function init(options = {}) {
   }) : null;
   // blocks skipped by content-visibility get snapped when they are first shown
   const onVisibility = e => { if (!e.skipped) snap(); };
+  // sheets added after init are watched too, so they resnap when they change width
+  const watched = new Set();
+  function watchSheet(s) {
+    if (watched.has(s)) return;
+    watched.add(s);
+    if (sheetRO) sheetRO.observe(s);
+    s.addEventListener('contentvisibilityautostatechange', onVisibility, true);
+  }
 
   /* ---------- start ---------- */
-  let booting = true;
+  let booting = true, destroyed = false;
   scan(root);
   booting = false;
-  sheets().forEach(s => { if (sheetRO) sheetRO.observe(s); s.addEventListener('contentvisibilityautostatechange', onVisibility, true); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { refresh(); });
+  // web fonts change every measurement, so draw again once they are in
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!destroyed) refresh(); });
   snap();
 
   if (o.observe && 'MutationObserver' in window) {
@@ -193,14 +203,19 @@ export function init(options = {}) {
   return {
     options: o,
     refresh, replay, snap, scan,
-    setPen: after(setPen), setPencil, setRibbon: after(setRibbon), setHighlighter: after(setHighlighter),
+    // shapes drawn into images bake their ink in, so every change of instrument redraws them
+    setPen: after(setPen), setPencil: after(setPencil), setRibbon: after(setRibbon), setHighlighter: after(setHighlighter),
     setFilters: params => injectFilters(params),
     setTypewriter: params => injectFilters({ typewriter: params }),
     planner: { dayHead, week, isoWeek },
     destroy() {
+      destroyed = true;
       document.removeEventListener('selectionchange', onSelection);
+      cancelAnimationFrame(selFrame); cancelAnimationFrame(snapFrame); scheduler.stop();
       watchers.disconnect(); if (drawIO) drawIO.disconnect(); if (sheetRO) sheetRO.disconnect(); if (mo) mo.disconnect();
-      sheets().forEach(s => s.removeEventListener('contentvisibilityautostatechange', onVisibility, true));
+      watched.forEach(s => s.removeEventListener('contentvisibilityautostatechange', onVisibility, true));
+      watched.clear();
+      selected.forEach(el => el.classList.remove('pt-selecting'));
       html.classList.remove('pt-motion');
     }
   };
