@@ -218,7 +218,7 @@ div.col { cursor: default; } .col-stamp .pt-stamp { font-size: 18px; }
 
 <header class="top">
   <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="side"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 5.2 C 7 4.8, 12 5.4, 17.5 4.9 M2.8 10.2 C 8 9.9, 12 10.4, 17.2 10 M2.5 15.1 C 7 14.8, 12 15.3, 17.4 14.9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Menu</span></button>
-  <a class="brand" href="#intro"><b>papertooth</b><span>v0.2</span></a>
+  <a class="brand" href="#intro"><b>papertooth</b><span id="version"></span></a>
   <span class="here" id="here"></span>
   <div class="top-ctl" id="settings" role="group" aria-label="Site settings">
     <label>Writing <span class="seg" id="g-mode"><button type="button" data-v="type" aria-pressed="true">typed</button><button type="button" data-v="hand" aria-pressed="false">by hand</button></span></label>
@@ -246,6 +246,8 @@ div.col { cursor: default; } .col-stamp .pt-stamp { font-size: 18px; }
 'use strict';
 const PT = window.Papertooth, html = document.documentElement;
 const kit = PT.init();   // draws everything as it comes into view; the live previews stay still (data-pt-draw="off")
+// the version of the script actually running, so the header never falls behind a release
+document.getElementById('version').textContent = 'v' + PT.VERSION;
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const IMG = { lake: 'img/lake.jpg', coffee: 'img/coffee.jpg' };
 const IMG_ALT = { lake: 'A mountain lake at dusk, with pines on both shores', coffee: 'A cup of coffee and a notebook on a wooden desk, seen from above' };
