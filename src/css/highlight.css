@@ -1,0 +1,113 @@
+/* papertooth: highlighter buttons, outlined buttons and inline highlights
+   <a class="pt-btn" data-hl="swipe|flick|double|low|dry|scribble" data-color="yellow|pink|green|orange|blue">
+   <button class="pt-btn pt-btn--outline" data-outline="sketch|double|pencil|circled|corners|brackets">
+   <mark class="pt-mark" data-hl="..." data-color="..."> */
+.pt-btn {
+  position: relative;
+  display: inline-flex; align-items: center;
+  height: calc(var(--pt-grid) * 2);
+  padding: 0 14px;
+  border: 0; background: none; color: var(--pt-ink);
+  font-family: var(--pt-f-body); font-size: var(--pt-s-body); line-height: var(--pt-grid);
+  font-weight: 700; cursor: pointer; text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.pt-mode-hand .pt-btn, .pt-btn.pt-mode-hand { font-weight: 600; }
+.pt-btn { isolation: isolate; }
+/* --pt-wipe runs from 0 to 1 as the second pass is drawn on hover. The highlighter and the ink it drags
+   both follow it, so the smudge appears exactly where the tip is, at the speed it moves. */
+@property --pt-wipe { syntax: '<number>'; inherits: true; initial-value: 0; }
+.pt-btn { --pt-wipe: 0; transition: --pt-wipe .45s cubic-bezier(.4,.6,.2,1); }
+.pt-btn:is(:hover, :focus-visible) { --pt-wipe: 1; }
+/* the label keeps its own layer from the start, so the hover never re-rasterises it on a different pixel (Safari) */
+.pt-btn__label { position: relative; filter: var(--pt-text-filter, ) var(--pt-smudge, ); transform: translateZ(0); }
+.pt-btn--outline .pt-btn__label { filter: var(--pt-text-filter, ); }
+.pt-btn:focus-visible { outline: 2px dashed var(--pt-pen); outline-offset: 4px; }
+
+/* the two highlighter passes: the mask is the shape and the ink density, the background is the colour */
+.pt-btn::before, .pt-btn::after {
+  content: ""; position: absolute; pointer-events: none;
+  inset: var(--pt-hl-inset, 6px -5px 4px -6px);
+  mix-blend-mode: multiply;
+  transform-origin: left center;
+  background:
+    radial-gradient(10px 60% at var(--pt-pool-x, calc(100% - 8px)) var(--pt-pool-y, 50%), color-mix(in srgb, var(--pt-hl), #6b5a00 11%), transparent 100%),
+    var(--pt-hl);
+}
+.pt-btn::before {
+  -webkit-mask: var(--pt-mask-a) 0 0 / 100% 100% no-repeat; mask: var(--pt-mask-a) 0 0 / 100% 100% no-repeat;
+  transform: rotate(calc(var(--pt-t1, 0deg) * var(--pt-tilt)));
+  transition: transform .35s cubic-bezier(.3,.7,.2,1);
+}
+.pt-btn::after {
+  -webkit-mask: var(--pt-mask-b) 0 0 / 100% 100% no-repeat; mask: var(--pt-mask-b) 0 0 / 100% 100% no-repeat;
+  opacity: .45;
+  transform: scaleX(var(--pt-wipe)) rotate(calc(var(--pt-t2, 0deg) * var(--pt-tilt)));
+}
+
+/* colours */
+:is(.pt-btn, .pt-mark, .pt-link)[data-color="yellow"] { --pt-hl: var(--pt-hl-yellow); }
+:is(.pt-btn, .pt-mark, .pt-link)[data-color="pink"] { --pt-hl: var(--pt-hl-pink); }
+:is(.pt-btn, .pt-mark, .pt-link)[data-color="green"] { --pt-hl: var(--pt-hl-green); }
+:is(.pt-btn, .pt-mark, .pt-link)[data-color="orange"] { --pt-hl: var(--pt-hl-orange); }
+:is(.pt-btn, .pt-mark, .pt-link)[data-color="blue"] { --pt-hl: var(--pt-hl-blue); }
+
+/* outlined: drawn box at rest, highlighter on hover */
+.pt-btn--outline {
+  padding: 0 22px;
+  background-image: var(--pt-ol, var(--pt-box));
+  background-size: var(--pt-ol-size, 100% 36px);
+  background-position: var(--pt-ol-pos, 0 6px);
+  background-repeat: no-repeat;
+}
+.pt-btn--outline::before { transform: scaleX(var(--pt-wipe)) rotate(calc(var(--pt-t1, 0deg) * var(--pt-tilt))); transition: none; }
+.pt-btn--outline::after { display: none; }
+
+/* on hover the second pass drags more wet ink along with it */
+.pt-btn__smear {
+  position: absolute; white-space: nowrap; pointer-events: none; box-sizing: border-box;
+  filter: var(--pt-smear, ); visibility: hidden;
+  /* the script lays this over the same box as the highlighter pass, so the clip edge is the tip */
+  clip-path: inset(var(--pt-smear-top, -80%) calc((1 - var(--pt-wipe)) * 100%) -80% -20%);
+}
+.pt-filters .pt-btn__smear { visibility: visible; }
+:is(.pt-dry, .pt-dry *) .pt-btn__smear { display: none; }
+
+/* inline highlight */
+.pt-mark {
+  color: inherit;
+  padding: 0 .2em; margin: 0 -.2em;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  background: var(--pt-mark, var(--pt-mark-y)) 0 var(--pt-mark-y-pos, 60%) / 100% var(--pt-mark-h, 88%) no-repeat;
+  mix-blend-mode: multiply;
+}
+.pt-mark > .pt-mark__ink { filter: var(--pt-smudge, ); }
+/* a low band only crosses the bottom of the letters, so only that part can smudge */
+.pt-btn[data-hl="low"] .pt-btn__label { filter: var(--pt-text-filter, ); }
+.pt-btn[data-hl="low"] { --pt-smear-top: 55%; }
+.pt-mark[data-hl="low"] > .pt-mark__ink { filter: none; }
+
+/* sizes: a fine tip, the usual chisel, or a broad one that covers the whole line */
+.pt-btn[data-size="fine"]  { --pt-hl-inset: 15px -4px 9px -5px; }
+.pt-btn[data-size="broad"] { --pt-hl-inset: 1px -7px -1px -8px; }
+.pt-mark[data-size="fine"]  { --pt-mark-h: 46%; --pt-mark-y-pos: 92%; }
+.pt-mark[data-size="broad"] { --pt-mark-h: 112%; --pt-mark-y-pos: 50%; }
+
+/* a highlighted button is already inked: hovering adds a second pass, but drags no more ink */
+.pt-btn:not(.pt-btn--outline) .pt-btn__smear { display: none; }
+
+/* data-hover on a button or link: "circle" or "underline" draws that mark on hover instead,
+   in the element's writing instrument (data-tool); "none" keeps it still */
+.pt-btn[data-hover]:not([data-hover="pass"])::after { display: none; }
+.pt-btn--outline[data-hover]:not([data-hover="pass"])::before { display: none; }
+.pt-btn--outline[data-hover]:not([data-hover="pass"]) .pt-btn__smear { display: none; }
+.pt-link[data-hover] { position: relative; background-size: var(--pt-u-size), 0% 9px !important; }
+.pt-hover-ink { position: absolute; overflow: visible; pointer-events: none; z-index: 1; }
+.pt-hover-ink path {
+  fill: none; stroke: var(--pt-t-color, var(--pt-pen)); stroke-width: calc(var(--pt-t-w, 1.8) * 1px); stroke-opacity: var(--pt-t-op, 1);
+  stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1 1; stroke-dashoffset: 1; visibility: hidden;
+  transition: stroke-dashoffset .3s var(--pt-ease), visibility 0s .3s;
+}
+:is(.pt-btn, .pt-link):is(:hover, :focus-visible) > .pt-hover-ink path { stroke-dashoffset: 0; visibility: visible; transition: stroke-dashoffset .5s var(--pt-ease); }
+.pt-btn:is([data-tool="graphite"], [data-tool="pencil"]) > .pt-hover-ink, .pt-link:is([data-tool="graphite"], [data-tool="pencil"]) > .pt-hover-ink { filter: var(--pt-graphite, ); }

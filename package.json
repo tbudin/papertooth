@@ -1,0 +1,35 @@
+{
+  "name": "papertooth",
+  "version": "0.2.0",
+  "description": "Hand-drawn Japanese stationery for the web: dotted paper, highlighters, ink, pencil, hanko stamps, washi tape and planner pieces, in CSS with an optional script.",
+  "keywords": ["css", "hand-drawn", "sketch", "stationery", "notebook", "highlighter", "typewriter", "washi", "hanko", "japanese", "ui-kit"],
+  "license": "MIT",
+  "author": "Thomas Budin",
+  "homepage": "https://tbudin.github.io/papertooth/",
+  "repository": { "type": "git", "url": "git+https://github.com/tbudin/papertooth.git" },
+  "bugs": { "url": "https://github.com/tbudin/papertooth/issues" },
+  "type": "module",
+  "main": "./dist/papertooth.js",
+  "module": "./dist/papertooth.js",
+  "style": "./dist/papertooth.css",
+  "unpkg": "./dist/papertooth.min.js",
+  "jsdelivr": "./dist/papertooth.min.js",
+  "exports": {
+    ".": { "import": "./dist/papertooth.js", "default": "./dist/papertooth.js" },
+    "./css": "./dist/papertooth.css",
+    "./min.css": "./dist/papertooth.min.css",
+    "./filters.svg": "./dist/papertooth-filters.svg",
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "src", "README.md", "LICENSE"],
+  "sideEffects": ["*.css", "./src/js/auto.js"],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs && npx --yes serve docs",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.2"
+  }
+}

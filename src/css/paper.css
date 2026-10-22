@@ -1,0 +1,123 @@
+/* papertooth: desk, sheet, paper stock and ruling
+   <body class="pt-desk">
+   <main class="pt-sheet" data-paper="white|cream|washi|kraft|recycled|tracing" data-ruling="dot|grid|graph|lined|blank">
+   The paper is the stock itself: its colour and grain. The ruling is what is printed on it. */
+.pt-desk { background: var(--pt-desk); }
+
+.pt-sheet {
+  /* printed dots are never perfect: a few print a little lighter, a few a little heavier */
+  --pt-pattern:
+    radial-gradient(circle at calc(var(--pt-grid) / 2) calc(var(--pt-grid) / 2), color-mix(in srgb, var(--pt-paper) 55%, transparent) var(--pt-dot-size), transparent calc(var(--pt-dot-size) + .5px)),
+    radial-gradient(circle at calc(var(--pt-grid) / 2) calc(var(--pt-grid) / 2), color-mix(in srgb, var(--pt-dot) 45%, transparent) calc(var(--pt-dot-size) + .25px), transparent calc(var(--pt-dot-size) + .9px)),
+    radial-gradient(circle at calc(var(--pt-grid) / 2) calc(var(--pt-grid) / 2), var(--pt-dot) var(--pt-dot-size), transparent calc(var(--pt-dot-size) + .7px));
+  --pt-pattern-size: calc(var(--pt-grid) * 5) calc(var(--pt-grid) * 3), calc(var(--pt-grid) * 3) calc(var(--pt-grid) * 2), var(--pt-grid) var(--pt-grid);
+  --pt-pattern-pos: calc(var(--pt-grid) / -2) calc(var(--pt-grid) / -2);
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  color-scheme: light;   /* paper stays paper, so native controls on it stay light too */
+  width: min(var(--pt-sheet-width), 100%);
+  margin-inline: auto;
+  padding: var(--pt-sheet-pad);
+  color: var(--pt-ink);
+  font-family: var(--pt-f-body);
+  background-color: var(--pt-paper);
+  background-image: var(--pt-pattern);
+  background-size: var(--pt-pattern-size);
+  background-position: var(--pt-pattern-pos);
+  box-shadow:
+    0 1px 0 rgba(0,0,0,.06), 0 2px 2px rgba(0,0,0,.05),
+    0 14px 30px -12px rgba(30,30,40,.35),
+    4px 4px 0 -1px color-mix(in srgb, var(--pt-paper), #000 3%),
+    4px 4px 0 0 rgba(0,0,0,.08);
+  display: flex; flex-direction: column; gap: var(--pt-grid);
+}
+/* keep the width a whole number of grid cells, so the dots line up with the text on both sides */
+@supports (width: round(down, 100%, 1px)) {
+  .pt-sheet { width: round(down, min(var(--pt-sheet-width), 100%), var(--pt-grid)); }
+}
+.pt-sheet--flat { box-shadow: none; }
+/* the page is the paper: fills the window, no desk and no shadow. Content keeps --pt-page-width,
+   centred, with the side margins rounded to whole grid cells so the text still lines up with the dots */
+.pt-sheet--page {
+  width: 100%; min-height: 100vh; min-height: 100dvh; margin: 0; box-shadow: none;
+  --pt-side: max(var(--pt-sheet-pad), calc((100% - var(--pt-page-width, 720px)) / 2));
+  padding-inline: var(--pt-side);
+}
+@supports (width: round(down, 100%, 1px)) {
+  .pt-sheet--page { width: 100%; padding-inline: round(down, var(--pt-side), var(--pt-grid)); }
+}
+body:has(> .pt-sheet--page) { margin: 0; background: var(--pt-paper); }
+
+/* grain in the paper itself: under the writing, never over notes, tape or stamps */
+.pt-sheet::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: -1;
+  background-image: var(--pt-grain-image);
+  opacity: var(--pt-grain); mix-blend-mode: multiply;
+}
+/* baseline guides: add .pt-guides to any ancestor */
+.pt-sheet::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 2;
+  background-image: linear-gradient(to bottom, var(--pt-guide) 1px, transparent 1px);
+  background-size: 100% var(--pt-grid); background-position: 0 -.5px;
+  transition: opacity .2s;
+}
+:is(.pt-guides .pt-sheet, .pt-guides.pt-sheet)::before { opacity: 1; }
+
+/* ruling: what is printed on the paper */
+.pt-sheet[data-ruling="grid"] {          /* 方眼, square grid */
+  --pt-pattern: linear-gradient(to right, var(--pt-line) 1px, transparent 1px), linear-gradient(to bottom, var(--pt-line) 1px, transparent 1px);
+  --pt-pattern-size: var(--pt-grid) var(--pt-grid);
+  --pt-pattern-pos: -.5px -.5px;
+}
+.pt-sheet[data-ruling="graph"] {         /* fine graph with a bolder line every cell */
+  --pt-pattern:
+    linear-gradient(to right, var(--pt-line-strong) 1px, transparent 1px), linear-gradient(to bottom, var(--pt-line-strong) 1px, transparent 1px),
+    linear-gradient(to right, var(--pt-line) .5px, transparent .5px), linear-gradient(to bottom, var(--pt-line) .5px, transparent .5px);
+  --pt-pattern-size: var(--pt-grid) var(--pt-grid), var(--pt-grid) var(--pt-grid), calc(var(--pt-grid) / 4) calc(var(--pt-grid) / 4), calc(var(--pt-grid) / 4) calc(var(--pt-grid) / 4);
+  --pt-pattern-pos: -.5px -.5px;
+}
+.pt-sheet[data-ruling="lined"] {         /* ruled, with a margin line */
+  --pt-pattern:
+    linear-gradient(to right, transparent calc(var(--pt-sheet-pad) - 9px), var(--pt-margin-line) calc(var(--pt-sheet-pad) - 9px) calc(var(--pt-sheet-pad) - 8px), transparent calc(var(--pt-sheet-pad) - 8px)),
+    linear-gradient(to bottom, var(--pt-line-strong) 1px, transparent 1px);
+  --pt-pattern-size: 100% 100%, 100% var(--pt-grid);
+  --pt-pattern-pos: 0 0, 0 -.5px;
+}
+.pt-sheet[data-ruling="blank"] { --pt-pattern: none; }
+
+/* paper stock: colour and grain; the ruling takes a colour that suits it */
+.pt-sheet[data-paper="cream"] {          /* thin ivory paper */
+  --pt-paper: #f8f1df; --pt-grain: .2;
+  --pt-dot: rgba(110, 92, 66, .24); --pt-line: rgba(150, 120, 80, .22); --pt-line-strong: rgba(150, 120, 80, .38);
+}
+.pt-sheet[data-paper="washi"] {          /* handmade paper with long fibres */
+  --pt-paper: #f6f2e6; --pt-grain: .5;
+  --pt-grain-image: var(--pt-washi-image);
+  --pt-dot: rgba(96, 86, 70, .22); --pt-line: rgba(110, 100, 80, .2); --pt-line-strong: rgba(110, 100, 80, .34);
+}
+.pt-sheet[data-paper="kraft"] {          /* brown kraft */
+  --pt-paper: #c9a67a; --pt-grain: .55;
+  --pt-dot: rgba(70, 44, 18, .3); --pt-line: rgba(70, 44, 18, .22); --pt-line-strong: rgba(70, 44, 18, .38); --pt-margin-line: rgba(140, 40, 30, .4);
+}
+.pt-sheet[data-paper="recycled"] {       /* grey recycled stock with flecks */
+  --pt-paper: #e9e8e2; --pt-grain: .45;
+  --pt-grain-image: var(--pt-fleck-image);
+  --pt-dot: rgba(60, 60, 66, .24); --pt-line: rgba(70, 90, 120, .2); --pt-line-strong: rgba(70, 90, 120, .34);
+}
+.pt-sheet[data-paper="tracing"] {        /* translucent tracing paper: the desk shows through */
+  --pt-paper: color-mix(in srgb, #f4f6f6 72%, transparent); --pt-grain: .15;
+  --pt-dot: rgba(70, 80, 90, .22); --pt-line: rgba(70, 90, 120, .18); --pt-line-strong: rgba(70, 90, 120, .3);
+  backdrop-filter: blur(1.5px);
+}
+
+/* printing: no desk, no drop shadows, no screen-only furniture; the paper and ink stay */
+@media print {
+  .pt-desk { background: none; }
+  .pt-sheet { width: auto; box-shadow: none; margin: 0; }
+  .pt-tabs, .pt-btn__smear { display: none !important; }
+  .pt-sheet, .pt-sheet * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+/* inline pieces placed straight on a sheet keep their own size instead of stretching across it */
+:is(.pt-sheet, .pt-sheet section) > :is(.pt-stamp, .pt-tape, .pt-btn, .pt-label, .pt-flag, .pt-photo, .pt-sticky, .pt-card, .pt-torn, .pt-ticket, .pt-lift, .pt-postage, .pt-approval, .pt-swatch) { align-self: flex-start; }

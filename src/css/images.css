@@ -1,0 +1,34 @@
+/* papertooth: image effects. They apply to a plain <img>; frames (polaroid, corners, tape, postage) are separate.
+   <img class="pt-litho" data-litho="mono|duo|tri" src="…" alt="…">   stone lithograph in one, two or three inks
+   <img class="pt-print" data-printer="gameboy|thermal" src="…" alt="…">   reprinted at low resolution with dithering */
+
+/* lithograph: the script swaps in a filter built from these settings */
+.pt-litho {
+  --pt-litho-ink: var(--pt-ink-sumi);
+  --pt-litho-ink2: none;          /* duo: a second ink for the mid tones, e.g. var(--pt-stamp-vermilion) */
+  --pt-litho-blue: #3a82c4;       /* tri: one stone per colour, as in a chromolithograph */
+  --pt-litho-red: #d8466c;
+  --pt-litho-yellow: #f2c640;
+  --pt-litho-grain: .6;           /* 0 to 1: how much the stone grain breaks up the tones */
+  --pt-litho-size: .7;            /* grain frequency: lower is coarser */
+  --pt-litho-contrast: 1.2;
+  --pt-litho-darken: 0;           /* -0.3 to 0.3 */
+  --pt-litho-offset: 1.5;         /* misregistration between stones, in px */
+  mix-blend-mode: multiply;
+  filter: grayscale(1) contrast(1.35);      /* without the script */
+}
+.pt-litho[data-litho="tri"] { filter: saturate(.8) contrast(1.2); }
+
+/* printer: the script replaces the picture with its low-resolution print; the ink sits on the page */
+.pt-print {
+  --pt-print-ink: #26262a;
+  --pt-print-contrast: 1.15;
+  --pt-print-brightness: 0;
+  --pt-print-wear: .5;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  mix-blend-mode: multiply;
+  filter: grayscale(1) contrast(1.4);       /* until it is printed, or without the script */
+}
+.pt-print.is-printed { filter: none; }
+.pt-print[data-palette="screen"] { mix-blend-mode: normal; }

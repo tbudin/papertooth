@@ -1,0 +1,67 @@
+/* papertooth: hand-drawn form controls
+   <label class="pt-check"><input type="checkbox"> Pick the paper</label>
+   <label class="pt-radio"><input type="radio" name="ink"> Blue pen</label>
+   <input class="pt-input" type="text">
+   Without the script the native controls stay visible and still work. */
+.pt-todo { list-style: none; padding: 0; display: flex; flex-direction: column; }
+.pt-todo li { max-width: none; height: var(--pt-grid); line-height: var(--pt-grid); }
+.pt-check, .pt-radio { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; min-height: var(--pt-grid); }
+.pt-todo .pt-check { height: var(--pt-grid); }
+:is(.pt-check, .pt-radio).is-ready input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+:is(.pt-check, .pt-radio) svg { flex: none; overflow: visible; }
+:is(.pt-check, .pt-radio) svg path { fill: none; stroke: var(--pt-ink); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+:is(.pt-check, .pt-radio) .pt-tick { stroke: var(--pt-t-color); stroke-width: calc(var(--pt-t-w) * 1px); stroke-opacity: var(--pt-t-op); stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset .35s var(--pt-ease); }
+.pt-radio .pt-tick { stroke-width: calc(var(--pt-t-w) * 1.2px); }
+:is(.pt-check, .pt-radio) input:checked ~ svg .pt-tick { stroke-dashoffset: 0; }
+/* a round cap leaves a dot at the start of an undrawn path: hide the mark until it is drawn */
+:is(.pt-check, .pt-radio) input:not(:checked) ~ svg .pt-tick { visibility: hidden; transition: stroke-dashoffset .35s var(--pt-ease), visibility 0s .35s; }
+:is(.pt-check, .pt-radio) input:focus-visible ~ svg { outline: 2px dashed var(--pt-pen); outline-offset: 3px; }
+.pt-check__text {
+  background: var(--pt-strike) 0 var(--pt-strike-y, 55%) / 0% var(--pt-strike-h, 10px) no-repeat;
+  transition: background-size .4s .15s var(--pt-ease);
+}
+.pt-check input:checked ~ .pt-check__text { background-size: 100% var(--pt-strike-h, 10px); }
+/* <ul class="pt-todo" data-strike="none|line|double|scribble|under" data-ul="wobble|slant|swash|double|marker|wave"> */
+[data-strike="none"] .pt-check__text, .pt-check__text[data-strike="none"] { background: none; }
+.pt-radios { display: flex; flex-wrap: wrap; gap: 0 var(--pt-grid); font-size: var(--pt-s-body); line-height: var(--pt-grid); }
+
+/* text fields: a line on the page to write on. At rest a dotted pencil line, as on a printed form;
+   in use the line is inked in and you write in pen.
+   <label class="pt-field"><span class="pt-field__label">Your name</span><input class="pt-input"></label>
+   <textarea class="pt-input" rows="3"> gets one ruled line per grid row. */
+.pt-field { display: flex; flex-direction: column; max-width: 26em; }
+.pt-field__label { font-family: var(--pt-font-type); font-size: var(--pt-s-small); line-height: var(--pt-grid); color: var(--pt-ribbon); opacity: .8; }
+.pt-input {
+  --pt-input-line: var(--pt-pencil-hb);
+  color-scheme: light;
+  display: block; width: 100%; box-sizing: border-box; margin: 0;
+  height: var(--pt-grid); padding: 0 2px 3px;
+  font-family: var(--pt-font-hand); font-size: 24px; line-height: calc(var(--pt-grid) - 3px); color: var(--pt-pen); caret-color: var(--pt-pen);
+  border: 0; border-radius: 0; outline: none; box-shadow: none; -webkit-appearance: none; appearance: none;
+  background:
+    var(--pt-r-wobble) 0 calc(100% + 4px) / 0% 12px no-repeat,
+    radial-gradient(circle, var(--pt-input-line) .7px, transparent 1.1px) 0 100% / 4px 3px repeat-x;
+  transition: background-size .45s var(--pt-ease);
+}
+.pt-input::placeholder { color: var(--pt-pencil-hb); opacity: .55; }
+/* in use: the line is drawn over in ink, left to right */
+.pt-input:focus { background-size: 100% 12px, 4px 3px; }
+.pt-input:focus-visible { outline: none; }
+.pt-input:disabled { opacity: .5; }
+.pt-input:user-invalid { --pt-input-line: var(--pt-ink-beni, #c23b3b); }
+/* several lines: one rule per grid row */
+textarea.pt-input {
+  height: auto; min-height: calc(var(--pt-grid) * 3); padding: 0 2px; resize: vertical;
+  line-height: var(--pt-grid);
+  background: repeating-linear-gradient(to bottom, transparent 0 calc(var(--pt-grid) - 1px), color-mix(in srgb, var(--pt-input-line) 45%, transparent) calc(var(--pt-grid) - 1px) var(--pt-grid));
+}
+textarea.pt-input:focus { background: repeating-linear-gradient(to bottom, transparent 0 calc(var(--pt-grid) - 1px), color-mix(in srgb, var(--pt-pen) 55%, transparent) calc(var(--pt-grid) - 1px) var(--pt-grid)); }
+.pt-field:has(.pt-input:focus) .pt-field__label { opacity: 1; }
+
+/* a drawn ink sample: <button class="pt-swatch" data-tool="fountain|ballpoint|pencil" style="--pt-swatch: #213c6b"> */
+.pt-swatch { display: grid; gap: 2px; text-align: left; background: none; border: 0; padding: 4px 0; cursor: pointer; color: var(--pt-ribbon); font: inherit; }
+.pt-swatch__ink { display: block; height: 40px; background: none center / 100% 100% no-repeat; }
+.pt-swatch[data-tool="pencil"] .pt-swatch__ink { filter: var(--pt-graphite, ); }
+.pt-swatch__name { font-family: var(--pt-font-type); font-size: 13px; line-height: 18px; }
+.pt-swatch[aria-pressed="true"] .pt-swatch__name { background: var(--pt-mark-y) 0 70% / 100% 70% no-repeat; }
+.pt-swatch:focus-visible { outline: 2px dashed var(--pt-pen); outline-offset: 2px; }

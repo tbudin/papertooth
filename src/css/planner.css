@@ -1,0 +1,56 @@
+/* papertooth: planner pieces
+   .pt-dayhead (today), .pt-week (seven days, Monday first), .pt-habits (tracker), .pt-dot-sticker */
+.pt-dayhead { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0 var(--pt-grid); padding-bottom: 12px; border-bottom: 2px solid var(--pt-ribbon); }
+.pt-dayhead__num { font-family: var(--pt-font-type-head); font-size: 88px; line-height: 96px; color: var(--pt-ribbon); }
+.pt-dayhead__meta { display: flex; flex-direction: column; padding-bottom: 12px; }
+.pt-dayhead__month { font-family: var(--pt-font-type); font-size: 16px; line-height: 24px; letter-spacing: .12em; text-transform: uppercase; color: var(--pt-ribbon); }
+.pt-dayhead__weekday { font-family: var(--pt-font-hand); font-size: 30px; line-height: 24px; color: var(--pt-pen); }
+.pt-dayhead__kanji { --pt-stamp: var(--pt-stamp-vermilion); margin-bottom: 12px; width: 52px; height: 52px; font-size: 27px; }
+.pt-dayhead__weekno { margin-left: auto; padding-bottom: 12px; font-family: var(--pt-font-type); font-size: 14px; line-height: 24px; opacity: .7; }
+
+.pt-week-wrap { container-type: inline-size; }
+.pt-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid color-mix(in srgb, var(--pt-ribbon) 45%, transparent); }
+.pt-week__day { min-height: calc(var(--pt-grid) * 7); padding: 0 6px; border-right: 1px solid color-mix(in srgb, var(--pt-ribbon) 22%, transparent); display: flex; flex-direction: column; }
+.pt-week__day:last-child { border-right: 0; }
+.pt-week__head { display: flex; justify-content: space-between; align-items: baseline; height: 24px; font-family: var(--pt-font-type); font-size: 12px; line-height: 24px; color: var(--pt-ribbon); }
+.pt-week__date { font-family: var(--pt-font-type-head); font-size: 17px; }
+.pt-week__head .pt-jp { font-size: 12px; }
+/* Saturday in blue and Sunday in red, as on Japanese calendars */
+.pt-week__day:nth-child(6) .pt-week__head { color: var(--pt-pencil-blue); }
+.pt-week__day:nth-child(7) .pt-week__head { color: var(--pt-pencil-red); }
+.pt-week__day:nth-child(n+6) { background: color-mix(in srgb, var(--pt-ribbon) 2.5%, transparent); }
+.pt-week__day p { font-family: var(--pt-font-hand); font-size: 20px; line-height: 24px; max-width: none; color: var(--pt-pen); }
+.pt-dot-sticker { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; margin-right: 4px; background: #ffb3c7; box-shadow: inset 0 -1px 1px rgba(0,0,0,.15), 0 1px 1px rgba(0,0,0,.12); }
+
+/* habit tracker: rows of <label class="pt-habit"><input type="checkbox"></label>; the script draws the circles */
+.pt-habits-wrap { container-type: inline-size; }
+/* wide: one row per habit, one column per day. The script places every cell, so narrow screens can swap rows and columns. */
+.pt-habits { display: grid; grid-template-columns: minmax(96px, 168px) repeat(var(--pt-days, 14), 24px); grid-auto-rows: 24px; align-items: center; }
+.pt-habits__row { --pt-hb: var(--pt-pen); display: contents; }
+.pt-habits__row > * { grid-row: var(--pt-ra, auto); grid-column: var(--pt-ca, auto); }
+.pt-habits__name { font-family: var(--pt-font-hand); font-size: 21px; line-height: 24px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--pt-hb); }
+.pt-habits__head > * { font-family: var(--pt-font-type); font-size: 11px; text-align: center; opacity: .6; color: var(--pt-ribbon); }
+.pt-habits__head .pt-habits__name { font-size: 12px; text-align: left; text-transform: uppercase; letter-spacing: .08em; }
+.pt-habit { display: grid; place-items: center; cursor: pointer; position: relative; height: 24px; }
+.pt-habit svg { overflow: visible; }
+.pt-habit .pt-ring { fill: none; stroke: color-mix(in srgb, var(--pt-ribbon) 32%, transparent); stroke-width: 1; }
+.pt-habit .pt-fill { fill: none; stroke: var(--pt-hb); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset .4s var(--pt-ease); }
+.pt-habit input:checked ~ svg .pt-fill { stroke-dashoffset: 0; }
+.pt-habit input:not(:checked) ~ svg .pt-fill { visibility: hidden; transition: stroke-dashoffset .4s var(--pt-ease), visibility 0s .4s; }
+.pt-habit.is-ready input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.pt-habit input:focus-visible ~ svg { outline: 2px dashed var(--pt-pen); outline-offset: 1px; }
+
+/* narrow: the week becomes a list of days, and the tracker runs down the page, one row per day */
+@container (max-width: 560px) {
+  .pt-week { grid-template-columns: minmax(0, 1fr); }
+  .pt-week__day { min-height: calc(var(--pt-grid) * 2); display: grid; grid-template-columns: 88px minmax(0, 1fr); column-gap: 12px; border-right: 0; border-bottom: 1px solid color-mix(in srgb, var(--pt-ribbon) 18%, transparent); }
+  .pt-week__head { grid-row: 1 / span 3; gap: 8px; justify-content: flex-start; }
+  .pt-week__day p { grid-column: 2; }
+}
+@container (max-width: 520px) {
+  .pt-habits { grid-template-columns: 40px repeat(var(--pt-habit-count, 3), minmax(0, 1fr)); grid-auto-rows: auto; row-gap: 0; }
+  .pt-habits__row > * { grid-row: var(--pt-rb, auto); grid-column: var(--pt-cb, auto); justify-self: center; }
+  .pt-habits .pt-habit { height: 24px; }
+  .pt-habits__name { white-space: normal; text-align: center; font-size: 17px; line-height: 18px; padding-bottom: 6px; align-self: end; }
+  .pt-habits__head > :not(.pt-habits__name) { justify-self: start; }
+}

@@ -1,0 +1,46 @@
+/* papertooth: writing on the sheet
+   Text inside .pt-sheet sits on the grid. The script nudges each block onto a dot row. */
+.pt-sheet :is(h1, h2, h3, h4, p, ul, ol, li, figure, blockquote) { margin: 0; }
+.pt-sheet :is(p, li) { font-size: var(--pt-s-body); line-height: var(--pt-grid); max-width: 52ch; }
+.pt-mode-hand .pt-sheet :is(p, li), .pt-sheet.pt-mode-hand :is(p, li) { max-width: 34em; }
+.pt-sheet :is(h1, h2) { font-family: var(--pt-f-head); font-weight: 400; line-height: calc(var(--pt-grid) * 2); text-wrap: balance; }
+.pt-sheet h1 { font-size: var(--pt-s-h1); max-width: 18em; }
+.pt-sheet h2 { font-size: var(--pt-s-h2); }
+.pt-sheet h3 { font-family: var(--pt-font-type); font-weight: 400; font-size: var(--pt-s-small); line-height: var(--pt-grid); opacity: .7; }
+:is(.pt-mode-hand) .pt-sheet :is(h1, h2), .pt-sheet.pt-mode-hand :is(h1, h2) { font-weight: 700; }
+.pt-sheet section { display: flex; flex-direction: column; gap: var(--pt-grid); }
+.pt-row { display: flex; flex-wrap: wrap; gap: 0 var(--pt-grid); align-items: center; }
+
+/* ink texture: body text varies in density only; headings also get a fine rough edge */
+.pt-sheet :is(p, li) { filter: var(--pt-text-filter, ); }
+.pt-sheet :is(h1, h2) { filter: var(--pt-head-filter, ); }
+
+/* per-letter wobble: the script wraps each letter of .pt-wobble in a span */
+.pt-c {
+  display: inline-block;
+  opacity: calc(1 - (1 - var(--o, 1)) * var(--pt-wobble));
+  transform: translateY(calc(var(--y, 0) * var(--pt-wobble) * 1px)) rotate(calc(var(--r, 0) * var(--pt-wobble) * 1deg));
+}
+.pt-mode-hand .pt-c { display: inline; transform: none; }
+
+/* text in a particular tool */
+.pt-type { font-family: var(--pt-font-type); color: var(--pt-ribbon); }
+.pt-pen-text { font-family: var(--pt-font-hand); color: var(--pt-pen); }
+.pt-pencil-text { font-family: var(--pt-font-hand); color: var(--pt-pencil-hb); }
+.pt-note { font-family: var(--pt-font-hand); color: var(--pt-pencil); }
+.pt-sheet :is(.pt-pencil-text, .pt-note), :is(.pt-pencil-text, .pt-note) { filter: var(--pt-graphite, ); }
+.pt-sheet p.pt-note, .pt-sheet p.pt-pencil-text { font-size: calc(var(--pt-s-body) * 1.05 + 4px); }
+.pt-sheet p.pt-pen-text { font-size: calc(var(--pt-s-body) * 1.05 + 6px); }
+.pt-jp { font-family: var(--pt-font-jp); font-weight: 800; }
+.pt-jp-round { font-family: var(--pt-font-jp-round); font-weight: 700; }
+
+/* typewriter texture for any font: add .pt-typewriter, tune it with setTypewriter() */
+.pt-typewriter { filter: url(#pt-typewriter); text-shadow: var(--pt-double-strike); }
+.pt-texture-off .pt-typewriter { filter: none; }
+
+/* lets the browser skip drawing sections far off screen */
+.pt-lazy { content-visibility: auto; contain-intrinsic-size: auto 600px; }
+
+/* selecting text: a clean highlighter colour, and the ink filter steps aside while it is selected */
+.pt-sheet ::selection, .pt-sheet::selection { background: color-mix(in srgb, var(--pt-hl-yellow, #fff04a) 70%, transparent); color: inherit; text-shadow: none; }
+.pt-selecting, .pt-selecting .pt-c { filter: none !important; }

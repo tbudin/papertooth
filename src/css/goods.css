@@ -1,0 +1,218 @@
+/* papertooth: tape, sticky notes, flags, index tabs, cards, clips, torn and perforated paper */
+
+/* tape: coloured and patterned tape is opaque; only clear tape lets the page through */
+.pt-tape {
+  --pt-rot: 0deg;
+  --pt-sheen: linear-gradient(to bottom, rgba(255,255,255,.18), rgba(255,255,255,0) 40%, rgba(0,0,0,.04));
+  /* masking tape is crepe paper: fine, uneven creases across the width */
+  --pt-crepe: repeating-linear-gradient(90deg, rgba(120,100,60,.05) 0 1px, transparent 1px 3px, rgba(255,255,255,.12) 3px 4px, transparent 4px 7px, rgba(120,100,60,.035) 7px 8px, transparent 8px 11px);
+  display: block; width: 132px; height: 30px;
+  transform: rotate(var(--pt-rot));
+  background: var(--pt-sheen), var(--pt-crepe), var(--pt-fibre-soft, var(--pt-fibre)), #efe4c6;
+  /* the paper underneath (an edge, a line) shows through slightly, as it does with real tape */
+  mix-blend-mode: multiply;
+  -webkit-mask: var(--pt-tape-mask) 0 0 / 100% 100% no-repeat; mask: var(--pt-tape-mask) 0 0 / 100% 100% no-repeat;
+}
+.pt-tape[data-tape="kraft"]    { background: var(--pt-sheen), var(--pt-crepe), var(--pt-fibre), #c9a36d; }
+.pt-tape:not([data-tape]):not(.pt-tape--text), .pt-tape:is([data-tape="masking"], [data-tape="kraft"]) { opacity: .94; }
+.pt-tape:is([data-tape="stripes"], [data-tape="dots"], [data-tape="gingham"], [data-tape="seigaiha"], [data-tape="clear"]) { mix-blend-mode: normal; }
+.pt-tape[data-tape="stripes"]  { background: var(--pt-sheen), repeating-linear-gradient(-45deg, #f39bb9 0 7px, #fde6ee 7px 14px); }
+.pt-tape[data-tape="dots"]     { background: var(--pt-sheen), radial-gradient(circle, #2f62b3 2.2px, transparent 2.8px) 0 0 / 11px 11px, #d2e4f7; }
+.pt-tape[data-tape="gingham"]  { background: var(--pt-sheen), repeating-linear-gradient(to right, rgba(74,140,104,.45) 0 6px, transparent 6px 12px), repeating-linear-gradient(to bottom, rgba(74,140,104,.45) 0 6px, transparent 6px 12px), #fbfaf5; }
+.pt-tape[data-tape="seigaiha"] { background: var(--pt-sheen), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10' viewBox='0 0 20 10'%3E%3Cg fill='%23fbf8f0' stroke='%23284a8c' stroke-width='.9'%3E%3Ccircle cx='10' cy='5' r='9.4'/%3E%3Ccircle cx='10' cy='5' r='6.4'/%3E%3Ccircle cx='10' cy='5' r='3.4'/%3E%3Ccircle cx='0' cy='10' r='9.4'/%3E%3Ccircle cx='0' cy='10' r='6.4'/%3E%3Ccircle cx='0' cy='10' r='3.4'/%3E%3Ccircle cx='20' cy='10' r='9.4'/%3E%3Ccircle cx='20' cy='10' r='6.4'/%3E%3Ccircle cx='20' cy='10' r='3.4'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 20px 10px, #fbf8f0; }
+.pt-tape[data-tape="clear"] {
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,.8) 0 1px, rgba(255,255,255,.32) 1px 30%, rgba(255,255,255,.1) 55%, rgba(255,255,255,.34) calc(100% - 1px), rgba(150,160,170,.35) calc(100% - 1px)),
+    linear-gradient(100deg, transparent 18%, rgba(255,255,255,.4) 28%, transparent 40%),
+    rgba(186,198,210,.32);
+  box-shadow: inset 0 0 0 1px rgba(150,160,172,.28);
+}
+
+/* sticky notes: <div class="pt-sticky" data-color="…" data-ratio="square|wide|tall|small|strip" data-sticky="lifted|pad|stack">
+   <div class="pt-sticky__paper">…</div></div>
+   No outline: what reads as an edge is the shadow underneath. */
+.pt-sticky {
+  --pt-rot: 0deg; --pt-note-paper: #fff4a3; --pt-note-w: 8; --pt-note-h: 8;
+  --pt-note-shadow: color-mix(in srgb, var(--pt-note-paper) 25%, rgba(48, 40, 20, .55));
+  position: relative; width: calc(var(--pt-grid) * var(--pt-note-w));
+  transform: rotate(calc(var(--pt-rot) * var(--pt-tilt))); z-index: 0;
+}
+.pt-sticky[data-ratio="wide"]  { --pt-note-w: 12; --pt-note-h: 7; }
+.pt-sticky[data-ratio="tall"]  { --pt-note-w: 7;  --pt-note-h: 10; }
+.pt-sticky[data-ratio="small"] { --pt-note-w: 5;  --pt-note-h: 4; }
+.pt-sticky[data-ratio="strip"] { --pt-note-w: 10; --pt-note-h: 3; }
+.pt-sticky::before, .pt-sticky::after {
+  content: ""; position: absolute; z-index: -1; bottom: 10px; width: 42%; height: 22%;
+  box-shadow: 0 11px 9px -1px var(--pt-note-shadow);
+  border-radius: 50%;
+}
+.pt-sticky::before { left: 7px; transform: rotate(-3deg); }
+.pt-sticky::after  { right: 7px; transform: rotate(3deg); }
+.pt-sticky__paper {
+  position: relative; min-height: calc(var(--pt-grid) * var(--pt-note-h)); padding: 26px 18px 20px; box-sizing: border-box;
+  background:
+    linear-gradient(to bottom, color-mix(in srgb, var(--pt-note-paper), #fff 26%) 0, var(--pt-note-paper) 20%, var(--pt-note-paper) 80%, color-mix(in srgb, var(--pt-note-paper), #fff 12%) 100%),
+    var(--pt-note-paper);
+  box-shadow: 0 .5px 1.5px rgba(48, 40, 20, .16);
+}
+.pt-sticky:is([data-ratio="small"], [data-ratio="strip"]) .pt-sticky__paper { padding: 14px 14px 10px; }
+.pt-sticky__paper p { font-family: var(--pt-font-hand); font-size: 25px; line-height: 24px; color: var(--pt-pen); max-width: none; }
+.pt-sticky[data-color="pink"]   { --pt-note-paper: #ffd0de; }
+.pt-sticky[data-color="mint"]   { --pt-note-paper: #cdf0dc; }
+.pt-sticky[data-color="blue"]   { --pt-note-paper: #d3e6fb; }
+.pt-sticky[data-color="orange"] { --pt-note-paper: #ffd8ad; }
+
+/* lifted: stuck down along the top, the lower half rises off the page. No tilt: the lift shows
+   in the light on the paper (a soft bend, then the raised part catching the light) and in a shadow
+   that grows wider and softer the further the paper is from the page. */
+.pt-sticky:is([data-sticky="lifted"], [data-sticky="curl"], [data-sticky="peel"]) .pt-sticky__paper {
+  background:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--pt-note-paper), #fff 22%) 0,
+      var(--pt-note-paper) 14%, var(--pt-note-paper) 38%,
+      color-mix(in srgb, var(--pt-note-paper), #6b5a30 4%) 60%,
+      color-mix(in srgb, var(--pt-note-paper), #fff 8%) 86%,
+      color-mix(in srgb, var(--pt-note-paper), #fff 14%) 100%),
+    var(--pt-note-paper);
+  border-radius: 0 0 3px 3px / 0 0 2px 2px;
+  box-shadow: 0 .5px 1px rgba(48, 40, 20, .14);
+}
+.pt-sticky:is([data-sticky="lifted"], [data-sticky="curl"], [data-sticky="peel"])::before {
+  left: 5%; right: 5%; width: auto; top: 40%; bottom: -10px; height: auto;
+  transform: none; border-radius: 0 0 50% 50% / 0 0 14px 14px; box-shadow: none;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--pt-note-shadow), transparent 55%) 70%, color-mix(in srgb, var(--pt-note-shadow), transparent 25%));
+  filter: blur(7px);
+}
+.pt-sticky:is([data-sticky="lifted"], [data-sticky="curl"], [data-sticky="peel"])::after {
+  display: block; left: 1px; right: 1px; width: auto; top: 30%; bottom: 0; height: auto;
+  transform: none; border-radius: 0; box-shadow: 0 3px 4px -1px rgba(48, 40, 20, .22);
+}
+
+/* pad: a whole block lying flat; only the bottom edges of the sheets underneath show */
+.pt-sticky[data-sticky="pad"]::before, .pt-sticky[data-sticky="pad"]::after { display: none; }
+.pt-sticky[data-sticky="pad"] .pt-sticky__paper {
+  background: var(--pt-note-paper);
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, var(--pt-note-paper), #000 5%), 0 2px 0 0 var(--pt-note-paper),
+    0 3px 0 0 color-mix(in srgb, var(--pt-note-paper), #000 7%), 0 4px 0 0 var(--pt-note-paper),
+    0 5px 0 0 color-mix(in srgb, var(--pt-note-paper), #000 10%),
+    0 7px 6px -1px rgba(48, 40, 20, .2);
+}
+
+/* stack: two loose notes underneath, each set down a little askew */
+.pt-sticky[data-sticky="stack"]::before, .pt-sticky[data-sticky="stack"]::after {
+  inset: 0; bottom: 0; width: auto; height: auto; border-radius: 0;
+  background: color-mix(in srgb, var(--pt-note-paper), #000 3%);
+  box-shadow: 0 .5px 1.5px rgba(48, 40, 20, .16), 0 6px 8px -4px var(--pt-note-shadow);
+}
+.pt-sticky[data-sticky="stack"]::before { transform: rotate(-4deg) translate(-4px, 3px); }
+.pt-sticky[data-sticky="stack"]::after  { transform: rotate(3deg) translate(5px, 5px); }
+
+/* film flags: a strip of thin plastic film. The coloured end is tinted film, the rest is frosted;
+   both let the page show through, and the film catches a little light along its edges */
+.pt-flag {
+  --pt-f: #f58db4;
+  position: relative; display: inline-block; height: 24px; padding: 0 14px 0 26px; box-sizing: border-box;
+  font-family: var(--pt-font-hand); font-size: 20px; line-height: 24px; color: var(--pt-ribbon);
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,.75) 0 .5px, transparent .5px calc(100% - .5px), rgba(0,0,0,.07) calc(100% - .5px)),
+    linear-gradient(104deg, transparent 0 35%, rgba(255,255,255,.28) 46%, transparent 58%),
+    linear-gradient(to right, color-mix(in srgb, var(--pt-f) 82%, transparent) 0 14px, color-mix(in srgb, var(--pt-f) 16%, rgba(250,250,247,.55)) 14px);
+  border-radius: 1px 2.5px 2.5px 1px;
+  box-shadow: inset 0 0 0 .5px color-mix(in srgb, var(--pt-f) 30%, rgba(0,0,0,.12)), 0 .5px .5px rgba(0,0,0,.05);
+}
+/* where the tinted part meets the frosted part */
+.pt-flag::before { content: ""; position: absolute; left: 14px; top: 0; bottom: 0; width: .5px; background: color-mix(in srgb, var(--pt-f) 60%, #000 10%); opacity: .5; }
+.pt-flag[data-color="pink"]   { --pt-f: #f58db4; }
+.pt-flag[data-color="yellow"] { --pt-f: #ffd43b; }
+.pt-flag[data-color="mint"]   { --pt-f: #62c99b; }
+.pt-flag[data-color="blue"]   { --pt-f: #6fa6ec; }
+.pt-flag[data-color="orange"] { --pt-f: #ff9f4f; }
+/* index tabs on the right edge of a sheet: <nav class="pt-tabs"><a class="pt-tab" data-color="…"> */
+.pt-tabs { position: absolute; top: calc(var(--pt-grid) * 8); right: -34px; display: flex; flex-direction: column; gap: 8px; z-index: 1; }
+.pt-tab {
+  --pt-tab: #f6a1c0;
+  display: block; width: 50px; padding: 12px 0 12px 16px; box-sizing: border-box;
+  writing-mode: vertical-rl;
+  font-family: var(--pt-font-hand); font-size: 19px; line-height: 1; color: var(--pt-ribbon); text-decoration: none;
+  background: linear-gradient(to right, color-mix(in srgb, var(--pt-tab) 42%, transparent) 0 16px, var(--pt-tab) 16px);
+  border-radius: 0 5px 5px 0; box-shadow: 1px 1px 0 rgba(0,0,0,.07);
+  transition: transform .2s;
+}
+.pt-tab:is(:hover, :focus-visible) { transform: translateX(4px); }
+.pt-tab[data-color="yellow"] { --pt-tab: #ffe36a; }
+.pt-tab[data-color="mint"]   { --pt-tab: #9fdcc0; }
+.pt-tab[data-color="blue"]   { --pt-tab: #a9c9f2; }
+.pt-tab[data-color="orange"] { --pt-tab: #ffbe7a; }
+@media (max-width: 860px) { .pt-tabs { display: none; } }
+
+/* ruled index card */
+.pt-card {
+  --pt-rot: 0deg;
+  position: relative; box-sizing: border-box; width: min(312px, 100%);
+  padding: 29px 24px 24px;
+  /* an index card lying flat: faint blue rules, one red heading rule, the fibre of thin board,
+     and only the hairline of its own thickness for a shadow */
+  background:
+    linear-gradient(to bottom, transparent 23px, rgba(214,92,92,.42) 23px 24px, transparent 24px),
+    repeating-linear-gradient(to bottom, transparent 0 47px, rgba(92,136,196,.2) 47px 48px) 0 0 / 100% 48px,
+    var(--pt-fibre-soft, none),
+    #fffdf8;
+  border-radius: 1.5px;
+  box-shadow:
+    0 0 0 .5px rgba(60, 50, 30, .12),
+    0 .5px 0 rgba(60, 50, 30, .1),
+    0 1px 2px -1px rgba(60, 50, 30, .18);
+  transform: rotate(calc(var(--pt-rot) * var(--pt-tilt)));
+}
+.pt-card p { font-family: var(--pt-font-hand); font-size: 25px; line-height: 24px; color: var(--pt-pen); max-width: none; }
+.pt-card .pt-tape { position: absolute; width: 104px; height: 28px; }
+
+/* paper clip: an empty span placed over the top edge of a card */
+/* the paper sits between the two loops: the inner loop disappears behind it at the edge */
+.pt-clip { position: absolute; top: -22px; left: 36px; width: 26px; height: 72px; background: var(--pt-clip) 0 0 / 100% 100% no-repeat; pointer-events: none; z-index: 2; }
+
+/* torn off a pad: <div class="pt-torn">…</div> */
+.pt-torn {
+  --pt-rot: 0deg;
+  position: relative; z-index: 0; box-sizing: border-box; width: min(288px, 100%);
+  padding: 32px 20px 20px;
+  transform: rotate(calc(var(--pt-rot) * var(--pt-tilt)));
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.14)) drop-shadow(0 8px 9px rgba(0,0,0,.13));
+}
+.pt-torn::before, .pt-torn::after {
+  content: ""; position: absolute; z-index: -1; left: 0; right: 0; height: 100%;
+  -webkit-mask: var(--pt-torn-mask) 0 0 / 100% 100% no-repeat; mask: var(--pt-torn-mask) 0 0 / 100% 100% no-repeat;
+}
+.pt-torn::before { top: -3px; background: var(--pt-fibre-soft), #fff; }
+.pt-torn::after {
+  top: 0;
+  background: repeating-linear-gradient(to bottom, transparent 0 23px, rgba(70,120,190,.28) 23px 24px) 0 8px / 100% 24px, var(--pt-fibre-soft), #fffdf6;
+}
+.pt-torn p { font-family: var(--pt-font-hand); font-size: 23px; line-height: 24px; color: var(--pt-pen); max-width: none; }
+.pt-memo-head { display: flex; justify-content: space-between; font-family: var(--pt-font-type) !important; font-size: 13px !important; letter-spacing: .14em; color: var(--pt-pencil-blue) !important; text-transform: uppercase; }
+
+/* perforated slip with a numbered stub */
+.pt-ticket {
+  --pt-rot: 0deg; --pt-stub: 72px;
+  position: relative; z-index: 0; display: flex; box-sizing: border-box; width: min(312px, 100%); min-height: 120px;
+  transform: rotate(calc(var(--pt-rot) * var(--pt-tilt)));
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.14)) drop-shadow(0 8px 9px rgba(0,0,0,.13));
+}
+.pt-ticket::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: var(--pt-fibre-soft), #f4ecd8;
+  -webkit-mask: radial-gradient(circle at var(--pt-stub) 0, #0000 7px, #000 7.5px), radial-gradient(circle at var(--pt-stub) 100%, #0000 7px, #000 7.5px);
+  -webkit-mask-composite: source-in;
+  mask: radial-gradient(circle at var(--pt-stub) 0, #0000 7px, #000 7.5px), radial-gradient(circle at var(--pt-stub) 100%, #0000 7px, #000 7.5px);
+  mask-composite: intersect;
+}
+.pt-ticket__stub { position: relative; flex: none; width: var(--pt-stub); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: var(--pt-font-type); color: var(--pt-pencil-red); }
+.pt-ticket__stub small { font-size: 11px; letter-spacing: .14em; }
+.pt-ticket__stub b { font-family: var(--pt-font-type-head); font-weight: 400; font-size: 20px; writing-mode: vertical-rl; letter-spacing: .1em; }
+.pt-ticket__stub::after {
+  content: ""; position: absolute; top: 10px; bottom: 10px; right: -3px; width: 6px;
+  background: radial-gradient(circle, rgba(0,0,0,.28) 0 .7px, var(--pt-paper) 1.1px 2.3px, transparent 2.7px) 0 0 / 6px 9px repeat-y;
+}
+.pt-ticket__body { padding: 18px 18px 16px 20px; display: flex; flex-direction: column; }
+.pt-ticket__body p { font-family: var(--pt-font-hand); font-size: 23px; line-height: 24px; color: var(--pt-pen); max-width: none; }

@@ -1,0 +1,15 @@
+/* papertooth: hand-drawn stationery for the web. MIT licence. */
+@import "./tokens.css";
+@import "./paper.css";
+@import "./type.css";
+@import "./highlight.css";
+@import "./lines.css";
+@import "./marks.css";
+@import "./goods.css";
+@import "./planner.css";
+@import "./forms.css";
+@import "./extras.css";
+@import "./images.css";
+@import "./diagram.css";
+@import "./tools.css";
+@import "./motion.css";
