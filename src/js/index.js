@@ -9,7 +9,7 @@ import { snapSheet } from './baseline.js';
 import { setPen, setPencil, setRibbon, setHighlighter } from './ink.js';
 import { dayHead, week, isoWeek } from './planner.js';
 
-export const VERSION = '0.2.0';
+export const VERSION = '0.2.1';
 
 export const DEFAULTS = {
   root: null,              // element to enhance; defaults to document.body
