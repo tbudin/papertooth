@@ -1956,6 +1956,7 @@ textarea.pt-input:focus {
   filter: var(--pt-graphite, );
 }
 .pt-swatch__name {
+  justify-self: start;
   font-family: var(--pt-font-type);
   font-size: 13px;
   line-height: 18px;
@@ -2656,6 +2657,11 @@ textarea.pt-input:focus {
     transform: rotate(calc(var(--pt-rot) * var(--pt-tilt))) scale(1);
   }
 }
+@keyframes pt-fade {
+  from {
+    opacity: 0;
+  }
+}
 @keyframes pt-stick {
   from {
     opacity: 0;
@@ -2676,6 +2682,12 @@ textarea.pt-input:focus {
 }
 .pt-motion :is(.pt-rule.is-drawn, .is-drawn .pt-rule, .is-drawn .pt-flag, .pt-flag.is-drawn, .is-drawn .pt-progress, .pt-progress.is-drawn) {
   animation: pt-wipe .8s var(--pt-delay, 0s) var(--pt-ease) both;
+}
+.pt-motion :is(.is-drawn .pt-progress, .pt-progress.is-drawn) {
+  animation-fill-mode: backwards;
+}
+.pt-motion :is(.is-drawn .pt-progress, .pt-progress.is-drawn)[data-label]::after {
+  animation: pt-fade .3s calc(var(--pt-delay, 0s) + .8s) var(--pt-ease) both;
 }
 .pt-motion :is(.is-drawn .pt-link, .pt-link.is-drawn):not([data-ul=wave], [data-ul=hl]) {
   animation: pt-ul .6s var(--pt-delay, 0s) var(--pt-ease) both;

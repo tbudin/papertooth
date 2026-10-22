@@ -62,6 +62,7 @@ textarea.pt-input:focus { background: repeating-linear-gradient(to bottom, trans
 .pt-swatch { display: grid; gap: 2px; text-align: left; background: none; border: 0; padding: 4px 0; cursor: pointer; color: var(--pt-ribbon); font: inherit; }
 .pt-swatch__ink { display: block; height: 40px; background: none center / 100% 100% no-repeat; }
 .pt-swatch[data-tool="pencil"] .pt-swatch__ink { filter: var(--pt-graphite, ); }
-.pt-swatch__name { font-family: var(--pt-font-type); font-size: 13px; line-height: 18px; }
+/* start, not stretch: the highlight on a chosen swatch should stop where its name does */
+.pt-swatch__name { justify-self: start; font-family: var(--pt-font-type); font-size: 13px; line-height: 18px; }
 .pt-swatch[aria-pressed="true"] .pt-swatch__name { background: var(--pt-mark-y) 0 70% / 100% 70% no-repeat; }
 .pt-swatch:focus-visible { outline: 2px dashed var(--pt-pen); outline-offset: 2px; }

@@ -7,6 +7,7 @@
 @keyframes pt-ul     { from { background-size: 0% 9px, 0% 9px; } }
 @keyframes pt-mark   { from { background-size: 0% var(--pt-mark-h, 88%); } }
 @keyframes pt-thunk  { 0% { opacity: 0; transform: rotate(calc(var(--pt-rot) * var(--pt-tilt))) scale(1.6); } 55% { opacity: .95; } 100% { opacity: var(--pt-stamp-opacity); transform: rotate(calc(var(--pt-rot) * var(--pt-tilt))) scale(1); } }
+@keyframes pt-fade   { from { opacity: 0; } }
 @keyframes pt-stick  { from { opacity: 0; transform: translateY(-10px) rotate(calc(var(--pt-rot, 0deg) * var(--pt-tilt) - 7deg)); } }
 
 /* a block waiting to be drawn, and anything drawn that is itself the block */
@@ -16,6 +17,10 @@
 .pt-motion .is-drawn :is(.pt-anno__ink path, .pt-draw-path) { animation: pt-draw var(--pt-draw) var(--pt-delay, 0s) var(--pt-ease) both; }
 .pt-motion :is(.is-drawn .pt-btn, .pt-btn.is-drawn):not(.pt-btn--outline)::before { animation: pt-wipe .55s var(--pt-delay, 0s) var(--pt-ease) both; }
 .pt-motion :is(.pt-rule.is-drawn, .is-drawn .pt-rule, .is-drawn .pt-flag, .pt-flag.is-drawn, .is-drawn .pt-progress, .pt-progress.is-drawn) { animation: pt-wipe .8s var(--pt-delay, 0s) var(--pt-ease) both; }
+/* a progress label sits outside the bar, where the wipe's clip would keep cutting it off: the clip goes once
+   the bar is drawn, and the label is written in after it */
+.pt-motion :is(.is-drawn .pt-progress, .pt-progress.is-drawn) { animation-fill-mode: backwards; }
+.pt-motion :is(.is-drawn .pt-progress, .pt-progress.is-drawn)[data-label]::after { animation: pt-fade .3s calc(var(--pt-delay, 0s) + .8s) var(--pt-ease) both; }
 .pt-motion :is(.is-drawn .pt-link, .pt-link.is-drawn):not([data-ul="wave"], [data-ul="hl"]) { animation: pt-ul .6s var(--pt-delay, 0s) var(--pt-ease) both; }
 .pt-motion :is(.is-drawn .pt-mark, .pt-mark.is-drawn) { animation: pt-mark .6s var(--pt-delay, 0s) var(--pt-ease) both; }
 .pt-motion :is(.is-drawn .pt-stamp, .pt-stamp.is-drawn) { animation: pt-thunk .42s var(--pt-delay, 0s) cubic-bezier(.2,.8,.3,1.15) both; }
