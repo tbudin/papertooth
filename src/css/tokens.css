@@ -145,6 +145,14 @@
 }
 .pt-night { --pt-desk: #2b2a27; --pt-desk-ink: #cfccc3; }
 .pt-day { --pt-desk: #cdcbc5; --pt-desk-ink: #3a3c42; }
+/* night inks: used only for marks made straight on the dark desk, where the paper inks would vanish */
+:root {
+  --pt-night-pen: #a9bde6;
+  --pt-night-pencil: #ec8a74;
+  --pt-night-graphite: #a3a5ac;
+  --pt-night-ballpoint: #93a6ee;
+  --pt-night-hl-ink: #24262c;   /* text under a highlighter stays dark, as it would on a yellow band */
+}
 
 /* handwritten mode: put .pt-mode-hand on any ancestor */
 .pt-mode-hand {

@@ -2387,6 +2387,9 @@ function init(options = {}) {
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => {
     if (!destroyed) refresh();
   });
+  const scheme = matchMedia("(prefers-color-scheme: dark)");
+  const onScheme = () => refresh();
+  scheme.addEventListener("change", onScheme);
   snap();
   if (o.observe && "MutationObserver" in window) {
     let pending = /* @__PURE__ */ new Set(), queued = false;
@@ -2437,6 +2440,7 @@ function init(options = {}) {
     destroy() {
       destroyed = true;
       document.removeEventListener("selectionchange", onSelection);
+      scheme.removeEventListener("change", onScheme);
       cancelAnimationFrame(selFrame);
       cancelAnimationFrame(snapFrame);
       scheduler.stop();

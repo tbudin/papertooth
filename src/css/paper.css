@@ -2,7 +2,43 @@
    <body class="pt-desk">
    <main class="pt-sheet" data-paper="white|cream|washi|kraft|recycled|tracing" data-ruling="dot|grid|graph|lined|blank">
    The paper is the stock itself: its colour and grain. The ruling is what is printed on it. */
-.pt-desk { background: var(--pt-desk); }
+/* text written straight on the desk takes the desk's ink, so it stays readable when the desk goes dark at night */
+.pt-desk { background: var(--pt-desk); color: var(--pt-desk-ink); }
+/* paper lying on the desk is written on in ink, whatever the desk is doing */
+:is(.pt-card, .pt-torn, .pt-ticket) { color: var(--pt-ink); }
+
+/* At night, marks made straight on the dark desk (links, highlights, ticks, rules, stamps, tape) switch to light
+   inks and stop multiplying into the desk. Paper lying on the desk goes back to the day inks, which are kept
+   on :root (custom properties resolve where they are declared, so these hold the page's own pen and pencil). */
+:root {
+  --pt-day-pen: var(--pt-pen); --pt-day-ink: var(--pt-ink); --pt-day-ribbon: var(--pt-ribbon); --pt-day-pencil: var(--pt-pencil);
+  --pt-day-graphite: var(--pt-graphite-c); --pt-day-ballpoint: var(--pt-ballpoint); --pt-day-brush: var(--pt-brush); --pt-day-marker: var(--pt-marker);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not(.pt-day):is(.pt-desk), :root:not(.pt-day) .pt-desk {
+    --pt-pen: var(--pt-night-pen); --pt-ink: var(--pt-desk-ink); --pt-ribbon: var(--pt-desk-ink); --pt-pencil: var(--pt-night-pencil);
+    --pt-graphite-c: var(--pt-night-graphite); --pt-ballpoint: var(--pt-night-ballpoint); --pt-brush: var(--pt-desk-ink); --pt-marker: var(--pt-desk-ink);
+    --pt-blend: screen; --pt-hl-ink: var(--pt-night-hl-ink);
+  }
+  :root:not(.pt-day) :is(.pt-sheet, .pt-card, .pt-torn, .pt-ticket, .pt-sticky__paper, .pt-photo, .pt-postage, .pt-label, .pt-flag, .pt-tab) {
+    --pt-pen: var(--pt-day-pen); --pt-ink: var(--pt-day-ink); --pt-ribbon: var(--pt-day-ribbon); --pt-pencil: var(--pt-day-pencil);
+    --pt-graphite-c: var(--pt-day-graphite); --pt-ballpoint: var(--pt-day-ballpoint); --pt-brush: var(--pt-day-brush); --pt-marker: var(--pt-day-marker);
+    --pt-blend: multiply; --pt-hl-ink: currentColor;
+  }
+}
+.pt-night:is(.pt-desk), .pt-night .pt-desk {
+  --pt-pen: var(--pt-night-pen); --pt-ink: var(--pt-desk-ink); --pt-ribbon: var(--pt-desk-ink); --pt-pencil: var(--pt-night-pencil);
+  --pt-graphite-c: var(--pt-night-graphite); --pt-ballpoint: var(--pt-night-ballpoint); --pt-brush: var(--pt-desk-ink); --pt-marker: var(--pt-desk-ink);
+  --pt-blend: screen; --pt-hl-ink: var(--pt-night-hl-ink);
+}
+.pt-night :is(.pt-sheet, .pt-card, .pt-torn, .pt-ticket, .pt-sticky__paper, .pt-photo, .pt-postage, .pt-label, .pt-flag, .pt-tab) {
+  --pt-pen: var(--pt-day-pen); --pt-ink: var(--pt-day-ink); --pt-ribbon: var(--pt-day-ribbon); --pt-pencil: var(--pt-day-pencil);
+  --pt-graphite-c: var(--pt-day-graphite); --pt-ballpoint: var(--pt-day-ballpoint); --pt-brush: var(--pt-day-brush); --pt-marker: var(--pt-day-marker);
+  --pt-blend: multiply; --pt-hl-ink: currentColor;
+}
+/* handwritten mode writes in pen on that paper too (specific enough to follow the resets above) */
+:root :is(.pt-mode-hand :is(.pt-sheet, .pt-card, .pt-torn, .pt-ticket, .pt-sticky__paper, .pt-photo, .pt-postage, .pt-label, .pt-flag, .pt-tab),
+  :is(.pt-sheet, .pt-card, .pt-torn, .pt-ticket, .pt-sticky__paper, .pt-photo, .pt-postage, .pt-label, .pt-flag, .pt-tab).pt-mode-hand) { --pt-ink: var(--pt-pen); }
 
 .pt-sheet {
   /* printed dots are never perfect: a few print a little lighter, a few a little heavier */

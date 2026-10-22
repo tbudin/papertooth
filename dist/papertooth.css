@@ -147,6 +147,13 @@
   --pt-desk: #cdcbc5;
   --pt-desk-ink: #3a3c42;
 }
+:root {
+  --pt-night-pen: #a9bde6;
+  --pt-night-pencil: #ec8a74;
+  --pt-night-graphite: #a3a5ac;
+  --pt-night-ballpoint: #93a6ee;
+  --pt-night-hl-ink: #24262c;
+}
 .pt-mode-hand {
   --pt-ink: var(--pt-pen);
   --pt-f-body: var(--pt-font-hand);
@@ -198,6 +205,75 @@
 /* src/css/paper.css */
 .pt-desk {
   background: var(--pt-desk);
+  color: var(--pt-desk-ink);
+}
+:is(.pt-card, .pt-torn, .pt-ticket) {
+  color: var(--pt-ink);
+}
+:root {
+  --pt-day-pen: var(--pt-pen);
+  --pt-day-ink: var(--pt-ink);
+  --pt-day-ribbon: var(--pt-ribbon);
+  --pt-day-pencil: var(--pt-pencil);
+  --pt-day-graphite: var(--pt-graphite-c);
+  --pt-day-ballpoint: var(--pt-ballpoint);
+  --pt-day-brush: var(--pt-brush);
+  --pt-day-marker: var(--pt-marker);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not(.pt-day):is(.pt-desk),
+  :root:not(.pt-day) .pt-desk {
+    --pt-pen: var(--pt-night-pen);
+    --pt-ink: var(--pt-desk-ink);
+    --pt-ribbon: var(--pt-desk-ink);
+    --pt-pencil: var(--pt-night-pencil);
+    --pt-graphite-c: var(--pt-night-graphite);
+    --pt-ballpoint: var(--pt-night-ballpoint);
+    --pt-brush: var(--pt-desk-ink);
+    --pt-marker: var(--pt-desk-ink);
+    --pt-blend: screen;
+    --pt-hl-ink: var(--pt-night-hl-ink);
+  }
+  :root:not(.pt-day) :is(.pt-sheet, .pt-card, .pt-torn, .pt-ticket, .pt-sticky__paper, .pt-photo, .pt-postage, .pt-label, .pt-flag, .pt-tab) {
+    --pt-pen: var(--pt-day-pen);
+    --pt-ink: var(--pt-day-ink);
+    --pt-ribbon: var(--pt-day-ribbon);
+    --pt-pencil: var(--pt-day-pencil);
+    --pt-graphite-c: var(--pt-day-graphite);
+    --pt-ballpoint: var(--pt-day-ballpoint);
+    --pt-brush: var(--pt-day-brush);
+    --pt-marker: var(--pt-day-marker);
+    --pt-blend: multiply;
+    --pt-hl-ink: currentColor;
+  }
+}
+.pt-night:is(.pt-desk),
+.pt-night .pt-desk {
+  --pt-pen: var(--pt-night-pen);
+  --pt-ink: var(--pt-desk-ink);
+  --pt-ribbon: var(--pt-desk-ink);
+  --pt-pencil: var(--pt-night-pencil);
+  --pt-graphite-c: var(--pt-night-graphite);
+  --pt-ballpoint: var(--pt-night-ballpoint);
+  --pt-brush: var(--pt-desk-ink);
+  --pt-marker: var(--pt-desk-ink);
+  --pt-blend: screen;
+  --pt-hl-ink: var(--pt-night-hl-ink);
+}
+.pt-night :is(.pt-sheet, .pt-card, .pt-torn, .pt-ticket, .pt-sticky__paper, .pt-photo, .pt-postage, .pt-label, .pt-flag, .pt-tab) {
+  --pt-pen: var(--pt-day-pen);
+  --pt-ink: var(--pt-day-ink);
+  --pt-ribbon: var(--pt-day-ribbon);
+  --pt-pencil: var(--pt-day-pencil);
+  --pt-graphite-c: var(--pt-day-graphite);
+  --pt-ballpoint: var(--pt-day-ballpoint);
+  --pt-brush: var(--pt-day-brush);
+  --pt-marker: var(--pt-day-marker);
+  --pt-blend: multiply;
+  --pt-hl-ink: currentColor;
+}
+:root :is(.pt-mode-hand :is(.pt-sheet, .pt-card, .pt-torn, .pt-ticket, .pt-sticky__paper, .pt-photo, .pt-postage, .pt-label, .pt-flag, .pt-tab), :is(.pt-sheet, .pt-card, .pt-torn, .pt-ticket, .pt-sticky__paper, .pt-photo, .pt-postage, .pt-label, .pt-flag, .pt-tab).pt-mode-hand) {
+  --pt-ink: var(--pt-pen);
 }
 .pt-sheet {
   --pt-pattern:
@@ -539,6 +615,8 @@ body:has(> .pt-sheet--page) {
   position: relative;
   display: inline-flex;
   align-items: center;
+  width: fit-content;
+  max-width: 100%;
   height: calc(var(--pt-grid) * 2);
   padding: 0 14px;
   border: 0;
@@ -585,7 +663,7 @@ body:has(> .pt-sheet--page) {
   position: absolute;
   pointer-events: none;
   inset: var(--pt-hl-inset, 6px -5px 4px -6px);
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
   transform-origin: left center;
   background:
     radial-gradient(
@@ -621,6 +699,9 @@ body:has(> .pt-sheet--page) {
 :is(.pt-btn, .pt-mark, .pt-link)[data-color=blue] {
   --pt-hl: var(--pt-hl-blue);
 }
+.pt-btn:not(.pt-btn--outline) {
+  color: var(--pt-hl-ink, var(--pt-ink));
+}
 .pt-btn--outline {
   padding: 0 22px;
   background-image: var(--pt-ol, var(--pt-box));
@@ -651,13 +732,13 @@ body:has(> .pt-sheet--page) {
   display: none;
 }
 .pt-mark {
-  color: inherit;
+  color: var(--pt-hl-ink, currentColor);
   padding: 0 .2em;
   margin: 0 -.2em;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
   background: var(--pt-mark, var(--pt-mark-y)) 0 var(--pt-mark-y-pos, 60%) / 100% var(--pt-mark-h, 88%) no-repeat;
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
 }
 .pt-mark > .pt-mark__ink {
   filter: var(--pt-smudge, );
@@ -908,7 +989,7 @@ body:has(> .pt-sheet--page) {
   transform: rotate(calc(var(--pt-rot) * var(--pt-tilt)));
   opacity: var(--pt-stamp-opacity);
   filter: var(--pt-stamp-filter, );
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
 }
 .pt-stamp svg {
   display: block;
@@ -1017,7 +1098,7 @@ body:has(> .pt-sheet--page) {
     var(--pt-crepe),
     var(--pt-fibre-soft, var(--pt-fibre)),
     #efe4c6;
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
   -webkit-mask: var(--pt-tape-mask) 0 0 / 100% 100% no-repeat;
   mask: var(--pt-tape-mask) 0 0 / 100% 100% no-repeat;
 }
@@ -1813,7 +1894,7 @@ body:has(> .pt-sheet--page) {
 }
 :is(.pt-check, .pt-radio) svg path {
   fill: none;
-  stroke: var(--pt-ink);
+  stroke: currentColor;
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -2230,7 +2311,7 @@ textarea.pt-input:focus {
   background: currentColor;
   -webkit-mask: var(--pt-sign) center / contain no-repeat;
   mask: var(--pt-sign) center / contain no-repeat;
-  color: var(--pt-ink);
+  color: currentColor;
 }
 .pt-bujo li[data-sign=task] {
   --pt-sign: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M9.4 7.2 C 11 7.4, 11.3 9.9, 9.6 10.8 C 8 11.4, 6.9 9.9, 7.4 8.6 C 7.7 7.7, 8.4 7.3, 9.4 7.2 Z'/%3E%3C/svg%3E");
@@ -2275,7 +2356,7 @@ textarea.pt-input:focus {
   background: var(--pt-hl);
   -webkit-mask: var(--pt-mask-a) 0 0 / 100% 100% no-repeat;
   mask: var(--pt-mask-a) 0 0 / 100% 100% no-repeat;
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
 }
 .pt-progress.is-painted {
   background: var(--pt-progress-img) 0 0 / 100% 100% no-repeat;
@@ -2301,7 +2382,7 @@ textarea.pt-input:focus {
   font-family: var(--pt-font-hand);
   font-size: 20px;
   line-height: 1;
-  color: var(--pt-ink);
+  color: currentColor;
 }
 .pt-progress:not([data-style=ring], [data-shape=ring])[data-label] {
   max-width: min(calc(var(--pt-grid) * 14), calc(100% - 56px));
@@ -2425,7 +2506,7 @@ textarea.pt-input:focus {
 .pt-diagram__wash {
   fill: var(--pt-hl);
   fill-opacity: .8;
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
 }
 .pt-diagram__wash--swipe {
   fill-opacity: .5;
@@ -2441,7 +2522,7 @@ textarea.pt-input:focus {
   fill: currentColor;
   fill-opacity: .36;
   stroke: none;
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
 }
 .pt-diagram__swipe-edge {
   fill: none;
@@ -2449,7 +2530,7 @@ textarea.pt-input:focus {
   stroke-opacity: .24;
   stroke-width: 11px;
   stroke-linejoin: round;
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
 }
 .pt-diagram__shade {
   fill: none;
@@ -2604,7 +2685,7 @@ textarea.pt-input:focus {
   filter: var(--pt-graphite, );
 }
 .pt-anno[data-tool=marker] .pt-anno__ink {
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
 }
 .pt-diagram .pt-diagram__ink path:not(.pt-diagram__thick, .pt-diagram__dotted),
 .pt-diagram .pt-diagram__line {
@@ -2614,7 +2695,7 @@ textarea.pt-input:focus {
   stroke-dasharray: 38 1.1 61 .7 23 1.4;
 }
 .pt-diagram[data-tool=marker] .pt-diagram__svg {
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
 }
 
 /* src/css/motion.css */

@@ -77,7 +77,7 @@ Fonts are not bundled. The defaults are Courier Prime, Special Elite and Caveat 
 
 A `.pt-sheet` is a sheet lying on a desk (`.pt-desk`), so it has a shadow and the edge of a second sheet under it. For a website where the page itself is the paper, use `.pt-sheet--page`: it fills the window with no desk or shadow, and keeps the content to `--pt-page-width` (720px), centred on whole grid cells. `.pt-sheet--flat` keeps the sheet's size but drops the shadow.
 
-The desk turns dark with the system's dark mode while the paper stays paper; force it with `.pt-night` or `.pt-day` on `<html>`. Pages print without the desk, shadows or tabs.
+The desk turns dark with the system's dark mode while the paper stays paper; force it with `.pt-night` or `.pt-day` on `<html>`. Anything written straight on the dark desk (text, links, highlights, ticks, rules, stamps, tape) switches to light night inks (`--pt-night-pen`, `--pt-night-pencil`, `--pt-night-graphite`, `--pt-night-ballpoint`) and text under a highlighter stays dark (`--pt-night-hl-ink`). Paper lying on the desk (sheets, cards, notes, tickets, photos, labels, flags, tabs) keeps its day inks. The script redraws when the system switches between light and dark; call `kit.refresh()` after toggling `.pt-night` yourself. Pages print without the desk, shadows or tabs.
 
 Selected text gets a clean highlighter colour, and the ink texture steps aside while text is selected.
 
@@ -103,7 +103,7 @@ Every effect is a custom property. Put them on `:root`, on a sheet, or on one el
 | --- | --- | --- |
 | `--pt-grid` | `24px` | Dot pitch and line height |
 | `--pt-sheet-width`, `--pt-sheet-pad` | `720px`, two cells | Sheet size |
-| `--pt-paper`, `--pt-desk` | `#fcfbf7`, `#cdcbc5` | Paper and desk |
+| `--pt-paper`, `--pt-desk`, `--pt-desk-ink` | `#fcfbf7`, `#cdcbc5`, `#3a3c42` | Paper, desk, and text written straight on the desk (light at night) |
 | `--pt-dot`, `--pt-dot-size`, `--pt-line` | | Ruling |
 | `--pt-grain` | `.28` | Paper grain, 0 to 1 |
 | `--pt-pen`, `--pt-pencil`, `--pt-ribbon`, `--pt-hl` | indigo, red pencil, black, yellow | Writing tools: pen ink, marking pencil, typewriter ribbon, highlighter |

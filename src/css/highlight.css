@@ -5,6 +5,8 @@
 .pt-btn {
   position: relative;
   display: inline-flex; align-items: center;
+  /* never stretched by a grid or column layout: the highlighter is drawn to the button's width */
+  width: fit-content; max-width: 100%;
   height: calc(var(--pt-grid) * 2);
   padding: 0 14px;
   border: 0; background: none; color: var(--pt-ink);
@@ -28,7 +30,7 @@
 .pt-btn::before, .pt-btn::after {
   content: ""; position: absolute; pointer-events: none;
   inset: var(--pt-hl-inset, 6px -5px 4px -6px);
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
   transform-origin: left center;
   background:
     radial-gradient(10px 60% at var(--pt-pool-x, calc(100% - 8px)) var(--pt-pool-y, 50%), color-mix(in srgb, var(--pt-hl), #6b5a00 11%), transparent 100%),
@@ -53,6 +55,8 @@
 :is(.pt-btn, .pt-mark, .pt-link)[data-color="blue"] { --pt-hl: var(--pt-hl-blue); }
 
 /* outlined: drawn box at rest, highlighter on hover */
+/* a highlighted label keeps dark text over the band, even on the night desk */
+.pt-btn:not(.pt-btn--outline) { color: var(--pt-hl-ink, var(--pt-ink)); }
 .pt-btn--outline {
   padding: 0 22px;
   background-image: var(--pt-ol, var(--pt-box));
@@ -75,11 +79,11 @@
 
 /* inline highlight */
 .pt-mark {
-  color: inherit;
+  color: var(--pt-hl-ink, currentColor);
   padding: 0 .2em; margin: 0 -.2em;
   -webkit-box-decoration-break: clone; box-decoration-break: clone;
   background: var(--pt-mark, var(--pt-mark-y)) 0 var(--pt-mark-y-pos, 60%) / 100% var(--pt-mark-h, 88%) no-repeat;
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
 }
 .pt-mark > .pt-mark__ink { filter: var(--pt-smudge, ); }
 /* a low band only crosses the bottom of the letters, so only that part can smudge */

@@ -32,7 +32,7 @@
 .pt-anno__ink path { stroke: var(--pt-t-color); stroke-width: calc(var(--pt-t-w) * var(--pt-k, 1) * 1px); stroke-opacity: calc(var(--pt-t-op) * var(--pt-o, 1)); }
 :is(.pt-anno, .pt-diagram, .pt-check, .pt-radio):is([data-tool="graphite"], [data-tool="pencil"]) :is(.pt-anno__ink, .pt-diagram__svg, svg),
 .pt-anno:not([data-tool]) > .pt-anno__ink { filter: var(--pt-graphite, ); }
-.pt-anno[data-tool="marker"] .pt-anno__ink { mix-blend-mode: multiply; }
+.pt-anno[data-tool="marker"] .pt-anno__ink { mix-blend-mode: var(--pt-blend, multiply); }
 .pt-diagram .pt-diagram__ink path:not(.pt-diagram__thick, .pt-diagram__dotted), .pt-diagram .pt-diagram__line { stroke-width: calc(var(--pt-t-w) * 1px); }
 .pt-diagram[data-tool="ballpoint"] .pt-diagram__ink path:not(.pt-diagram__dotted) { stroke-dasharray: 38 1.1 61 .7 23 1.4; }
-.pt-diagram[data-tool="marker"] .pt-diagram__svg { mix-blend-mode: multiply; }
+.pt-diagram[data-tool="marker"] .pt-diagram__svg { mix-blend-mode: var(--pt-blend, multiply); }

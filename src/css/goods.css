@@ -10,7 +10,7 @@
   transform: rotate(calc(var(--pt-rot) * var(--pt-tilt)));
   background: var(--pt-sheen), var(--pt-crepe), var(--pt-fibre-soft, var(--pt-fibre)), #efe4c6;
   /* the paper underneath (an edge, a line) shows through slightly, as it does with real tape */
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
   -webkit-mask: var(--pt-tape-mask) 0 0 / 100% 100% no-repeat; mask: var(--pt-tape-mask) 0 0 / 100% 100% no-repeat;
 }
 .pt-tape[data-tape="kraft"]    { background: var(--pt-sheen), var(--pt-crepe), var(--pt-fibre), #c9a36d; }

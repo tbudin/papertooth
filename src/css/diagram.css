@@ -24,12 +24,12 @@
 .pt-diagram__hatch { fill: none; stroke: currentColor; stroke-width: 1px; stroke-opacity: .28; }
 .pt-diagram__hatch-strong { fill: none; stroke: currentColor; stroke-width: 1.3px; stroke-opacity: .72; stroke-linecap: round; }
 .pt-diagram__stipple { stroke-width: 2.2px; stroke-opacity: .6; }
-.pt-diagram__wash { fill: var(--pt-hl); fill-opacity: .8; mix-blend-mode: multiply; }
+.pt-diagram__wash { fill: var(--pt-hl); fill-opacity: .8; mix-blend-mode: var(--pt-blend, multiply); }
 .pt-diagram__wash--swipe { fill-opacity: .5; }
 .pt-diagram__wash--edge { fill: none; stroke: var(--pt-hl); stroke-opacity: .5; stroke-width: 11px; stroke-linejoin: round; }
 /* highlighter swipes in the series colour, and pencil shading: light, close, with the paper's grain */
-.pt-diagram__swipe { fill: currentColor; fill-opacity: .36; stroke: none; mix-blend-mode: multiply; }
-.pt-diagram__swipe-edge { fill: none; stroke: currentColor; stroke-opacity: .24; stroke-width: 11px; stroke-linejoin: round; mix-blend-mode: multiply; }
+.pt-diagram__swipe { fill: currentColor; fill-opacity: .36; stroke: none; mix-blend-mode: var(--pt-blend, multiply); }
+.pt-diagram__swipe-edge { fill: none; stroke: currentColor; stroke-opacity: .24; stroke-width: 11px; stroke-linejoin: round; mix-blend-mode: var(--pt-blend, multiply); }
 .pt-diagram__shade { fill: none; stroke: currentColor; stroke-width: .9px; stroke-linejoin: round; stroke-linecap: round; filter: var(--pt-graphite, ); }
 .pt-diagram__pencil { stroke-width: .8px; stroke-opacity: .2; stroke-linejoin: round; filter: var(--pt-graphite, ); }
 .pt-diagram__hatch-strong.pt-diagram__pencil { stroke-width: .9px; stroke-opacity: .38; }

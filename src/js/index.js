@@ -178,6 +178,10 @@ export function init(options = {}) {
   booting = false;
   // web fonts change every measurement, so draw again once they are in
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!destroyed) refresh(); });
+  // drawn shapes bake their ink in, and the desk changes inks between day and night
+  const scheme = matchMedia('(prefers-color-scheme: dark)');
+  const onScheme = () => refresh();
+  scheme.addEventListener('change', onScheme);
   snap();
 
   if (o.observe && 'MutationObserver' in window) {
@@ -211,6 +215,7 @@ export function init(options = {}) {
     destroy() {
       destroyed = true;
       document.removeEventListener('selectionchange', onSelection);
+      scheme.removeEventListener('change', onScheme);
       cancelAnimationFrame(selFrame); cancelAnimationFrame(snapFrame); scheduler.stop();
       watchers.disconnect(); if (drawIO) drawIO.disconnect(); if (sheetRO) sheetRO.disconnect(); if (mo) mo.disconnect();
       watched.forEach(s => s.removeEventListener('contentvisibilityautostatechange', onVisibility, true));

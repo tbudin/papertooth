@@ -33,7 +33,7 @@
   transform: rotate(calc(var(--pt-rot) * var(--pt-tilt)));
   opacity: var(--pt-stamp-opacity);
   filter: var(--pt-stamp-filter, );
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
 }
 .pt-stamp svg { display: block; }
 .pt-stamp--box {

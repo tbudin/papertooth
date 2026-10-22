@@ -101,7 +101,7 @@
   content: ""; position: absolute; left: 0; top: calc(var(--pt-grid) / 2 - 9px); width: 18px; height: 18px;
   background: currentColor;
   -webkit-mask: var(--pt-sign) center / contain no-repeat; mask: var(--pt-sign) center / contain no-repeat;
-  color: var(--pt-ink);
+  color: currentColor;
 }
 .pt-bujo li[data-sign="task"]      { --pt-sign: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M9.4 7.2 C 11 7.4, 11.3 9.9, 9.6 10.8 C 8 11.4, 6.9 9.9, 7.4 8.6 C 7.7 7.7, 8.4 7.3, 9.4 7.2 Z'/%3E%3C/svg%3E"); }
 .pt-bujo li[data-sign="done"]      { --pt-sign: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18' fill='none' stroke='%23000' stroke-width='1.9' stroke-linecap='round'%3E%3Cpath d='M5 5.4 C 8 8.2, 10.5 10.8, 13.2 13.4 M12.8 4.8 C 10.4 7.6, 7.6 10.6, 5.2 13'/%3E%3C/svg%3E"); }
@@ -126,13 +126,13 @@
   width: calc((100% - 6px) * var(--pt-value, .5));
   background: var(--pt-hl);
   -webkit-mask: var(--pt-mask-a) 0 0 / 100% 100% no-repeat; mask: var(--pt-mask-a) 0 0 / 100% 100% no-repeat;
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--pt-blend, multiply);
 }
 .pt-progress.is-painted { background: var(--pt-progress-img) 0 0 / 100% 100% no-repeat; }
 .pt-progress.is-painted::before { display: none; }
 .pt-progress:is([data-shape="boxes"], [data-shape="circles"], [data-style="segments"], [data-style="dots"]) { height: calc(var(--pt-grid) * 1.25); }
 .pt-progress:is([data-shape="ring"], [data-style="ring"]) { width: calc(var(--pt-grid) * 3); height: calc(var(--pt-grid) * 3); display: grid; place-items: center; }
 .pt-progress:is([data-shape="tally"], [data-shape="sei"], [data-style="tally"], [data-style="sei"]) { width: calc(var(--pt-groups, 4) * 30px); height: calc(var(--pt-grid) * 1.25); }
-.pt-progress[data-label]::after { content: attr(data-label); font-family: var(--pt-font-hand); font-size: 20px; line-height: 1; color: var(--pt-ink); }
+.pt-progress[data-label]::after { content: attr(data-label); font-family: var(--pt-font-hand); font-size: 20px; line-height: 1; color: currentColor; }
 .pt-progress:not([data-style="ring"], [data-shape="ring"])[data-label] { max-width: min(calc(var(--pt-grid) * 14), calc(100% - 56px)); }
 .pt-progress:not([data-style="ring"], [data-shape="ring"])[data-label]::after { position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%); white-space: nowrap; }
