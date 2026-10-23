@@ -1,0 +1,4 @@
+/* papertooth inside a cascade layer, for sites that order their CSS with @layer (Tailwind v4 does).
+   Declare the order once, before both, e.g. @layer theme, base, papertooth, components, utilities;
+   so utilities such as p-4 win over papertooth, and papertooth wins over the base reset. */
+@import "./index.css" layer(papertooth);

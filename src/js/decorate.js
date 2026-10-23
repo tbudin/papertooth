@@ -57,7 +57,9 @@ export const DECORATORS = [
     el.dataset.ptReady = '';
   }],
   ['.pt-habits', el => {
-    // place every cell twice over: rows-as-habits (wide) and rows-as-days (narrow)
+    // place every cell twice over: rows-as-habits (wide) and rows-as-days (narrow); a grid that arrives
+    // already placed (papertooth/react) says so with data-pt-ready
+    if (el.dataset.ptReady != null) return;
     let habit = 0, days = 0;
     el.querySelectorAll(':scope > .pt-habits__row').forEach(row => {
       const head = row.classList.contains('pt-habits__head');

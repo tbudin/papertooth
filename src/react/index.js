@@ -5,7 +5,8 @@
 import { createElement as h, forwardRef, useEffect, useId, useState } from 'react';
 import { init } from '../js/index.js';
 import { rng, f } from '../js/core.js';
-import { wobblyBox, wobblyRing, TICK, DOT } from '../js/shapes.js';
+import { wobblyBox, wobblyRing, spiral, TICK, DOT } from '../js/shapes.js';
+import { firstDayOf, weekDates, sameDay, dayParts } from '../js/dates.js';
 
 /** Start papertooth when the component mounts and stop it when it unmounts. Returns the kit once running. */
 export function usePapertooth(options) {
@@ -104,4 +105,63 @@ export const Check = named('Check', ({ type = 'checkbox', tool, seed, className,
     h('svg', { width: 22, height: 22, viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' },
       h('path', { d: box }), h('path', { className: 'pt-tick', pathLength: 1, d: radio ? DOT : TICK })),
     radio ? children : h('span', { className: 'pt-check__text' }, children));
+});
+
+/* ---------- planner ----------
+   Dates are worked out during render, so nothing is written into the page afterwards. The defaults (English,
+   Monday first) are the same on the server and in every browser; pass locale and weekStart for others, and pass
+   the date (and today) from the server if it renders in another time zone. */
+
+/** A day heading: the date large, month and weekday, the weekday's kanji as a stamp, and the ISO week. */
+export const DayHead = named('DayHead', ({ date = new Date(), locale = 'en-GB', weekLabel = n => `Week ${n}`, className, ...rest }, ref) => {
+  const p = dayParts(date, locale);
+  return h('div', { ...rest, ref, className: cls('pt-dayhead', className) },
+    h('span', { className: 'pt-dayhead__num' }, p.day),
+    h('span', { className: 'pt-dayhead__meta' },
+      h('span', { className: 'pt-dayhead__month' }, p.month), h('span', { className: 'pt-dayhead__weekday' }, p.weekday)),
+    h('span', { className: 'pt-stamp pt-stamp--round pt-dayhead__kanji', lang: 'ja', 'aria-hidden': 'true' }, p.kanji),
+    h('span', { className: 'pt-dayhead__weekno' }, weekLabel(p.week)));
+});
+
+/** Seven days from weekStart around `date`, today circled. children(day) fills a day: { date, index, today }. */
+export const Week = named('Week', ({ date = new Date(), today = date, locale = 'en-GB', weekStart, className, children, ...rest }, ref) => {
+  const start = weekStart == null ? firstDayOf(locale) : weekStart;
+  return h('div', { className: 'pt-week-wrap' }, h('div', { ...rest, ref, className: cls('pt-week', className) },
+    weekDates(date, start).map((d, index) => {
+      const p = dayParts(d, locale), isToday = sameDay(d, today);
+      const num = isToday
+        ? h(Anno, { className: 'pt-week__date', style: { '--pt-anno': 'var(--pt-ink-beni)', '--pt-ox': '6px', '--pt-oy': '3px' } }, p.day)
+        : h('span', { className: 'pt-week__date' }, p.day);
+      return h('div', { key: index, className: 'pt-week__day', 'data-day': d.getDay(), 'aria-current': isToday ? 'date' : undefined },
+        h('div', { className: 'pt-week__head' }, h('span', null, p.short, ' ', h('span', { className: 'pt-jp', lang: 'ja' }, p.kanji)), num),
+        typeof children === 'function' ? children({ date: d, index, today: isToday }) : null);
+    })));
+});
+
+/** One habit-tracker cell: a ring, coloured in with a spiral when checked. Input props and the ref go to the input. */
+export const Habit = named('Habit', ({ seed, className, style, ...input }, ref) =>
+  h('label', { className: cls('pt-habit', className), style, 'data-pt-ready': '' },
+    h('input', { type: 'checkbox', ...input, ref }),
+    h('svg', { width: 20, height: 20, viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' },
+      h('circle', { className: 'pt-ring', cx: 12, cy: 12, r: 9 }),
+      h('path', { className: 'pt-fill', pathLength: 1, d: spiral(rng(useSeed(seed))) }))));
+
+/**
+ * A habit tracker: one row per habit, one column per day (rows and columns swap on narrow screens).
+ * habits: [{ name, ink?, done: boolean[] }]; onToggle(habitIndex, day, checked) is called when a cell changes.
+ */
+export const Habits = named('Habits', ({ days, head, habits, onToggle, title = 'Habit', className, style, ...rest }, ref) => {
+  const n = days || Math.max(0, ...habits.map(x => x.done.length));
+  const labels = head || Array.from({ length: n }, (_, d) => d + 1);
+  // each cell is placed twice over, as rows-as-habits (wide) and rows-as-days (narrow)
+  const at = (ra, ca, rb, cb) => ({ '--pt-ra': ra, '--pt-ca': ca, '--pt-rb': rb, '--pt-cb': cb });
+  const row = (r, c, key, name, cells, ink) => h('div', { key, className: cls('pt-habits__row', r === 1 && 'pt-habits__head'), style: ink ? { '--pt-hb': /^[a-z]+(-[a-z0-9]+)+$/.test(ink) ? `var(--pt-${ink})` : ink } : undefined },
+    h('span', { className: 'pt-habits__name', style: at(r, 1, 1, c) }, name),
+    cells.map((cell, d) => cell(at(r, d + 2, d + 2, c), d)));
+  return h('div', { className: 'pt-habits-wrap' }, h('div', { ...rest, ref, className: cls('pt-habits', className), 'data-pt-ready': '', style: { '--pt-days': n, '--pt-habit-count': habits.length, ...style } },
+    row(1, 1, 'head', title, labels.slice(0, n).map(label => (s, d) => h('span', { key: d, style: s }, label))),
+    habits.map((x, i) => row(i + 2, i + 2, i, x.name, Array.from({ length: n }, () => (s, d) => h(Habit, {
+      key: d, style: s, seed: (i + 1) * 101 + d, checked: !!x.done[d], 'aria-label': `${x.name}, ${labels[d]}`,
+      onChange: onToggle ? e => onToggle(i, d, e.target.checked) : undefined, readOnly: !onToggle
+    })), x.ink))));
 });

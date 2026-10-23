@@ -25,6 +25,8 @@ const useMainEntry = {
 await Promise.all([
   build({ entryPoints: ['src/css/index.css'], bundle: true, outfile: 'dist/papertooth.css', banner, logLevel: 'warning', charset: 'ascii' }),
   build({ entryPoints: ['src/css/index.css'], bundle: true, minify: true, outfile: 'dist/papertooth.min.css', banner, logLevel: 'warning', charset: 'ascii' }),
+  // the same CSS inside @layer papertooth, for sites that order their CSS in cascade layers (Tailwind v4)
+  build({ entryPoints: ['src/css/layer.css'], bundle: true, minify: true, outfile: 'dist/papertooth.layer.css', banner, logLevel: 'warning', charset: 'ascii' }),
   build({ entryPoints: ['src/js/index.js'], bundle: true, format: 'esm', target: 'es2020', outfile: 'dist/papertooth.js', banner, logLevel: 'warning', charset: 'ascii' }),
   build({ entryPoints: ['src/js/index.js'], bundle: true, format: 'esm', target: 'es2020', minify: true, outfile: 'dist/papertooth.min.mjs', banner, logLevel: 'warning', charset: 'ascii' }),
   build({ entryPoints: ['src/js/auto.js'], bundle: true, format: 'iife', target: 'es2020', minify: true, outfile: 'dist/papertooth.min.js', banner, logLevel: 'warning', charset: 'ascii' }),

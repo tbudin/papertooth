@@ -1,5 +1,5 @@
 /* papertooth: planner pieces
-   .pt-dayhead (today), .pt-week (seven days, Monday first), .pt-habits (tracker), .pt-dot-sticker */
+   .pt-dayhead (today), .pt-week (seven days, from any first day), .pt-habits (tracker), .pt-dot-sticker */
 .pt-dayhead { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0 var(--pt-grid); padding-bottom: 12px; border-bottom: 2px solid var(--pt-ribbon); }
 .pt-dayhead__num { font-family: var(--pt-font-type-head); font-size: 88px; line-height: 96px; color: var(--pt-ribbon); }
 .pt-dayhead__meta { display: flex; flex-direction: column; padding-bottom: 12px; }
@@ -15,10 +15,11 @@
 .pt-week__head { display: flex; justify-content: space-between; align-items: baseline; height: 24px; font-family: var(--pt-font-type); font-size: 12px; line-height: 24px; color: var(--pt-ribbon); }
 .pt-week__date { font-family: var(--pt-font-type-head); font-size: 17px; }
 .pt-week__head .pt-jp { font-size: 12px; }
-/* Saturday in blue and Sunday in red, as on Japanese calendars */
-.pt-week__day:nth-child(6) .pt-week__head { color: var(--pt-pencil-blue); }
-.pt-week__day:nth-child(7) .pt-week__head { color: var(--pt-pencil-red); }
-.pt-week__day:nth-child(n+6) { background: color-mix(in srgb, var(--pt-ribbon) 2.5%, transparent); }
+/* Saturday in blue and Sunday in red, as on Japanese calendars. data-day (0 = Sunday … 6 = Saturday) places them
+   wherever the week starts; without it, the week is taken to start on Monday. */
+.pt-week__day:is([data-day="6"], :not([data-day]):nth-child(6)) .pt-week__head { color: var(--pt-pencil-blue); }
+.pt-week__day:is([data-day="0"], :not([data-day]):nth-child(7)) .pt-week__head { color: var(--pt-pencil-red); }
+.pt-week__day:is([data-day="0"], [data-day="6"], :not([data-day]):nth-child(n+6)) { background: color-mix(in srgb, var(--pt-ribbon) 2.5%, transparent); }
 .pt-week__day p { font-family: var(--pt-font-hand); font-size: 20px; line-height: 24px; max-width: none; color: var(--pt-pen); }
 .pt-dot-sticker { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; margin-right: 4px; background: #ffb3c7; box-shadow: inset 0 -1px 1px rgba(0,0,0,.15), 0 1px 1px rgba(0,0,0,.12); }
 

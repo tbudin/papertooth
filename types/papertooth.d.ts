@@ -134,8 +134,21 @@ export declare function setPencil(colour: string, target?: HTMLElement): string;
 export declare function setRibbon(colour: string, target?: HTMLElement): string;
 export declare function setHighlighter(colour: string, target?: HTMLElement): string;
 
+/** 0 = Sunday … 6 = Saturday, as Date#getDay. */
+export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
 /** Fill a .pt-dayhead with a date (today by default). */
-export declare function dayHead(el: Element, date?: Date): void;
-/** Fill a .pt-week with the week containing a date, Monday first, today circled. */
-export declare function week(el: Element, date?: Date): void;
+export declare function dayHead(el: Element, date?: Date, options?: { locale?: string }): void;
+/** Fill a .pt-week with the week containing a date, that date circled. weekStart defaults to the locale's first day. */
+export declare function week(el: Element, date?: Date, options?: { locale?: string; weekStart?: Weekday }): void;
+
+/* Calendar helpers with no DOM. */
+/** ISO 8601 week number. */
 export declare function isoWeek(date: Date): number;
+/** The locale's first day of the week when the runtime knows it, Monday otherwise. */
+export declare function firstDayOf(locale?: string): Weekday;
+/** The seven days of the week that contains `date`, from weekStart (default Monday). */
+export declare function weekDates(date?: Date, weekStart?: Weekday): Date[];
+export declare function sameDay(a: Date, b: Date): boolean;
+/** What a day heading shows, in a locale (default 'en-GB'). */
+export declare function dayParts(date?: Date, locale?: string): { day: number; month: string; weekday: string; short: string; kanji: string; week: number };

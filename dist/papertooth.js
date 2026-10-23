@@ -1928,6 +1928,7 @@ var DECORATORS = [
     el.dataset.ptReady = "";
   }],
   [".pt-habits", (el) => {
+    if (el.dataset.ptReady != null) return;
     let habit = 0, days = 0;
     el.querySelectorAll(":scope > .pt-habits__row").forEach((row) => {
       const head = row.classList.contains("pt-habits__head");
@@ -2074,38 +2075,66 @@ function setHighlighter(colour, target = document.documentElement) {
   return hex;
 }
 
-// src/js/planner.js
-var DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-var KANJI = "\u6708\u706B\u6C34\u6728\u91D1\u571F\u65E5";
-var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-var set = (el, sel, text) => {
-  const n = el.querySelector(sel);
-  if (n) n.textContent = text;
-};
-var dayIndex = (d) => (d.getDay() + 6) % 7;
+// src/js/dates.js
 function isoWeek(d) {
   const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
   t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
   return Math.ceil(((t - new Date(Date.UTC(t.getUTCFullYear(), 0, 1))) / 864e5 + 1) / 7);
 }
-function dayHead(el, date = /* @__PURE__ */ new Date()) {
-  const i = dayIndex(date);
-  set(el, ".pt-dayhead__num", date.getDate());
-  set(el, ".pt-dayhead__month", MONTHS[date.getMonth()] + " " + date.getFullYear());
-  set(el, ".pt-dayhead__weekday", DAYS[i]);
-  set(el, ".pt-dayhead__kanji", KANJI[i]);
-  set(el, ".pt-dayhead__weekno", "Week " + isoWeek(date));
+function firstDayOf(locale) {
+  try {
+    const l = new Intl.Locale(locale || new Intl.DateTimeFormat().resolvedOptions().locale);
+    const info = typeof l.getWeekInfo === "function" ? l.getWeekInfo() : l.weekInfo;
+    if (info && info.firstDay) return info.firstDay % 7;
+  } catch (e) {
+  }
+  return 1;
 }
-function week(el, date = /* @__PURE__ */ new Date()) {
-  const i = dayIndex(date), mon = new Date(date);
-  mon.setDate(date.getDate() - i);
+function weekDates(date = /* @__PURE__ */ new Date(), weekStart = 1) {
+  const back = (date.getDay() - weekStart + 7) % 7;
+  return Array.from({ length: 7 }, (_, k) => new Date(date.getFullYear(), date.getMonth(), date.getDate() - back + k));
+}
+var sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+var formats = /* @__PURE__ */ new Map();
+var fmt = (locale, opts) => {
+  const key = locale + JSON.stringify(opts);
+  if (!formats.has(key)) formats.set(key, new Intl.DateTimeFormat(locale, opts));
+  return formats.get(key);
+};
+function dayParts(date = /* @__PURE__ */ new Date(), locale = "en-GB") {
+  return {
+    day: date.getDate(),
+    month: fmt(locale, { month: "long", year: "numeric" }).format(date),
+    weekday: fmt(locale, { weekday: "long" }).format(date),
+    short: fmt(locale, { weekday: "short" }).format(date),
+    kanji: fmt("ja-JP", { weekday: "narrow" }).format(date),
+    week: isoWeek(date)
+  };
+}
+
+// src/js/planner.js
+var set = (el, sel, text) => {
+  const n = el.querySelector(sel);
+  if (n) n.textContent = text;
+};
+function dayHead(el, date = /* @__PURE__ */ new Date(), { locale = "en-GB" } = {}) {
+  const p = dayParts(date, locale);
+  set(el, ".pt-dayhead__num", p.day);
+  set(el, ".pt-dayhead__month", p.month);
+  set(el, ".pt-dayhead__weekday", p.weekday);
+  set(el, ".pt-dayhead__kanji", p.kanji);
+  set(el, ".pt-dayhead__weekno", "Week " + p.week);
+}
+function week(el, date = /* @__PURE__ */ new Date(), { locale = "en-GB", weekStart = firstDayOf(locale) } = {}) {
+  const dates = weekDates(date, weekStart);
   el.querySelectorAll(".pt-week__day").forEach((d, k) => {
-    const dt = new Date(mon);
-    dt.setDate(mon.getDate() + k);
+    const dt = dates[k];
+    if (!dt) return;
+    d.dataset.day = dt.getDay();
     const ds = d.querySelector(".pt-week__date");
     if (!ds) return;
     ds.textContent = dt.getDate();
-    const today = k === i;
+    const today = sameDay(dt, date);
     ds.classList.toggle("pt-anno", today);
     if (today) {
       ds.dataset.anno = "circle";
@@ -2483,16 +2512,20 @@ export {
   PALETTE,
   VERSION,
   dayHead,
+  dayParts,
   filtersMarkup,
+  firstDayOf,
   init,
   isoWeek,
   lithoFilter,
   renderDiagram,
+  sameDay,
   setHighlighter,
   setPen,
   setPencil,
   setRibbon,
   smearColour,
   typewriterFilter,
-  week
+  week,
+  weekDates
 };

@@ -1714,13 +1714,13 @@ body:has(> .pt-sheet--page) {
 .pt-week__head .pt-jp {
   font-size: 12px;
 }
-.pt-week__day:nth-child(6) .pt-week__head {
+.pt-week__day:is([data-day="6"], :not([data-day]):nth-child(6)) .pt-week__head {
   color: var(--pt-pencil-blue);
 }
-.pt-week__day:nth-child(7) .pt-week__head {
+.pt-week__day:is([data-day="0"], :not([data-day]):nth-child(7)) .pt-week__head {
   color: var(--pt-pencil-red);
 }
-.pt-week__day:nth-child(n+6) {
+.pt-week__day:is([data-day="0"], [data-day="6"], :not([data-day]):nth-child(n+6)) {
   background: color-mix(in srgb, var(--pt-ribbon) 2.5%, transparent);
 }
 .pt-week__day p {

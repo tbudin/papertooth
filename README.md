@@ -30,6 +30,12 @@ Or from a CDN, with no build step:
 
 The module does nothing when it is imported, so it is safe to import during server rendering; call `init()` in the browser. With React or Next.js, use [`papertooth/react`](#react-and-nextjs). TypeScript types are included.
 
+With Tailwind v4 or anything else that orders CSS in cascade layers, import `papertooth/layer.css` instead of `papertooth/css`: it is the same stylesheet inside `@layer papertooth`. Declare the order once, before both, so utilities such as `p-4` win over papertooth and papertooth wins over the base reset:
+
+```css
+@layer theme, base, papertooth, components, utilities;
+```
+
 Fonts are not bundled. The defaults are Courier Prime, Special Elite and Caveat from Google Fonts, plus Shippori Mincho B1 and Zen Maru Gothic for Japanese stamps. Change them with the `--pt-font-*` settings.
 
 ## Use
@@ -165,7 +171,8 @@ Also exported:
 - `renderDiagram(source, options)`: a diagram as an SVG string
 - `filtersMarkup(params)`, `typewriterFilter(id, params)`, `lithoFilter(id, params)`, `smearColour(ink, highlighter)`
 - `setPen`, `setPencil`, `setRibbon`, `setHighlighter` (colour, target): change the ink on any element without a kit. They do not redraw what is already drawn; the kit's methods do.
-- `dayHead(el, date)`, `week(el, date)`, `isoWeek(date)`: fill planner pieces with any date
+- `dayHead(el, date, { locale })`, `week(el, date, { locale, weekStart })`: fill planner pieces with any date, in any language, from any first day of the week (0 = Sunday … 6 = Saturday; by default the locale's own when the browser knows it, Monday otherwise)
+- `weekDates(date, weekStart)`, `dayParts(date, locale)`, `firstDayOf(locale)`, `sameDay(a, b)`, `isoWeek(date)`: the same calendar sums with no DOM, for a server or your own components
 
 ### Without the script
 
@@ -212,9 +219,13 @@ import { Btn, Mark, Anno, Wobble, Check } from 'papertooth/react';
 | `Mark` | `mark.pt-mark` | `hl`, `color`, `size` |
 | `Anno` | `span.pt-anno` | `anno` (default circle), `tool` |
 | `Wobble` | `.pt-wobble`, as any element (`as`) | `seed`; text, including `Hello {name}`, is split into letters (read out whole by screen readers); anything else is passed through |
+| `DayHead` | `.pt-dayhead` | `date`, `locale` (default `en-GB`), `weekLabel` |
+| `Week` | `.pt-week` | `date`, `today`, `locale`, `weekStart`; `children` is a function that fills each day: `{day => <p>{tasks[day.index]}</p>}` |
+| `Habits` | a habit tracker, cells placed for wide and narrow screens | `habits` (`[{ name, ink, done: [] }]`), `days`, `head`, `title`, `onToggle(habit, day, checked)` |
+| `Habit` | one tracker cell, for your own layout | input props and `ref` go on the checkbox; give it an `aria-label` |
 | `Check` | `label.pt-check` (or `.pt-radio` with `type="radio"`) | `tool`, `seed`; `className` and `style` go on the label, every other prop and the `ref` on the input |
 
-Everything else is plain classes: `<div className="pt-sticky">`, `<span className="pt-stamp">` and so on need no component. Two cases to know about: a `pre.pt-diagram` is replaced by its drawing, so give it `key={source}` if the source can change; and planner pieces with `data-today` fill in their own dates, so leave their date elements empty. Shapes are seeded from React's `useId`, so the server and the browser draw the same thing and hydration matches.
+Everything else is plain classes: `<div className="pt-sticky">`, `<span className="pt-stamp">` and so on need no component. Two cases to know about: a `pre.pt-diagram` is replaced by its drawing, so give it `key={source}` if the source can change; and for planner pieces use `DayHead`, `Week` and `Habits` rather than `data-today`, which writes the dates in after React has rendered. Their defaults (English, Monday first) are the same on the server and in every browser; when you pass a locale, also pass `weekStart`, and pass `date` (and `today`) from the server if it runs in another time zone, so hydration matches. Shapes are seeded from React's `useId`, so the server and the browser draw the same thing and hydration matches.
 
 In an app, pass `drawInserted={false}` to `<Papertooth>` so a page or tab swapped in on screen appears already drawn instead of drawing itself on each time; content that scrolls into view still draws on. `kit.settle(element)` does the same for one part of the page. The script keeps its own state in `data-pt-*` attributes, never in classes, so changing an element's `className` does not undo it, and it starts cleanly again after `destroy()` (a remount, or React's StrictMode in development).
 
@@ -241,7 +252,10 @@ Current Chrome, Edge, Safari and Firefox. Uses CSS masks, `color-mix()`, `:is()`
 npm install
 npm run build     # dist/ and docs/
 npm run dev       # build, then serve the docs page on http://localhost:4173
+npm test          # browser tests (Playwright, with the installed Chrome)
 ```
+
+Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 `dist/` is committed so the files can be used straight from GitHub; rebuild before committing a change to `src/`. Bump the version in both `package.json` and `src/js/index.js` (the build checks they match).
 

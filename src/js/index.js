@@ -245,4 +245,5 @@ export function init(options = {}) {
 export { renderDiagram } from './diagram.js';
 export { PALETTE } from './palette.js';
 export { lithoFilter } from './filters.js';
+export { weekDates, firstDayOf, dayParts, sameDay } from './dates.js';
 export { filtersMarkup, typewriterFilter, smearColour, FILTER_DEFAULTS, setPen, setPencil, setRibbon, setHighlighter, dayHead, week, isoWeek };

@@ -1,6 +1,6 @@
 // Types for papertooth/react.
 import type { ComponentPropsWithRef, ElementType, InputHTMLAttributes, CSSProperties, ReactNode, ReactElement, Ref } from 'react';
-import type { Options, Kit, HighlightStyle, OutlineStyle } from 'papertooth';
+import type { Options, Kit, HighlightStyle, OutlineStyle, Weekday } from 'papertooth';
 
 export type HighlighterColor = 'yellow' | 'pink' | 'green' | 'orange' | 'blue';
 export type Tool = 'pen' | 'ballpoint' | 'brush' | 'marker' | 'graphite' | 'pencil';
@@ -73,3 +73,64 @@ export type CheckProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 's
 };
 /** A hand-drawn checkbox or radio around a native input. */
 export declare function Check(props: CheckProps): ReactElement;
+
+/* Planner. Dates are worked out during render. The defaults (English, Monday first) are the same on the server and
+   in every browser; pass locale and weekStart for others, and pass date (and today) if the server is in another time zone. */
+
+export type DayHeadProps = ComponentPropsWithRef<'div'> & {
+  /** Default: today. */
+  date?: Date;
+  /** Default: 'en-GB'. */
+  locale?: string;
+  /** Default: n => `Week ${n}`. */
+  weekLabel?: (week: number) => ReactNode;
+};
+/** A day heading: the date, month and weekday, the weekday's kanji as a stamp, and the ISO week. */
+export declare function DayHead(props: DayHeadProps): ReactElement;
+
+export interface WeekDay { date: Date; index: number; today: boolean }
+export type WeekProps = Omit<ComponentPropsWithRef<'div'>, 'children'> & {
+  /** Any day of the week to show. Default: today. */
+  date?: Date;
+  /** The day to circle. Default: date. */
+  today?: Date;
+  /** Default: 'en-GB'. */
+  locale?: string;
+  /** Default: the locale's first day when the runtime knows it, Monday otherwise. */
+  weekStart?: Weekday;
+  /** Fills each day, e.g. day => tasks[key(day.date)].map(…). */
+  children?: (day: WeekDay) => ReactNode;
+};
+/** Seven days around a date, the weekend coloured and today circled. */
+export declare function Week(props: WeekProps): ReactElement;
+
+export type HabitProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'style' | 'className'> & {
+  seed?: number;
+  /** Class and style go on the label; every other prop, and the ref, go on the input. */
+  className?: string;
+  style?: CSSProperties;
+  ref?: Ref<HTMLInputElement>;
+};
+/** One habit-tracker cell. Give it an aria-label: it has no visible text. */
+export declare function Habit(props: HabitProps): ReactElement;
+
+export interface HabitRow {
+  name: string;
+  /** A token such as 'ink-beni', or any colour. Default: the pen. */
+  ink?: string;
+  /** One entry per day. */
+  done: boolean[];
+}
+export type HabitsProps = Omit<ComponentPropsWithRef<'div'>, 'children'> & {
+  habits: HabitRow[];
+  /** Columns. Default: the longest done list. */
+  days?: number;
+  /** Column headings. Default: 1, 2, 3… */
+  head?: ReactNode[];
+  /** The heading above the habit names. Default: 'Habit'. */
+  title?: ReactNode;
+  /** Without it the tracker is read-only. */
+  onToggle?: (habit: number, day: number, checked: boolean) => void;
+};
+/** A habit tracker: a row per habit and a column per day, swapped on narrow screens. */
+export declare function Habits(props: HabitsProps): ReactElement;
