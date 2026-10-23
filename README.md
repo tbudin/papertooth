@@ -22,8 +22,8 @@ const kit = init({ pen: 'ink-ai', motion: 'scroll' });
 Or from a CDN, with no build step:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/papertooth@0.2/dist/papertooth.min.css">
-<script src="https://cdn.jsdelivr.net/npm/papertooth@0.2/dist/papertooth.min.js" defer data-pt-auto></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/papertooth@0.3/dist/papertooth.min.css">
+<script src="https://cdn.jsdelivr.net/npm/papertooth@0.3/dist/papertooth.min.js" defer data-pt-auto></script>
 ```
 
 `data-pt-auto` starts the script on load. It accepts options as JSON: `data-pt-auto='{"seed": 7}'`. The running instance is `window.Papertooth.kit`.

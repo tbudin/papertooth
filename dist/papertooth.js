@@ -1,4 +1,4 @@
-/*! papertooth v0.2.2 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.3.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 
 // src/js/core.js
 var f = (n) => String(Math.round(n * 10) / 10);
@@ -2194,7 +2194,7 @@ var PALETTE = {
 };
 
 // src/js/index.js
-var VERSION = "0.2.2";
+var VERSION = "0.3.0";
 var DEFAULTS2 = {
   root: null,
   // element to enhance; defaults to document.body
