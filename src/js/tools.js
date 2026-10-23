@@ -1,6 +1,7 @@
 // Writing instruments. Anything drawn can be drawn with any of them: the colour, weight and
 // texture come from CSS (data-tool on the element), the character of the line from here.
 import { f } from './core.js';
+import { brushFilter } from './filters.js';
 
 export const TOOLS = ['pen', 'ballpoint', 'brush', 'marker', 'graphite', 'pencil'];
 
@@ -18,9 +19,12 @@ export function toolOf(el, def = {}) {
 }
 export const toolKey = t => `${t.kind}|${t.color}|${t.w}|${t.op}`;
 const grainy = t => t.kind === 'graphite' || t.kind === 'pencil';
+// instruments whose texture is a filter: lead caught by the paper's tooth, or a brush's hairs
+const textured = t => grainy(t) || t.kind === 'brush';
 
 /** Filters a standalone SVG needs for this instrument. */
 export function toolDefs(t, id = 'pg') {
+  if (t.kind === 'brush') return brushFilter(id);
   if (!grainy(t)) return '';
   // the paper's tooth only catches some of the lead
   return `<filter id="${id}" x="-10%" y="-30%" width="120%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="1.3 .9" numOctaves="2" seed="3" result="n"/>`
@@ -69,11 +73,11 @@ export function inkPath(d, t, opts = {}) {
   if (t.kind === 'pen' && !opts.nonScaling && op > .5) {
     out += ends(d).slice(0, 24).map(([x, y]) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(w * .55)}" fill="${c}" fill-opacity="${f(op * 55) / 100}"/>`).join('');
   }
-  return grainy(t) && !opts.noFilter ? `<g filter="url(#${opts.filterId || 'pg'})">${out}</g>` : out;
+  return textured(t) && !opts.noFilter ? `<g filter="url(#${opts.filterId || 'pg'})">${out}</g>` : out;
 }
 
 /** A filled shape in the instrument's ink (used for pressure strokes). */
 export function inkFill(d, t, opts = {}) {
   const fill = `<path d="${d}" fill="${t.color}" fill-opacity="${f(t.op * (t.kind === 'marker' ? .86 : 1) * 100) / 100}"/>`;
-  return grainy(t) && !opts.noFilter ? `<g filter="url(#${opts.filterId || 'pg'})">${fill}</g>` : fill;
+  return textured(t) && !opts.noFilter ? `<g filter="url(#${opts.filterId || 'pg'})">${fill}</g>` : fill;
 }

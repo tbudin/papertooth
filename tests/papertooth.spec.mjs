@@ -72,6 +72,10 @@ test('date stamps print a week strip, a month calendar, a year and bars, with th
   expect(r.weekWriteMarks).toBe('x x - - - - - x x - - - - -');               // the days gone by crossed in each row
   expect(r.weekLabel).toMatch(/^Wednesday,? 21 October 2026$/);
   expect(r.circleDrawn).toBe(true);
+  expect(r.monthLabel).toMatch(/^Wednesday,? 21 October 2026$/);             // a calendar says the day it marks
+  expect(r.wideLabel).toMatch(/^Wednesday,? 21 October 2026$/);
+  expect(r.yearLabel).toBe('October 2026');                                    // a year of months says the month
+  expect(r.barLabel).toMatch(/^Wednesday,? 21 October 2026$/);
   expect(r.monthSelector).toBe('Jan Feb Mar Apr May Jun Jul Aug Sept Oct Nov Dec');
   expect(r.monthSelectorMarks).toBe('- - - - - - - - - circle - -');          // only circled, never crossed
   expect(r.monthHead).toBe('M T W T F S S');
@@ -188,6 +192,32 @@ test('buttons and links draw their hover mark in every state that calls for it, 
   });
   expect(look).toEqual({ disabledOpacity: '0.5', linkButtonBorder: 'none', linkButtonBg: 'rgba(0, 0, 0, 0)', secondPass: 'none' });
   expect(errors).toEqual([]);
+});
+
+test('a brush mark has the texture of brush ink, a pen mark none', async ({ page }) => {
+  await page.goto('http://localhost:4317/tests/fixtures/states.html');
+  await page.waitForFunction(() => document.querySelector('#brushMark .pt-anno__ink path')?.getAttribute('d'));
+  const r = await page.evaluate(() => ({
+    brush: getComputedStyle(document.querySelector('#brushMark .pt-anno__ink')).filter,
+    pen: getComputedStyle(document.querySelector('#penMark .pt-anno__ink')).filter,
+    defined: !!document.querySelector('#pt-filters filter#pt-brush')
+  }));
+  expect(r).toEqual({ brush: 'url("#pt-brush")', pen: 'none', defined: true });
+});
+
+test('snapping again puts buttons exactly where they were', async ({ page }) => {
+  await page.goto('http://localhost:4317/tests/fixtures/states.html');
+  await page.waitForFunction(() => document.querySelector('#btn > .pt-hover-ink path')?.getAttribute('d'));
+  // with transitions on, as on a real page: an animated translate would be measured mid-way and the snap would swing
+  const offsets = await page.evaluate(async () => {
+    const frame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const read = () => [...document.querySelectorAll('.pt-btn')].map(b => b.style.translate || '0').join(' | ');
+    await frame();
+    const runs = [read()];
+    for (let i = 0; i < 3; i++) { window.kit.snap(); await frame(); runs.push(read()); }
+    return runs;
+  });
+  expect(new Set(offsets).size, offsets.join('\n')).toBe(1);
 });
 
 test('a section on a sheet keeps the rhythm of a document but not over an app layout', async ({ page }) => {

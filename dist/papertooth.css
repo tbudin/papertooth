@@ -1,4 +1,4 @@
-/*! papertooth v0.4.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.4.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 /* src/css/tokens.css */
 :root {
   --pt-grid: 24px;
@@ -183,6 +183,7 @@
   --pt-text-filter: url(#pt-ink-text);
   --pt-head-filter: url(#pt-ink-head);
   --pt-graphite: url(#pt-graphite);
+  --pt-brush-filter: url(#pt-brush);
   --pt-stamp-filter: url(#pt-stamp);
   --pt-smudge: url(#pt-smudge-ribbon);
   --pt-smear: url(#pt-smear-ribbon);
@@ -655,7 +656,7 @@ body:has(> .pt-sheet--page) {
 @property --pt-wipe { syntax: "<number>"; inherits: true; initial-value: 0; }
 .pt-btn {
   --pt-wipe: 0;
-  transition: --pt-wipe .45s cubic-bezier(.4, .6, .2, 1), translate .1s;
+  transition: --pt-wipe .45s cubic-bezier(.4, .6, .2, 1), transform .1s;
 }
 @media (hover: hover) {
   .pt-btn:hover:not(:disabled, [aria-disabled=true]) {
@@ -664,7 +665,7 @@ body:has(> .pt-sheet--page) {
 }
 .pt-btn:active:not(:disabled, [aria-disabled=true]) {
   --pt-wipe: 1;
-  translate: 0 1px;
+  transform: translateY(1px);
 }
 .pt-btn:is(:focus-visible, [aria-pressed=true], [aria-selected=true], [aria-expanded=true], [aria-current]:not([aria-current=false])),
 details[open] > summary.pt-btn {
@@ -3009,7 +3010,7 @@ textarea.pt-input:focus {
 [data-tool=brush] {
   --pt-t-kind: brush;
   --pt-t-color: var(--pt-brush);
-  --pt-t-w: 3;
+  --pt-t-w: 4.2;
   --pt-t-op: 1;
 }
 [data-tool=marker] {
@@ -3041,6 +3042,9 @@ textarea.pt-input:focus {
 :is(.pt-anno, .pt-diagram, .pt-check, .pt-radio):is([data-tool=graphite], [data-tool=pencil]) :is(.pt-anno__ink, .pt-diagram__svg, svg),
 .pt-anno:not([data-tool]) > .pt-anno__ink {
   filter: var(--pt-graphite, );
+}
+:is(.pt-anno, .pt-diagram, .pt-check, .pt-radio)[data-tool=brush] :is(.pt-anno__ink, .pt-diagram__svg, svg) {
+  filter: var(--pt-brush-filter, );
 }
 .pt-anno[data-tool=marker] .pt-anno__ink {
   mix-blend-mode: var(--pt-blend, multiply);

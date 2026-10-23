@@ -87,7 +87,7 @@ export function dateStamp(el, date = parseDate(el.dataset.date), opts = {}) {
     return out;
   };
   el.setAttribute('role', 'img');
-  el.setAttribute('aria-label', stampLabel(unit, date, locale));
+  el.setAttribute('aria-label', stampLabel(unit, date, locale, { mark, variant: d.variant }));
   if (/^ja\b/.test(locale)) el.lang = 'ja';
   el.replaceChildren(layer(false), layer(true));
   el.dataset.ptReady = '';

@@ -1,4 +1,4 @@
-/*! papertooth v0.4.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.4.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 
 // src/js/core.js
 var f = (n) => String(Math.round(n * 10) / 10);
@@ -29,10 +29,48 @@ function stroke(a, b, r, over, bend) {
   return `M${f(s[0])} ${f(s[1])} Q${f(m[0])} ${f(m[1])} ${f(e[0])} ${f(e[1])}`;
 }
 
+// src/js/filters.js
+var DEFAULTS = {
+  text: { density: 0.7 },
+  // 0..1  how uneven the ribbon ink is on body text
+  head: { rough: 1, density: 0.8 },
+  // rough: 0..3 edge roughness on headings
+  graphite: { tooth: 2.4, rough: 0.9 },
+  // tooth: how much of the paper grain catches the lead
+  brush: { dry: 0.5, rough: 1.2 },
+  // dry: gaps where the brush runs out of ink; rough: how ragged the hairs leave the edge
+  stamp: { wear: 0.55, rough: 1.3, edge: 0.5, mottle: 0.5 },
+  // wear: paper gaps; edge: ink pooling at the rim; mottle: uneven pad
+  smudge: { drag: 4.2, blur: 3.4, strength: 0.78 },
+  // fresh ink under a highlight
+  smear: { drag: 7, blur: 4.5, strength: 0.7 },
+  // extra ink dragged on hover
+  typewriter: { spread: 0.6, rough: 1.2, uneven: 0.7, speckle: 0.5 },
+  colors: { ribbon: "#24262c", pen: "#213c6b", highlighter: "#fff04a" }
+};
+var n2 = (v) => (+v).toFixed(2);
+var density = (k, b) => `<feColorMatrix in="blot" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  ${n2(k)} 0 0 0 ${n2(b)}" result="density"/>`;
+function brushFilter(id, p) {
+  p = { ...DEFAULTS.brush, ...p };
+  const thr = 0.74 - 0.18 * p.dry;
+  return `<filter id="${id}" x="-10%" y="-30%" width="120%" height="160%" color-interpolation-filters="sRGB">
+<feTurbulence type="fractalNoise" baseFrequency="0.32" numOctaves="2" seed="5" result="grain"/>
+<feDisplacementMap in="SourceGraphic" in2="grain" scale="${n2(p.rough)}" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+<feTurbulence type="fractalNoise" baseFrequency="0.04 0.85" numOctaves="2" seed="8" result="hair"/>
+<feColorMatrix in="hair" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -10 0 0 0 ${n2(1 + 10 * thr)}" result="dry"/>
+<feComposite in="rough" in2="dry" operator="in" result="kasure"/>
+<feTurbulence type="fractalNoise" baseFrequency="0.025 0.04" numOctaves="2" seed="2" result="blot"/>
+${density(0.9, 0.45)}
+<feComposite in="kasure" in2="density" operator="in"/>
+</filter>`;
+}
+
 // src/js/tools.js
 var TOOLS = ["pen", "ballpoint", "brush", "marker", "graphite", "pencil"];
 var grainy = (t) => t.kind === "graphite" || t.kind === "pencil";
+var textured = (t) => grainy(t) || t.kind === "brush";
 function toolDefs(t, id = "pg") {
+  if (t.kind === "brush") return brushFilter(id);
   if (!grainy(t)) return "";
   return `<filter id="${id}" x="-10%" y="-30%" width="120%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="1.3 .9" numOctaves="2" seed="3" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -.55" result="a"/><feComposite in="SourceGraphic" in2="a" operator="in"/></filter>`;
 }
@@ -71,11 +109,11 @@ function inkPath(d, t, opts = {}) {
   if (t.kind === "pen" && !opts.nonScaling && op > 0.5) {
     out += ends(d).slice(0, 24).map(([x, y]) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(w * 0.55)}" fill="${c}" fill-opacity="${f(op * 55) / 100}"/>`).join("");
   }
-  return grainy(t) && !opts.noFilter ? `<g filter="url(#${opts.filterId || "pg"})">${out}</g>` : out;
+  return textured(t) && !opts.noFilter ? `<g filter="url(#${opts.filterId || "pg"})">${out}</g>` : out;
 }
 function inkFill(d, t, opts = {}) {
   const fill2 = `<path d="${d}" fill="${t.color}" fill-opacity="${f(t.op * (t.kind === "marker" ? 0.86 : 1) * 100) / 100}"/>`;
-  return grainy(t) && !opts.noFilter ? `<g filter="url(#${opts.filterId || "pg"})">${fill2}</g>` : fill2;
+  return textured(t) && !opts.noFilter ? `<g filter="url(#${opts.filterId || "pg"})">${fill2}</g>` : fill2;
 }
 
 // src/js/shapes.js
@@ -185,9 +223,9 @@ function scribbleD(x, y, w, h, r, step = 6) {
   }
   return curve(pts, true);
 }
-function stippleD(x, y, w, h, r, density = 0.1) {
+function stippleD(x, y, w, h, r, density2 = 0.1) {
   let d = "";
-  const n = Math.round(w * h * density / 10);
+  const n = Math.round(w * h * density2 / 10);
   for (let i = 0; i < n; i++) {
     const px = x + r() * w, py = y + r() * h;
     d += `M${f(px)} ${f(py)} h.01 `;

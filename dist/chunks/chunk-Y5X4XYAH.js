@@ -1,10 +1,11 @@
-/*! papertooth v0.4.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.4.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 import {
+  brushFilter,
   curve,
   f,
   jit,
   stroke
-} from "./chunk-UEZKEGJH.js";
+} from "./chunk-TVJQOPJV.js";
 
 // src/js/tools.js
 var TOOLS = ["pen", "ballpoint", "brush", "marker", "graphite", "pencil"];
@@ -21,7 +22,9 @@ function toolOf(el, def = {}) {
 }
 var toolKey = (t) => `${t.kind}|${t.color}|${t.w}|${t.op}`;
 var grainy = (t) => t.kind === "graphite" || t.kind === "pencil";
+var textured = (t) => grainy(t) || t.kind === "brush";
 function toolDefs(t, id = "pg") {
+  if (t.kind === "brush") return brushFilter(id);
   if (!grainy(t)) return "";
   return `<filter id="${id}" x="-10%" y="-30%" width="120%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="1.3 .9" numOctaves="2" seed="3" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -.55" result="a"/><feComposite in="SourceGraphic" in2="a" operator="in"/></filter>`;
 }
@@ -60,11 +63,11 @@ function inkPath(d, t, opts = {}) {
   if (t.kind === "pen" && !opts.nonScaling && op > 0.5) {
     out += ends(d).slice(0, 24).map(([x, y]) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(w * 0.55)}" fill="${c}" fill-opacity="${f(op * 55) / 100}"/>`).join("");
   }
-  return grainy(t) && !opts.noFilter ? `<g filter="url(#${opts.filterId || "pg"})">${out}</g>` : out;
+  return textured(t) && !opts.noFilter ? `<g filter="url(#${opts.filterId || "pg"})">${out}</g>` : out;
 }
 function inkFill(d, t, opts = {}) {
   const fill2 = `<path d="${d}" fill="${t.color}" fill-opacity="${f(t.op * (t.kind === "marker" ? 0.86 : 1) * 100) / 100}"/>`;
-  return grainy(t) && !opts.noFilter ? `<g filter="url(#${opts.filterId || "pg"})">${fill2}</g>` : fill2;
+  return textured(t) && !opts.noFilter ? `<g filter="url(#${opts.filterId || "pg"})">${fill2}</g>` : fill2;
 }
 
 // src/js/shapes.js

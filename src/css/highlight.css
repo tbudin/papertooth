@@ -20,11 +20,12 @@
    button's highlighter). The highlighter and the ink it drags both follow it, so the smudge appears exactly where
    the tip is, at the speed it moves. */
 @property --pt-wipe { syntax: '<number>'; inherits: true; initial-value: 0; }
-.pt-btn { --pt-wipe: 0; transition: --pt-wipe .45s cubic-bezier(.4,.6,.2,1), translate .1s; }
+/* the press moves the button with transform: translate belongs to grid snapping, which must read it unanimated */
+.pt-btn { --pt-wipe: 0; transition: --pt-wipe .45s cubic-bezier(.4,.6,.2,1), transform .1s; }
 /* drawn on hover only where a pointer hovers, so a tap on a phone leaves nothing stuck; drawn while pressed down,
    on keyboard focus, and kept while the button is on: pressed, selected, expanded, open or the current page */
 @media (hover: hover) { .pt-btn:hover:not(:disabled, [aria-disabled="true"]) { --pt-wipe: 1; } }
-.pt-btn:active:not(:disabled, [aria-disabled="true"]) { --pt-wipe: 1; translate: 0 1px; }
+.pt-btn:active:not(:disabled, [aria-disabled="true"]) { --pt-wipe: 1; transform: translateY(1px); }
 .pt-btn:is(:focus-visible, [aria-pressed="true"], [aria-selected="true"], [aria-expanded="true"], [aria-current]:not([aria-current="false"])), details[open] > summary.pt-btn { --pt-wipe: 1; }
 .pt-btn:is(:disabled, [aria-disabled="true"]) { cursor: not-allowed; opacity: .5; }
 .pt-btn:is(:disabled, [aria-disabled="true"])::before { filter: grayscale(1); }

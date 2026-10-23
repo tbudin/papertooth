@@ -177,6 +177,7 @@
   --pt-text-filter: url(#pt-ink-text);
   --pt-head-filter: url(#pt-ink-head);
   --pt-graphite: url(#pt-graphite);
+  --pt-brush-filter: url(#pt-brush);
   --pt-stamp-filter: url(#pt-stamp);
   --pt-smudge: url(#pt-smudge-ribbon);
   --pt-smear: url(#pt-smear-ribbon);

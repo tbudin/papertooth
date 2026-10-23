@@ -22,7 +22,7 @@
 /* the instruments */
 [data-tool="pen"]       { --pt-t-kind: pen;       --pt-t-color: var(--pt-pen);        --pt-t-w: 1.8; --pt-t-op: 1; }
 [data-tool="ballpoint"] { --pt-t-kind: ballpoint; --pt-t-color: var(--pt-ballpoint);  --pt-t-w: 1.15; --pt-t-op: .92; }
-[data-tool="brush"]     { --pt-t-kind: brush;     --pt-t-color: var(--pt-brush);      --pt-t-w: 3; --pt-t-op: 1; }
+[data-tool="brush"]     { --pt-t-kind: brush;     --pt-t-color: var(--pt-brush);      --pt-t-w: 4.2; --pt-t-op: 1; }
 [data-tool="marker"]    { --pt-t-kind: marker;    --pt-t-color: var(--pt-marker);     --pt-t-w: 3.4; --pt-t-op: .9; }
 [data-tool="graphite"]  { --pt-t-kind: graphite;  --pt-t-color: var(--pt-graphite-c); --pt-t-w: 1.6; --pt-t-op: .85; }
 [data-tool="pencil"]    { --pt-t-kind: pencil;    --pt-t-color: var(--pt-pencil);     --pt-t-w: 1.9; --pt-t-op: .95; }
@@ -33,6 +33,7 @@
 .pt-anno > .pt-anno__ink path { stroke: var(--pt-t-color); stroke-width: calc(var(--pt-t-w) * var(--pt-k, 1) * 1px); stroke-opacity: calc(var(--pt-t-op) * var(--pt-o, 1)); }
 :is(.pt-anno, .pt-diagram, .pt-check, .pt-radio):is([data-tool="graphite"], [data-tool="pencil"]) :is(.pt-anno__ink, .pt-diagram__svg, svg),
 .pt-anno:not([data-tool]) > .pt-anno__ink { filter: var(--pt-graphite, ); }
+:is(.pt-anno, .pt-diagram, .pt-check, .pt-radio)[data-tool="brush"] :is(.pt-anno__ink, .pt-diagram__svg, svg) { filter: var(--pt-brush-filter, ); }
 .pt-anno[data-tool="marker"] .pt-anno__ink { mix-blend-mode: var(--pt-blend, multiply); }
 .pt-diagram .pt-diagram__ink path:not(.pt-diagram__thick, .pt-diagram__dotted), .pt-diagram .pt-diagram__line { stroke-width: calc(var(--pt-t-w) * 1px); }
 .pt-diagram[data-tool="ballpoint"] .pt-diagram__ink path:not(.pt-diagram__dotted) { stroke-dasharray: 38 1.1 61 .7 23 1.4; }

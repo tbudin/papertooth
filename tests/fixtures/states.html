@@ -14,7 +14,8 @@
     <button id="linkButton" class="pt-link" type="button">a button</button>
   </p>
   <details open><summary id="summary" class="pt-btn">Open</summary><p>Inside.</p></details>
+  <p>A <span id="brushMark" class="pt-anno" data-anno="circle" data-tool="brush">brush</span> mark and a <span id="penMark" class="pt-anno" data-anno="circle" data-tool="pen">pen</span> mark.</p>
 </main>
 <script src="/dist/papertooth.min.js"></script>
-<script>Papertooth.init({ motion: 'none', lazy: false });</script>
+<script>window.kit = Papertooth.init({ motion: 'none', lazy: false });</script>
 </body></html>

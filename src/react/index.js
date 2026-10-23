@@ -188,7 +188,7 @@ export const DateStamp = named('DateStamp', ({ unit = 'week', variant, date = ne
           : h('span', { key: i, className: 'pt-datestamp__cell', 'data-state': c.state, 'data-side': c.side ? '' : undefined }, inner);
       }))))));
   return h('div', {
-    ...rest, ref, role: 'img', 'aria-label': stampLabel(unit, date, locale), lang: /^ja\b/.test(locale) ? 'ja' : undefined,
+    ...rest, ref, role: 'img', 'aria-label': stampLabel(unit, date, locale, { mark, variant }), lang: /^ja\b/.test(locale) ? 'ja' : undefined,
     // the full date's punctuation depends on each runtime's date data (Node 23 drops the comma Chrome writes)
     suppressHydrationWarning: true,
     className: cls('pt-datestamp', className), 'data-unit': unit, 'data-variant': variant, 'data-ink': ink, 'data-pt-ready': '', style

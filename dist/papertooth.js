@@ -1,12 +1,4 @@
-/*! papertooth v0.4.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
-import {
-  DEFAULTS,
-  filtersMarkup,
-  injectFilters,
-  lithoFilter,
-  smearColour,
-  typewriterFilter
-} from "./chunks/chunk-L76RC6MZ.js";
+/*! papertooth v0.4.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 import {
   ANNO,
   DOT,
@@ -32,18 +24,24 @@ import {
   waveD,
   wobblyBox,
   wobblyRing
-} from "./chunks/chunk-RTRDMXDM.js";
+} from "./chunks/chunk-Y5X4XYAH.js";
 import {
+  DEFAULTS,
   cssVar,
   enc,
   f,
+  filtersMarkup,
   hoverOf,
+  injectFilters,
+  lithoFilter,
   rng,
   seedOf,
   setSeed,
+  smearColour,
   svgDoc,
-  toHex
-} from "./chunks/chunk-UEZKEGJH.js";
+  toHex,
+  typewriterFilter
+} from "./chunks/chunk-TVJQOPJV.js";
 
 // src/js/painter.js
 var repaint = () => {
@@ -59,8 +57,8 @@ var onDemand = (load) => {
     return null;
   };
 };
-var imagesFor = onDemand(() => import("./chunks/images-M7GNIVWC.js"));
-var diagramFor = onDemand(() => import("./chunks/diagram-LVZYT5BB.js"));
+var imagesFor = onDemand(() => import("./chunks/images-4KE454GZ.js"));
+var diagramFor = onDemand(() => import("./chunks/diagram-YGOT6HSM.js"));
 var LINE_MARKS = /* @__PURE__ */ new Set(["strike", "under", "cross"]);
 var shiftPath = (d, dx, dy) => d.replace(/(-?[\d.]+) (-?[\d.]+)/g, (_, x, y) => `${f(+x + dx)} ${f(+y + dy)}`);
 var SVGNS = "http://www.w3.org/2000/svg";
@@ -501,8 +499,10 @@ function stampCells(unit = "week", date = /* @__PURE__ */ new Date(), { locale =
   const name = fmt(locale, { weekday: "short" });
   return weekDates(date, weekStart).map((d) => ({ label: name.format(d), state: sign(midnight(d) - midnight(date)) }));
 }
-function stampLabel(unit, date = /* @__PURE__ */ new Date(), locale = "en-GB") {
-  const opts = unit === "month" ? { month: "long", year: "numeric" } : unit === "year" ? { year: "numeric" } : { dateStyle: "full" };
+function stampLabel(unit, date = /* @__PURE__ */ new Date(), locale = "en-GB", { mark = "circle", variant } = {}) {
+  const marked = mark !== "none", bar = variant === "bar";
+  const DATE = { dateStyle: "full" }, MONTH = { month: "long", year: "numeric" }, YEAR = { year: "numeric" };
+  const opts = unit === "month" ? bar || !marked ? MONTH : DATE : unit === "year" ? bar || !marked ? YEAR : MONTH : DATE;
   return fmt(locale, opts).format(date);
 }
 function stampLayout(unit = "week", date = /* @__PURE__ */ new Date(), { variant, locale = "en-GB", weekStart = firstDayOf(locale), years, from, rows = 1, title } = {}) {
@@ -629,7 +629,7 @@ function dateStamp(el, date = parseDate(el.dataset.date), opts = {}) {
     return out;
   };
   el.setAttribute("role", "img");
-  el.setAttribute("aria-label", stampLabel(unit, date, locale));
+  el.setAttribute("aria-label", stampLabel(unit, date, locale, { mark, variant: d.variant }));
   if (/^ja\b/.test(locale)) el.lang = "ja";
   el.replaceChildren(layer(false), layer(true));
   el.dataset.ptReady = "";
@@ -942,7 +942,7 @@ var PALETTE = {
 };
 
 // src/js/index.js
-var VERSION = "0.4.0";
+var VERSION = "0.4.1";
 var DEFAULTS2 = {
   root: null,
   // element to enhance; defaults to document.body

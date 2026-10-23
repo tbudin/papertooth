@@ -2,6 +2,15 @@
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## 0.4.1 - 2026-10-23
+
+### Changed
+- The brush looks like brush ink: a heavier stroke with a ragged edge, dry streaks where the brush runs out, and uneven ink, on marks, checkboxes, diagrams, and drawn underlines and rules. Before, it was a thick, even line, close to the fountain pen and the marker. Tune it with `setFilters({ brush: { dry, rough } })`.
+- A date stamp tells screen readers what it marks: a month calendar says the day it marks (Wednesday 21 October 2026), a year of months says the month. Before, a month calendar only said the month. `stampLabel()` takes `{ mark, variant }` for this.
+
+### Fixed
+- Buttons swung between two grid positions each time the page was snapped again (when an app changed the page, for example). The press effect animated `translate`, which snapping reads, so a snap measured the button mid-animation; the press now uses `transform`.
+
 ## 0.4.0 - 2026-10-23
 
 ### Added

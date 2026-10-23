@@ -8,6 +8,8 @@ export interface FilterParams {
   head?: { rough?: number; density?: number };
   /** How much of the paper grain catches the lead, and how rough its edge is. */
   graphite?: { tooth?: number; rough?: number };
+  /** Brush ink: dry streaks where the brush runs out (0 to 1), and how ragged the edge is. */
+  brush?: { dry?: number; rough?: number };
   /** Paper gaps, edge roughness, ink pooling at the rim, uneven pad. */
   stamp?: { wear?: number; rough?: number; edge?: number; mottle?: number };
   /** Fresh ink dragged by a highlighter. */
@@ -148,7 +150,8 @@ export interface StampCell { label: string; state: 'past' | 'current' | 'future'
 /** The cells of a date stamp: seven weekdays, twelve months, a run of years (default 5 around the date) or the days of the month. */
 export declare function stampCells(unit?: StampUnit, date?: Date, options?: { locale?: string; weekStart?: Weekday; years?: number; from?: number }): StampCell[];
 /** What a date stamp says, read whole (for screen readers). */
-export declare function stampLabel(unit?: StampUnit, date?: Date, locale?: string): string;
+/** What a date stamp marks, as a screen reader reads it: the date, the month or the year. */
+export declare function stampLabel(unit?: StampUnit, date?: Date, locale?: string, options?: { mark?: 'circle' | 'box' | 'highlight' | 'none'; variant?: 'bar' | 'wide' }): string;
 /** Fill a .pt-datestamp from its data attributes (data-unit, data-date, data-mark, data-past, data-locale…). The script does this for you. */
 export declare function dateStamp(el: Element, date?: Date, options?: { locale?: string; weekStart?: Weekday; years?: number; from?: number }): void;
 export interface StampLayout { sections: { part: 'bar' | 'head' | 'write' | 'months' | 'days' | 'title' | 'year'; rows: { label: string; state: StampCell['state'] | ''; side?: boolean }[][] }[] }

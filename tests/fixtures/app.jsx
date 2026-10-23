@@ -132,6 +132,8 @@ const scenarios = {
       weekParts: [...document.querySelectorAll('#week .pt-datestamp__print > .pt-datestamp__section')].map(s => s.dataset.part + ':' + s.children.length).join(' '),
       weekHead: labels('week', 'head'), weekHeadMarks: marks('week', 'head'), weekWriteMarks: marks('week', 'write'),
       weekLabel: q('#week').getAttribute('aria-label'), circleDrawn: q('#week .pt-datestamp__marks [data-part="head"] .pt-anno__ink path') != null,
+      monthLabel: q('#month').getAttribute('aria-label'), wideLabel: q('#wide').getAttribute('aria-label'),
+      yearLabel: q('#year').getAttribute('aria-label'), barLabel: q('#bar').getAttribute('aria-label'),
       monthSelector: labels('month', 'months'), monthSelectorMarks: marks('month', 'months'),
       monthHead: labels('month', 'head'), monthDays: labels('month', 'days'), monthDayMarks: marks('month', 'days'),
       jaHead: labels('monthJa', 'head'), jaSelectorMarks: marks('monthJa', 'months'), jaLang: q('#monthJa').lang,

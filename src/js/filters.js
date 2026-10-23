@@ -5,6 +5,7 @@ export const DEFAULTS = {
   text:       { density: .7 },               // 0..1  how uneven the ribbon ink is on body text
   head:       { rough: 1, density: .8 },     // rough: 0..3 edge roughness on headings
   graphite:   { tooth: 2.4, rough: .9 },     // tooth: how much of the paper grain catches the lead
+  brush:      { dry: .5, rough: 1.2 },       // dry: gaps where the brush runs out of ink; rough: how ragged the hairs leave the edge
   stamp:      { wear: .55, rough: 1.3, edge: .5, mottle: .5 },  // wear: paper gaps; edge: ink pooling at the rim; mottle: uneven pad
   smudge:     { drag: 4.2, blur: 3.4, strength: .78 },   // fresh ink under a highlight
   smear:      { drag: 7, blur: 4.5, strength: .7 },      // extra ink dragged on hover
@@ -34,6 +35,25 @@ function smudgeFilter(id, p, colour, onlySmear) {
 <feComposite in2="shape" operator="in" result="smear"/>` +
   (onlySmear ? '' : `<feComponentTransfer in="SourceGraphic" result="lifted"><feFuncA type="linear" slope="0.86"/></feComponentTransfer>
 <feMerge><feMergeNode in="smear"/><feMergeNode in="lifted"/></feMerge>`) + `</filter>`;
+}
+
+/**
+ * Sumi ink from a brush: the hairs leave a ragged edge, run dry in streaks (kasure) and carry more ink in places.
+ * Used on marks drawn in the page and inside the SVGs the script paints.
+ */
+export function brushFilter(id, p) {
+  p = { ...DEFAULTS.brush, ...p };
+  const thr = .74 - .18 * p.dry;
+  return `<filter id="${id}" x="-10%" y="-30%" width="120%" height="160%" color-interpolation-filters="sRGB">
+<feTurbulence type="fractalNoise" baseFrequency="0.32" numOctaves="2" seed="5" result="grain"/>
+<feDisplacementMap in="SourceGraphic" in2="grain" scale="${n2(p.rough)}" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+<feTurbulence type="fractalNoise" baseFrequency="0.04 0.85" numOctaves="2" seed="8" result="hair"/>
+<feColorMatrix in="hair" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -10 0 0 0 ${n2(1 + 10 * thr)}" result="dry"/>
+<feComposite in="rough" in2="dry" operator="in" result="kasure"/>
+<feTurbulence type="fractalNoise" baseFrequency="0.025 0.04" numOctaves="2" seed="2" result="blot"/>
+${density(.9, .45)}
+<feComposite in="kasure" in2="density" operator="in"/>
+</filter>`;
 }
 
 /** The typewriter texture as one filter. Works on any font. */
@@ -132,6 +152,7 @@ ${smudgeFilter('pt-smudge-pen', P.smudge, smearColour(c.pen, c.highlighter))}
 ${smudgeFilter('pt-smear-ribbon', P.smear, smearColour(c.ribbon, c.highlighter), true)}
 ${smudgeFilter('pt-smear-pen', P.smear, smearColour(c.pen, c.highlighter), true)}
 ${typewriterFilter('pt-typewriter', P.typewriter)}
+${brushFilter('pt-brush', P.brush)}
 </svg>`;
 }
 

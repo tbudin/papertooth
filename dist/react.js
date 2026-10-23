@@ -1,4 +1,4 @@
-/*! papertooth v0.4.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.4.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 "use client";
 
 // src/react/index.js
@@ -104,8 +104,10 @@ function stampCells(unit = "week", date = /* @__PURE__ */ new Date(), { locale =
   const name = fmt(locale, { weekday: "short" });
   return weekDates(date, weekStart).map((d) => ({ label: name.format(d), state: sign(midnight(d) - midnight(date)) }));
 }
-function stampLabel(unit, date = /* @__PURE__ */ new Date(), locale = "en-GB") {
-  const opts = unit === "month" ? { month: "long", year: "numeric" } : unit === "year" ? { year: "numeric" } : { dateStyle: "full" };
+function stampLabel(unit, date = /* @__PURE__ */ new Date(), locale = "en-GB", { mark = "circle", variant } = {}) {
+  const marked = mark !== "none", bar = variant === "bar";
+  const DATE = { dateStyle: "full" }, MONTH = { month: "long", year: "numeric" }, YEAR = { year: "numeric" };
+  const opts = unit === "month" ? bar || !marked ? MONTH : DATE : unit === "year" ? bar || !marked ? YEAR : MONTH : DATE;
   return fmt(locale, opts).format(date);
 }
 function stampLayout(unit = "week", date = /* @__PURE__ */ new Date(), { variant, locale = "en-GB", weekStart = firstDayOf(locale), years, from, rows = 1, title } = {}) {
@@ -351,7 +353,7 @@ var DateStamp = named("DateStamp", ({
     ...rest,
     ref,
     role: "img",
-    "aria-label": stampLabel(unit, date, locale),
+    "aria-label": stampLabel(unit, date, locale, { mark, variant }),
     lang: /^ja\b/.test(locale) ? "ja" : void 0,
     // the full date's punctuation depends on each runtime's date data (Node 23 drops the comma Chrome writes)
     suppressHydrationWarning: true,

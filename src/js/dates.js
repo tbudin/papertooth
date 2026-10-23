@@ -73,9 +73,15 @@ export function stampCells(unit = 'week', date = new Date(), { locale = 'en-GB',
   return weekDates(date, weekStart).map(d => ({ label: name.format(d), state: sign(midnight(d) - midnight(date)) }));
 }
 
-/** What a date stamp says, read whole: the date for a week or day stamp, the month or the year for the others. */
-export function stampLabel(unit, date = new Date(), locale = 'en-GB') {
-  const opts = unit === 'month' ? { month: 'long', year: 'numeric' } : unit === 'year' ? { year: 'numeric' } : { dateStyle: 'full' };
+/**
+ * What a date stamp says to a screen reader, read whole: what it marks. A week or day stamp, and a month calendar
+ * with its day marked, say the date; a year of months with its month marked, and the month bar, say the month;
+ * the year bar says the year. With nothing marked (mark 'none'), a calendar says the month or year it shows.
+ */
+export function stampLabel(unit, date = new Date(), locale = 'en-GB', { mark = 'circle', variant } = {}) {
+  const marked = mark !== 'none', bar = variant === 'bar';
+  const DATE = { dateStyle: 'full' }, MONTH = { month: 'long', year: 'numeric' }, YEAR = { year: 'numeric' };
+  const opts = unit === 'month' ? (bar || !marked ? MONTH : DATE) : unit === 'year' ? (bar || !marked ? YEAR : MONTH) : DATE;
   return fmt(locale, opts).format(date);
 }
 
