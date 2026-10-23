@@ -1115,9 +1115,9 @@ function replay() {
 }
 // play the drawing once in a live preview, then keep it still so editing does not replay it
 function drawOnce(box) {
-  html.classList.add('pt-motion');
-  box.setAttribute('data-pt-draw', ''); box.classList.remove('is-drawn'); void box.offsetWidth; box.classList.add('is-drawn');
-  clearTimeout(box._still); box._still = setTimeout(() => { box.classList.remove('is-drawn'); box.setAttribute('data-pt-draw', 'off'); }, 2800);
+  html.dataset.ptMotion = '';
+  box.setAttribute('data-pt-draw', ''); delete box.dataset.ptDrawn; void box.offsetWidth; box.dataset.ptDrawn = '';
+  clearTimeout(box._still); box._still = setTimeout(() => { delete box.dataset.ptDrawn; box.setAttribute('data-pt-draw', 'off'); }, 2800);
 }
 function copy(pre, btn) {
   const done = m => { btn.textContent = m; setTimeout(() => { btn.textContent = 'Copy'; }, 1500); };

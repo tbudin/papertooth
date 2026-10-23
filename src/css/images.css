@@ -30,5 +30,5 @@
   mix-blend-mode: multiply;
   filter: grayscale(1) contrast(1.4);       /* until it is printed, or without the script */
 }
-.pt-print.is-printed { filter: none; }
+.pt-print[data-pt-printed] { filter: none; }
 .pt-print[data-palette="screen"] { mix-blend-mode: normal; }

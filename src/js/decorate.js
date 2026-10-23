@@ -40,7 +40,7 @@ export const DECORATORS = [
     el.appendChild(svg);
   }],
   ['.pt-check, .pt-radio', el => {
-    if (el.classList.contains('is-ready')) return;
+    if (el.dataset.ptReady != null) return;
     const input = el.querySelector('input'); if (!input) return;
     const r = rng(seedOf(el)), radio = el.classList.contains('pt-radio');
     const svg = svgEl('svg', { width: '22', height: '22', viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' });
@@ -54,7 +54,7 @@ export const DECORATORS = [
       while (n) { const next = n.nextSibling; t.appendChild(n); n = next; }
       el.appendChild(t);
     }
-    el.classList.add('is-ready');
+    el.dataset.ptReady = '';
   }],
   ['.pt-habits', el => {
     // place every cell twice over: rows-as-habits (wide) and rows-as-days (narrow)
@@ -74,13 +74,13 @@ export const DECORATORS = [
     if (!el.style.getPropertyValue('--pt-days')) el.style.setProperty('--pt-days', days);
   }],
   ['.pt-habit', el => {
-    if (el.classList.contains('is-ready')) return;
+    if (el.dataset.ptReady != null) return;
     const input = el.querySelector('input'); if (!input) return;
     const svg = svgEl('svg', { width: '20', height: '20', viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' });
     svg.appendChild(svgEl('circle', { class: 'pt-ring', cx: '12', cy: '12', r: '9' }));
     svg.appendChild(svgEl('path', { class: 'pt-fill', pathLength: '1', d: spiral(rng(seedOf(el))) }));
     input.after(svg);
-    el.classList.add('is-ready');
+    el.dataset.ptReady = '';
   }],
   ['.pt-links-mix .pt-link:not([data-ul])', (el, o, i) => {
     el.dataset.ul = UL_MIX[(i + (rng(seedOf(el))() * 3 | 0)) % 3];

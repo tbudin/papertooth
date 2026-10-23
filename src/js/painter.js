@@ -123,7 +123,7 @@ export const PAINTERS = [
     draw: (el, m) => {
       if (!m.style || m.w < 10) { el.style.removeProperty('--pt-gen'); return; }
       el.style.setProperty('--pt-gen', enc(svgDoc(m.w, m.h, `<defs>${toolDefs(m.t)}</defs>` + RULE[m.style](m.w, m.h, rng(seedOf(el)), m.t))));
-      el.classList.add('is-painted');
+      el.dataset.ptPainted = '';
     }
   },
   {
@@ -160,7 +160,7 @@ export const PAINTERS = [
     draw: (el, m) => {
       if (m.shape === 'tally' || m.shape === 'sei') el.style.setProperty('--pt-groups', Math.ceil(m.max / 5));
       if (m.w < 8 || m.h < 8) return;
-      el.classList.add('is-painted');
+      el.dataset.ptPainted = '';
       el.style.setProperty('--pt-progress-img', enc(svgDoc(m.w, m.h, `<defs>${toolDefs(m.t)}</defs>` + progressSVG(m.shape, m.style, m.w, m.h, rng(seedOf(el)), m.t, m.v, m))));
     }
   },
@@ -227,7 +227,7 @@ PAINTERS.push(
         el.dataset.ptSrc = el.currentSrc || el.src;
       }
       // a picture shown at its own size keeps that size once it is replaced by the smaller print
-      if (!el.dataset.ptW && el.complete && el.naturalWidth && !el.classList.contains('is-printed')) {
+      if (!el.dataset.ptW && el.complete && el.naturalWidth && el.dataset.ptPrinted == null) {
         const w = el.getBoundingClientRect().width;
         el.dataset.ptW = Math.abs(w - el.naturalWidth) < 1 && !el.style.width && !el.getAttribute('width') ? String(Math.round(w)) : 'css';
       }
@@ -236,7 +236,7 @@ PAINTERS.push(
     },
     key: m => `${m.ready}|${m.failed}|${m.src}|${JSON.stringify(m.p)}`,
     draw: (el, m) => {
-      el.classList.toggle('pt-print--blocked', !!m.failed);
+      if (m.failed) el.dataset.ptBlocked = ''; else delete el.dataset.ptBlocked;
       if (!m.src || !m.ready) return;
       if (el.dataset.ptW && el.dataset.ptW !== 'css' && !el.style.width) el.style.width = el.dataset.ptW + 'px';
       renderPrint(el, m.rec.img, m.p);
@@ -253,7 +253,7 @@ PAINTERS.push(
     draw: (el, m) => {
       if (!kindOf(m.src)) return;
       el.innerHTML = renderDiagram(m.src, { seed: seedOf(el), font: m.font, lineHeight: m.lh, fill: m.fill, width: m.w });
-      el.classList.add('is-drawn-svg');
+      el.dataset.ptPainted = '';
     }
   }
 );

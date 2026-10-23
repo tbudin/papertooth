@@ -37,7 +37,7 @@
 .pt-rule[data-rule="short"]  { width: calc(var(--pt-grid) * 6); margin-inline: auto; }
 .pt-rule:is([data-rule="brush"], [data-rule="coil"], [data-rule="scrawl"]) { background: var(--pt-r-wobble) center / 100% 12px no-repeat; }
 /* drawn by the script at its real width, with its writing instrument */
-.pt-rule.is-painted:not([data-rule="stars"]) { background: var(--pt-gen) center / 100% 100% no-repeat; }
+.pt-rule[data-pt-painted]:not([data-rule="stars"]) { background: var(--pt-gen) center / 100% 100% no-repeat; }
 .pt-rule[data-rule="stars"] { background: none; display: flex; justify-content: center; }
 .pt-rule[data-rule="stars"]::before {
   content: "*\00a0\00a0\00a0*\00a0\00a0\00a0*";

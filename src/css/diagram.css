@@ -10,8 +10,8 @@
   font-family: var(--pt-font-hand); font-size: 21px; line-height: 24px;
   white-space: pre-wrap;
 }
-.pt-diagram.is-drawn-svg { white-space: normal; }
-.pt-diagram:not(.is-drawn-svg) { font-family: var(--pt-font-type); font-size: 13px; line-height: 18px; opacity: .6; }
+.pt-diagram[data-pt-painted] { white-space: normal; }
+.pt-diagram:not([data-pt-painted]) { font-family: var(--pt-font-type); font-size: 13px; line-height: 18px; opacity: .6; }
 .pt-diagram__svg { display: block; max-width: 100%; height: auto; overflow: visible; }
 .pt-diagram__ink path, .pt-diagram__ink, .pt-diagram__line, .pt-diagram__grid {
   fill: none; stroke: currentColor; stroke-width: var(--pt-diagram-stroke); stroke-linecap: round; stroke-linejoin: round;

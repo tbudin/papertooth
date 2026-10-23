@@ -145,7 +145,7 @@ export function injectFilters(params = {}, doc = document) {
   tpl.innerHTML = markup;
   const svg = tpl.firstElementChild;
   if (old) old.replaceWith(svg); else doc.body.prepend(svg);
-  doc.documentElement.classList.add('pt-filters');
+  doc.documentElement.dataset.ptFilters = '';
   return svg;
 }
 export const filterParams = () => current;

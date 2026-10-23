@@ -1,5 +1,5 @@
 // Types for papertooth/react.
-import type { ComponentPropsWithoutRef, ElementType, InputHTMLAttributes, CSSProperties, ReactNode, ReactElement } from 'react';
+import type { ComponentPropsWithRef, ElementType, InputHTMLAttributes, CSSProperties, ReactNode, ReactElement, Ref } from 'react';
 import type { Options, Kit, HighlightStyle, OutlineStyle } from 'papertooth';
 
 export type HighlighterColor = 'yellow' | 'pink' | 'green' | 'orange' | 'blue';
@@ -12,7 +12,8 @@ export declare function usePapertooth(options?: Options): Kit | null;
 /** Drop-in for a layout: <Papertooth seed={7} /> starts the script for the whole page. Renders nothing. */
 export declare function Papertooth(props: Options): null;
 
-type As<E extends ElementType, P> = P & { as?: E } & Omit<ComponentPropsWithoutRef<E>, keyof P | 'as'>;
+// the element's own props, ref included, so <Btn ref={…}> is typed for the element it renders
+type As<E extends ElementType, P> = P & { as?: E } & Omit<ComponentPropsWithRef<E>, keyof P | 'as'>;
 
 export type BtnProps<E extends ElementType = 'button'> = As<E, {
   /** An outlined button; a string picks the outline. */
@@ -31,7 +32,7 @@ export type BtnProps<E extends ElementType = 'button'> = As<E, {
 export declare function Btn(props: BtnProps<'a'> & { href: string }): ReactElement;
 export declare function Btn<E extends ElementType = 'button'>(props: BtnProps<E>): ReactElement;
 
-export type MarkProps = Omit<ComponentPropsWithoutRef<'mark'>, 'color'> & {
+export type MarkProps = Omit<ComponentPropsWithRef<'mark'>, 'color'> & {
   hl?: HighlightStyle;
   color?: HighlighterColor;
   size?: 'fine' | 'broad';
@@ -39,7 +40,7 @@ export type MarkProps = Omit<ComponentPropsWithoutRef<'mark'>, 'color'> & {
 /** A highlighted phrase. */
 export declare function Mark(props: MarkProps): ReactElement;
 
-export type AnnoProps = ComponentPropsWithoutRef<'span'> & {
+export type AnnoProps = ComponentPropsWithRef<'span'> & {
   /** Default: 'circle'. */
   anno?: AnnoStyle;
   /** Default: the marking pencil. */
@@ -51,7 +52,7 @@ export declare function Anno(props: AnnoProps): ReactElement;
 export type WobbleProps<E extends ElementType = 'span'> = As<E, {
   /** The same seed gives the same letters on every visit. Default: stable per component. */
   seed?: number;
-  /** Plain text is split into letters; anything else is passed through unchanged. */
+  /** Text (strings and numbers, e.g. `Hello {name}`) is split into letters; anything else is passed through unchanged. */
   children?: ReactNode;
 }>;
 /** Typed text whose letters sit a little unevenly. */
@@ -64,10 +65,11 @@ export type CheckProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 's
   tool?: Tool;
   /** The same seed gives the same box on every visit. Default: stable per component. */
   seed?: number;
-  /** Class and style go on the label; every other prop goes on the input. */
+  /** Class and style go on the label; every other prop, and the ref, go on the input. */
   className?: string;
   style?: CSSProperties;
   children?: ReactNode;
+  ref?: Ref<HTMLInputElement>;
 };
 /** A hand-drawn checkbox or radio around a native input. */
 export declare function Check(props: CheckProps): ReactElement;

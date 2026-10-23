@@ -2,7 +2,7 @@
 "use client";
 
 // src/react/index.js
-import { createElement as h, useEffect, useId, useState } from "react";
+import { createElement as h, forwardRef, useEffect, useId, useState } from "react";
 import { init } from "papertooth";
 
 // src/js/core.js
@@ -69,59 +69,62 @@ var data = (attrs) => {
   return out;
 };
 var cls = (...names) => names.filter(Boolean).join(" ");
+var textOf = (node) => node == null || typeof node === "boolean" ? "" : typeof node === "string" || typeof node === "number" ? String(node) : Array.isArray(node) ? node.map(textOf).join("") : node.props ? textOf(node.props.children) : "";
+var plainText = (children) => {
+  const parts = [].concat(children).flat(Infinity);
+  return parts.every((c) => typeof c === "string" || typeof c === "number") ? parts.join("") : null;
+};
+var named = (name, fn) => Object.assign(forwardRef(fn), { displayName: name });
 var ink = (className) => h("svg", { className, "aria-hidden": "true", focusable: "false", preserveAspectRatio: "none" }, h("path", { pathLength: 1 }));
-function Btn({ as, outline, hl, color, size, hover, tool, className, children, ...rest }) {
+var Btn = named("Btn", ({ as, outline, hl, color, size, hover, tool, className, children, ...rest }, ref) => {
   const Tag = as || (rest.href != null ? "a" : "button");
   return h(
     Tag,
     {
       ...Tag === "button" && rest.type == null ? { type: "button" } : null,
       ...rest,
+      ref,
       className: cls("pt-btn", outline && "pt-btn--outline", className),
       ...data({ outline: typeof outline === "string" ? outline : null, hl, color, size, hover, tool })
     },
     h("span", { className: "pt-btn__label" }, children),
-    h("span", { className: "pt-btn__smear", "aria-hidden": "true" }, children),
+    // text only: rendering children twice would duplicate ids and the state of anything stateful inside
+    h("span", { className: "pt-btn__smear", "aria-hidden": "true" }, textOf(children)),
     hover === "circle" || hover === "underline" ? ink("pt-hover-ink") : null
   );
-}
-function Mark({ hl, color, size, className, children, ...rest }) {
-  return h(
-    "mark",
-    { ...rest, className: cls("pt-mark", className), ...data({ hl, color, size }) },
-    h("span", { className: "pt-mark__ink" }, children)
-  );
-}
-function Anno({ anno = "circle", tool, className, children, ...rest }) {
-  return h(
+});
+var Mark = named("Mark", ({ hl, color, size, className, children, ...rest }, ref) => h(
+  "mark",
+  { ...rest, ref, className: cls("pt-mark", className), ...data({ hl, color, size }) },
+  h("span", { className: "pt-mark__ink" }, children)
+));
+var Anno = named("Anno", ({ anno = "circle", tool, className, children, ...rest }, ref) => (
+  // the svg is left empty: the script draws one path in it per pass of the instrument
+  h(
     "span",
-    { ...rest, className: cls("pt-anno", className), ...data({ anno, tool }) },
+    { ...rest, ref, className: cls("pt-anno", className), ...data({ anno, tool }) },
     children,
     h("svg", { className: "pt-anno__ink", "aria-hidden": "true", focusable: "false" })
-  );
-}
-function Wobble({ as = "span", seed, className, children, ...rest }) {
-  const r = rng(useSeed(seed) + 11);
-  const text = typeof children === "string" || typeof children === "number" ? String(children) : null;
-  const body = text == null ? children : text.split(/(\s+)/).filter(Boolean).map((part, i) => /^\s+$/.test(part) ? part : h("span", { key: i, style: { whiteSpace: "nowrap" } }, Array.from(part, (ch, j) => h("span", {
+  )
+));
+var Wobble = named("Wobble", ({ as = "span", seed, className, children, ...rest }, ref) => {
+  const r = rng(useSeed(seed) + 11), text = plainText(children);
+  const props = { ...rest, ref, className: cls("pt-wobble", className), "data-pt-wobbled": "1" };
+  if (text == null) return h(as, props, children);
+  const letters = text.split(/(\s+)/).filter(Boolean).map((part, i) => /^\s+$/.test(part) ? part : h("span", { key: i, style: { whiteSpace: "nowrap" } }, Array.from(part, (ch, j) => h("span", {
     key: j,
     className: "pt-c",
     style: { "--y": f((r() - 0.5) * 1.2), "--r": f((r() - 0.5) * 2), "--o": f(r() < 0.1 ? 0.74 + r() * 0.12 : 0.9 + r() * 0.1) }
   }, ch))));
-  return h(as, {
-    "aria-label": text == null ? void 0 : text.replace(/\s+/g, " ").trim(),
-    ...rest,
-    className: cls("pt-wobble", className),
-    "data-pt-wobbled": "1"
-  }, body);
-}
-function Check({ type = "checkbox", tool, seed, className, style, children, ...input }) {
+  return h(as, props, h("span", { className: "pt-sr" }, text), h("span", { "aria-hidden": "true" }, letters));
+});
+var Check = named("Check", ({ type = "checkbox", tool, seed, className, style, children, ...input }, ref) => {
   const radio = type === "radio", r = rng(useSeed(seed));
   const box = radio ? wobblyRing(r) : wobblyBox(r);
   return h(
     "label",
-    { className: cls(radio ? "pt-radio" : "pt-check", "is-ready", className), style, ...data({ tool }) },
-    h("input", { type, ...input }),
+    { className: cls(radio ? "pt-radio" : "pt-check", className), style, "data-pt-ready": "", ...data({ tool }) },
+    h("input", { type, ...input, ref }),
     h(
       "svg",
       { width: 22, height: 22, viewBox: "0 0 24 24", "aria-hidden": "true", focusable: "false" },
@@ -130,7 +133,7 @@ function Check({ type = "checkbox", tool, seed, className, style, children, ...i
     ),
     radio ? children : h("span", { className: "pt-check__text" }, children)
   );
-}
+});
 export {
   Anno,
   Btn,

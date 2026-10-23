@@ -169,9 +169,9 @@
   .pt-mode-hand { --pt-s-body: 23px; --pt-s-small: 20px; --pt-s-h1: 40px; --pt-s-h2: 30px; }
 }
 
-/* Filters are referenced only once they exist. The script adds .pt-filters after injecting them;
-   without the script, paste dist/papertooth-filters.svg into the page and add the class yourself. */
-.pt-filters {
+/* Filters are referenced only once they exist. The script sets data-pt-filters on <html> after injecting them;
+   without the script, paste dist/papertooth-filters.svg into the page and add class="pt-filters" yourself. */
+:is(.pt-filters, [data-pt-filters]) {
   --pt-text-filter: url(#pt-ink-text);
   --pt-head-filter: url(#pt-ink-head);
   --pt-graphite: url(#pt-graphite);
@@ -179,7 +179,7 @@
   --pt-smudge: url(#pt-smudge-ribbon);
   --pt-smear: url(#pt-smear-ribbon);
 }
-:is(.pt-filters.pt-mode-hand, .pt-filters .pt-mode-hand, .pt-filters .pt-pen-text) {
+:is(.pt-filters, [data-pt-filters]):is(.pt-mode-hand), :is(.pt-filters, [data-pt-filters]) :is(.pt-mode-hand, .pt-pen-text) {
   --pt-smudge: url(#pt-smudge-pen);
   --pt-smear: url(#pt-smear-pen);
 }

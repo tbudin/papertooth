@@ -128,8 +128,8 @@
   -webkit-mask: var(--pt-mask-a) 0 0 / 100% 100% no-repeat; mask: var(--pt-mask-a) 0 0 / 100% 100% no-repeat;
   mix-blend-mode: var(--pt-blend, multiply);
 }
-.pt-progress.is-painted { background: var(--pt-progress-img) 0 0 / 100% 100% no-repeat; }
-.pt-progress.is-painted::before { display: none; }
+.pt-progress[data-pt-painted] { background: var(--pt-progress-img) 0 0 / 100% 100% no-repeat; }
+.pt-progress[data-pt-painted]::before { display: none; }
 .pt-progress:is([data-shape="boxes"], [data-shape="circles"], [data-style="segments"], [data-style="dots"]) { height: calc(var(--pt-grid) * 1.25); }
 .pt-progress:is([data-shape="ring"], [data-style="ring"]) { width: calc(var(--pt-grid) * 3); height: calc(var(--pt-grid) * 3); display: grid; place-items: center; }
 .pt-progress:is([data-shape="tally"], [data-shape="sei"], [data-style="tally"], [data-style="sei"]) { width: calc(var(--pt-groups, 4) * 30px); height: calc(var(--pt-grid) * 1.25); }

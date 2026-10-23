@@ -45,6 +45,8 @@ export interface Options {
   drawAll?: boolean;
   /** Also draw on what is on screen when the page opens. Default: false. */
   drawOnLoad?: boolean;
+  /** Content added later draws on even when it lands on screen. false shows it drawn, like the first screen. Default: true. */
+  drawInserted?: boolean;
   /** Seconds between marks drawing on in one block. Default: 0.12. */
   stagger?: number;
   /** Default highlighter for .pt-btn and .pt-mark. Default: 'swipe'. */
@@ -71,6 +73,8 @@ export interface Kit {
   refresh(scope?: Element): void;
   /** Draw everything on again. */
   replay(scope?: Element): void;
+  /** Show everything in scope as drawn, without drawing it on: for content swapped in by a route or tab change. */
+  settle(scope?: Element): void;
   /** Put text back on the grid. */
   snap(): void;
   /** Enhance a subtree added without the mutation observer. */

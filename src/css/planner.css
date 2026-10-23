@@ -37,7 +37,7 @@
 .pt-habit .pt-fill { fill: none; stroke: var(--pt-hb); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset .4s var(--pt-ease); }
 .pt-habit input:checked ~ svg .pt-fill { stroke-dashoffset: 0; }
 .pt-habit input:not(:checked) ~ svg .pt-fill { visibility: hidden; transition: stroke-dashoffset .4s var(--pt-ease), visibility 0s .4s; }
-.pt-habit.is-ready input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.pt-habit[data-pt-ready] input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .pt-habit input:focus-visible ~ svg { outline: 2px dashed var(--pt-pen); outline-offset: 1px; }
 
 /* narrow: the week becomes a list of days, and the tracker runs down the page, one row per day */

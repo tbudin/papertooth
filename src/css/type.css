@@ -22,6 +22,8 @@
   transform: translateY(calc(var(--y, 0) * var(--pt-wobble) * 1px)) rotate(calc(var(--r, 0) * var(--pt-wobble) * 1deg));
 }
 .pt-mode-hand .pt-c { display: inline; transform: none; }
+/* the whole text for screen readers, next to letters hidden from them; not selectable, so a copy is not doubled */
+.pt-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; user-select: none; }
 
 /* text in a particular tool */
 .pt-type { font-family: var(--pt-font-type); color: var(--pt-ribbon); }
@@ -43,4 +45,4 @@
 
 /* selecting text: a clean highlighter colour, and the ink filter steps aside while it is selected */
 .pt-sheet ::selection, .pt-sheet::selection { background: color-mix(in srgb, var(--pt-hl-yellow, #fff04a) 70%, transparent); color: inherit; text-shadow: none; }
-.pt-selecting, .pt-selecting .pt-c { filter: none !important; }
+[data-pt-selecting], [data-pt-selecting] .pt-c { filter: none !important; }

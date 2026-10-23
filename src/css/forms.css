@@ -7,7 +7,7 @@
 .pt-todo li { max-width: none; height: var(--pt-grid); line-height: var(--pt-grid); }
 .pt-check, .pt-radio { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; min-height: var(--pt-grid); }
 .pt-todo .pt-check { height: var(--pt-grid); }
-:is(.pt-check, .pt-radio).is-ready input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+:is(.pt-check, .pt-radio)[data-pt-ready] input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 :is(.pt-check, .pt-radio) svg { flex: none; overflow: visible; }
 :is(.pt-check, .pt-radio) svg path { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 :is(.pt-check, .pt-radio) .pt-tick { stroke: var(--pt-t-color); stroke-width: calc(var(--pt-t-w) * 1px); stroke-opacity: var(--pt-t-op); stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset .35s var(--pt-ease); }

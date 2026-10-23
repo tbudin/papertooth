@@ -193,7 +193,7 @@ function injectFilters(params = {}, doc = document) {
   const svg = tpl.firstElementChild;
   if (old) old.replaceWith(svg);
   else doc.body.prepend(svg);
-  doc.documentElement.classList.add("pt-filters");
+  doc.documentElement.dataset.ptFilters = "";
   return svg;
 }
 
@@ -884,7 +884,7 @@ function renderPrint(el, img, p) {
   try {
     src = ctx2.getImageData(0, 0, w, h);
   } catch (err) {
-    el.classList.add("pt-print--blocked");
+    el.dataset.ptBlocked = "";
     return false;
   }
   const q = dither(luminance(src.data, w, h, p), w, h, p);
@@ -920,7 +920,7 @@ function renderPrint(el, img, p) {
   }
   ctx2.putImageData(out, 0, 0);
   el.src = work.toDataURL("image/png");
-  el.classList.add("is-printed");
+  el.dataset.ptPrinted = "";
   return true;
 }
 
@@ -1642,7 +1642,7 @@ var PAINTERS = [
         return;
       }
       el.style.setProperty("--pt-gen", enc(svgDoc(m.w, m.h, `<defs>${toolDefs(m.t)}</defs>` + RULE[m.style](m.w, m.h, rng(seedOf(el)), m.t))));
-      el.classList.add("is-painted");
+      el.dataset.ptPainted = "";
     }
   },
   {
@@ -1687,7 +1687,7 @@ var PAINTERS = [
     draw: (el, m) => {
       if (m.shape === "tally" || m.shape === "sei") el.style.setProperty("--pt-groups", Math.ceil(m.max / 5));
       if (m.w < 8 || m.h < 8) return;
-      el.classList.add("is-painted");
+      el.dataset.ptPainted = "";
       el.style.setProperty("--pt-progress-img", enc(svgDoc(m.w, m.h, `<defs>${toolDefs(m.t)}</defs>` + progressSVG(m.shape, m.style, m.w, m.h, rng(seedOf(el)), m.t, m.v, m))));
     }
   },
@@ -1754,7 +1754,7 @@ PAINTERS.push(
         if (!el.currentSrc && !el.getAttribute("src")) return { src: "" };
         el.dataset.ptSrc = el.currentSrc || el.src;
       }
-      if (!el.dataset.ptW && el.complete && el.naturalWidth && !el.classList.contains("is-printed")) {
+      if (!el.dataset.ptW && el.complete && el.naturalWidth && el.dataset.ptPrinted == null) {
         const w = el.getBoundingClientRect().width;
         el.dataset.ptW = Math.abs(w - el.naturalWidth) < 1 && !el.style.width && !el.getAttribute("width") ? String(Math.round(w)) : "css";
       }
@@ -1763,7 +1763,8 @@ PAINTERS.push(
     },
     key: (m) => `${m.ready}|${m.failed}|${m.src}|${JSON.stringify(m.p)}`,
     draw: (el, m) => {
-      el.classList.toggle("pt-print--blocked", !!m.failed);
+      if (m.failed) el.dataset.ptBlocked = "";
+      else delete el.dataset.ptBlocked;
       if (!m.src || !m.ready) return;
       if (el.dataset.ptW && el.dataset.ptW !== "css" && !el.style.width) el.style.width = el.dataset.ptW + "px";
       renderPrint(el, m.rec.img, m.p);
@@ -1780,7 +1781,7 @@ PAINTERS.push(
     draw: (el, m) => {
       if (!kindOf(m.src)) return;
       el.innerHTML = renderDiagram(m.src, { seed: seedOf(el), font: m.font, lineHeight: m.lh, fill: m.fill, width: m.w });
-      el.classList.add("is-drawn-svg");
+      el.dataset.ptPainted = "";
     }
   }
 );
@@ -1905,7 +1906,7 @@ var DECORATORS = [
     el.appendChild(svg);
   }],
   [".pt-check, .pt-radio", (el) => {
-    if (el.classList.contains("is-ready")) return;
+    if (el.dataset.ptReady != null) return;
     const input = el.querySelector("input");
     if (!input) return;
     const r = rng(seedOf(el)), radio = el.classList.contains("pt-radio");
@@ -1924,7 +1925,7 @@ var DECORATORS = [
       }
       el.appendChild(t);
     }
-    el.classList.add("is-ready");
+    el.dataset.ptReady = "";
   }],
   [".pt-habits", (el) => {
     let habit = 0, days = 0;
@@ -1948,14 +1949,14 @@ var DECORATORS = [
     if (!el.style.getPropertyValue("--pt-days")) el.style.setProperty("--pt-days", days);
   }],
   [".pt-habit", (el) => {
-    if (el.classList.contains("is-ready")) return;
+    if (el.dataset.ptReady != null) return;
     const input = el.querySelector("input");
     if (!input) return;
     const svg = svgEl("svg", { width: "20", height: "20", viewBox: "0 0 24 24", "aria-hidden": "true", focusable: "false" });
     svg.appendChild(svgEl("circle", { class: "pt-ring", cx: "12", cy: "12", r: "9" }));
     svg.appendChild(svgEl("path", { class: "pt-fill", pathLength: "1", d: spiral(rng(seedOf(el))) }));
     input.after(svg);
-    el.classList.add("is-ready");
+    el.dataset.ptReady = "";
   }],
   [".pt-links-mix .pt-link:not([data-ul])", (el, o, i) => {
     el.dataset.ul = UL_MIX[(i + (rng(seedOf(el))() * 3 | 0)) % 3];
@@ -2216,6 +2217,8 @@ var DEFAULTS2 = {
   // draw every mark as it comes into view, not only inside [data-pt-draw] blocks
   drawOnLoad: false,
   // also draw on what is already on screen when the page opens (costs more on slow phones)
+  drawInserted: true,
+  // content added later draws on even when it lands on screen; false shows it drawn, like the first screen
   stagger: 0.12,
   // seconds between items drawing on inside one block
   highlight: "swipe",
@@ -2264,9 +2267,11 @@ function init(options = {}) {
         });
       }
       selected.forEach((el) => {
-        if (!now.includes(el)) el.classList.remove("pt-selecting");
+        if (!now.includes(el)) delete el.dataset.ptSelecting;
       });
-      now.forEach((el) => el.classList.add("pt-selecting"));
+      now.forEach((el) => {
+        el.dataset.ptSelecting = "";
+      });
       selected = now;
     });
   };
@@ -2302,7 +2307,8 @@ function init(options = {}) {
           const block = el.closest(".pt-sheet > *") || el;
           if (!block.closest('[data-pt-draw="off"]')) blocks.add(block);
         });
-        const still = booting && !o.drawOnLoad && drawIO ? new Set([...blocks].filter((b) => {
+        const settleOnScreen = booting ? !o.drawOnLoad : !o.drawInserted;
+        const still = settleOnScreen && drawIO ? new Set([...blocks].filter((b) => {
           const r = b.getBoundingClientRect();
           return r.bottom > 0 && r.top < innerHeight;
         })) : /* @__PURE__ */ new Set();
@@ -2321,34 +2327,46 @@ function init(options = {}) {
   const DRAWABLE = ".pt-anno, .pt-btn, .pt-rule, .pt-link, .pt-mark, .pt-stamp, .pt-tape, .pt-sticky, .pt-flag, .pt-torn, .pt-ticket, .pt-photo, .pt-postage, .pt-label, .pt-progress, .pt-diagram, .pt-draw-path";
   let drawIO = null;
   if (o.motion !== "none" && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    html.classList.add("pt-motion");
+    html.dataset.ptMotion = "";
     if (o.motion === "scroll" && "IntersectionObserver" in window) {
       drawIO = new IntersectionObserver((entries) => {
         for (const e of entries) if (e.isIntersecting) {
-          e.target.classList.add("is-drawn");
+          e.target.dataset.ptDrawn = "";
           drawIO.unobserve(e.target);
         }
       }, { threshold: 0.2 });
     }
   }
+  const prepared = /* @__PURE__ */ new WeakSet();
   function prepareDraw(block) {
-    if (block.dataset.ptDrawReady) return;
-    block.dataset.ptDrawReady = "1";
+    if (prepared.has(block)) return;
+    prepared.add(block);
     const items = block.matches(DRAWABLE) ? [block] : [];
     items.push(...block.querySelectorAll(DRAWABLE));
     items.forEach((it, i) => it.style.setProperty("--pt-delay", Math.min(i * o.stagger, 1.4).toFixed(2) + "s"));
     if (drawIO) drawIO.observe(block);
-    else block.classList.add("is-drawn");
+    else block.dataset.ptDrawn = "";
   }
   function replay(scope = root) {
     const blocks = (scope.matches && scope.matches(o.drawSelector) ? [scope] : []).concat(Array.from(scope.querySelectorAll(o.drawSelector))).filter((b) => b.dataset.ptDraw !== "off");
-    blocks.forEach((b) => b.classList.remove("is-drawn"));
+    blocks.forEach((b) => {
+      delete b.dataset.ptDrawn;
+    });
     void document.body.offsetWidth;
     blocks.forEach((b) => {
       const r = b.getBoundingClientRect();
-      if (!drawIO || r.bottom > 0 && r.top < innerHeight) b.classList.add("is-drawn");
+      if (!drawIO || r.bottom > 0 && r.top < innerHeight) b.dataset.ptDrawn = "";
       else drawIO.observe(b);
     });
+  }
+  function settle(scope = root) {
+    scan(scope);
+    const sel = `${o.drawSelector}, [data-pt-draw]`;
+    (scope.matches && scope.matches(sel) ? [scope] : []).concat(Array.from(scope.querySelectorAll(sel))).forEach((b) => {
+      if (drawIO) drawIO.unobserve(b);
+      b.setAttribute("data-pt-draw", "off");
+    });
+    quiet();
   }
   const sheets = () => Array.from((root.matches && root.matches(".pt-sheet") ? [root] : []).concat(Array.from(root.querySelectorAll(".pt-sheet"))));
   let snapFrame = 0;
@@ -2428,6 +2446,7 @@ function init(options = {}) {
     options: o,
     refresh,
     replay,
+    settle,
     snap,
     scan,
     // shapes drawn into images bake their ink in, so every change of instrument redraws them
@@ -2451,8 +2470,10 @@ function init(options = {}) {
       if (mo) mo.disconnect();
       watched.forEach((s) => s.removeEventListener("contentvisibilityautostatechange", onVisibility, true));
       watched.clear();
-      selected.forEach((el) => el.classList.remove("pt-selecting"));
-      html.classList.remove("pt-motion");
+      selected.forEach((el) => {
+        delete el.dataset.ptSelecting;
+      });
+      delete html.dataset.ptMotion;
     }
   };
 }

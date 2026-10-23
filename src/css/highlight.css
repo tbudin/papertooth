@@ -74,7 +74,7 @@
   /* the script lays this over the same box as the highlighter pass, so the clip edge is the tip */
   clip-path: inset(var(--pt-smear-top, -80%) calc((1 - var(--pt-wipe)) * 100%) -80% -20%);
 }
-.pt-filters .pt-btn__smear { visibility: visible; }
+:is(.pt-filters, [data-pt-filters]) .pt-btn__smear { visibility: visible; }
 :is(.pt-dry, .pt-dry *) .pt-btn__smear { display: none; }
 
 /* inline highlight */

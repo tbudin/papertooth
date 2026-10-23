@@ -93,7 +93,7 @@ Anything drawn takes `data-tool`: `pen` (fountain pen), `ballpoint`, `brush`, `m
 
 Nothing is rotated by default. Set `--pt-rot` on any stamp, tape, note, card, photo or label to put it at an angle; `--pt-tilt` scales every angle at once.
 
-Image effects (lithograph, printer) apply to a plain `<img>`; frames (instant print, photo corners, tape, postage stamp) are separate, so any effect can go in any frame. The printer reads pixels, so pictures must come from the same site or be served with CORS headers (the script requests pictures from other sites with `crossOrigin="anonymous"`). A picture it cannot read stays in plain greyscale and gets the class `pt-print--blocked`. Diagrams follow the ink and font variables, so changing the pen restyles them without drawing them again.
+Image effects (lithograph, printer) apply to a plain `<img>`; frames (instant print, photo corners, tape, postage stamp) are separate, so any effect can go in any frame. The printer reads pixels, so pictures must come from the same site or be served with CORS headers (the script requests pictures from other sites with `crossOrigin="anonymous"`). A picture it cannot read stays in plain greyscale and gets the attribute `data-pt-blocked`. Diagrams follow the ink and font variables, so changing the pen restyles them without drawing them again.
 
 ## Settings
 
@@ -137,6 +137,7 @@ const kit = init({
   drawSelector: '[data-pt-draw]', // blocks that draw on as a group
   drawAll: true,         // draw every mark as it comes into view, not only inside [data-pt-draw]
   drawOnLoad: false,     // also draw on what is on screen when the page opens
+  drawInserted: true,    // content added later draws on even when it lands on screen; false shows it drawn
   stagger: .12,          // seconds between marks drawing on in one block
   highlight: 'swipe',    // default highlighter
   outline: 'sketch',     // default outline
@@ -154,6 +155,7 @@ kit.setTypewriter({ spread: .8 });
 kit.setFilters({ stamp: { wear: .8 } });
 kit.refresh();                   // after changing writing mode, layout or ink tokens in CSS
 kit.replay();                    // draw everything on again
+kit.settle(el);                  // show el's content as drawn, without drawing it on (after a route change)
 kit.destroy();                   // stop observing; what is drawn stays drawn
 ```
 
@@ -209,12 +211,14 @@ import { Btn, Mark, Anno, Wobble, Check } from 'papertooth/react';
 | `Btn` | `.pt-btn`: an `<a>` with `href`, otherwise a `<button>` (or `as`) | `outline` (true or a style), `hl`, `color`, `size`, `hover`, `tool` |
 | `Mark` | `mark.pt-mark` | `hl`, `color`, `size` |
 | `Anno` | `span.pt-anno` | `anno` (default circle), `tool` |
-| `Wobble` | `.pt-wobble`, as any element (`as`) | `seed`; plain text only, anything else is passed through |
-| `Check` | `label.pt-check` (or `.pt-radio` with `type="radio"`) | `tool`, `seed`; `className` and `style` go on the label, every other prop on the input |
+| `Wobble` | `.pt-wobble`, as any element (`as`) | `seed`; text, including `Hello {name}`, is split into letters (read out whole by screen readers); anything else is passed through |
+| `Check` | `label.pt-check` (or `.pt-radio` with `type="radio"`) | `tool`, `seed`; `className` and `style` go on the label, every other prop and the `ref` on the input |
 
 Everything else is plain classes: `<div className="pt-sticky">`, `<span className="pt-stamp">` and so on need no component. Two cases to know about: a `pre.pt-diagram` is replaced by its drawing, so give it `key={source}` if the source can change; and planner pieces with `data-today` fill in their own dates, so leave their date elements empty. Shapes are seeded from React's `useId`, so the server and the browser draw the same thing and hydration matches.
 
-For Vue, Svelte or Angular, the same rule applies: for elements whose content changes, write the markup the script would add (`.pt-btn__label` and `.pt-btn__smear` inside a button, `.pt-mark__ink` inside a mark, an empty `svg.pt-anno__ink` inside an annotation) and it will paint that markup in place. Start the script with `init()` when the page mounts and call `kit.destroy()` when it unmounts.
+In an app, pass `drawInserted={false}` to `<Papertooth>` so a page or tab swapped in on screen appears already drawn instead of drawing itself on each time; content that scrolls into view still draws on. `kit.settle(element)` does the same for one part of the page. The script keeps its own state in `data-pt-*` attributes, never in classes, so changing an element's `className` does not undo it, and it starts cleanly again after `destroy()` (a remount, or React's StrictMode in development).
+
+For Vue, Svelte or Angular, the same rule applies: for elements whose content changes, write the markup the script would add (`.pt-btn__label` and `.pt-btn__smear` inside a button, `.pt-mark__ink` inside a mark, an empty `svg.pt-anno__ink` inside an annotation, `data-pt-ready` on a checkbox label that already has its drawn box) and it will paint that markup in place. Start the script with `init()` when the page mounts and call `kit.destroy()` when it unmounts.
 
 ## Performance
 

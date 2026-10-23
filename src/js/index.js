@@ -23,6 +23,7 @@ export const DEFAULTS = {
   drawSelector: '[data-pt-draw]',
   drawAll: true,           // draw every mark as it comes into view, not only inside [data-pt-draw] blocks
   drawOnLoad: false,       // also draw on what is already on screen when the page opens (costs more on slow phones)
+  drawInserted: true,      // content added later draws on even when it lands on screen; false shows it drawn, like the first screen
   stagger: .12,            // seconds between items drawing on inside one block
   highlight: 'swipe',      // default highlighter style for .pt-btn and .pt-mark
   outline: 'sketch',       // default outline for .pt-btn--outline
@@ -66,8 +67,8 @@ export function init(options = {}) {
         for (let n = scope; n && n !== document.body; n = n.parentElement) if (n.matches(SEL_TEXT)) cands.add(n);
         cands.forEach(el => { if (sel.containsNode(el, true)) now.push(el); });
       }
-      selected.forEach(el => { if (!now.includes(el)) el.classList.remove('pt-selecting'); });
-      now.forEach(el => el.classList.add('pt-selecting'));
+      selected.forEach(el => { if (!now.includes(el)) delete el.dataset.ptSelecting; });
+      now.forEach(el => { el.dataset.ptSelecting = ''; });
       selected = now;
     });
   };
@@ -100,9 +101,10 @@ export function init(options = {}) {
           const block = el.closest('.pt-sheet > *') || el;
           if (!block.closest('[data-pt-draw="off"]')) blocks.add(block);
         });
-        // what is already on screen when the page opens is simply there; only what scrolls into view draws on
-        // (one layout read for all of them)
-        const still = booting && !o.drawOnLoad && drawIO
+        // what is already on screen when the page opens (and, with drawInserted: false, what is added on screen
+        // later) is simply there; only what scrolls into view draws on. One layout read for all of them.
+        const settleOnScreen = booting ? !o.drawOnLoad : !o.drawInserted;
+        const still = settleOnScreen && drawIO
           ? new Set([...blocks].filter(b => { const r = b.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; })) : new Set();
         blocks.forEach(block => {
           if (still.has(block)) { block.setAttribute('data-pt-draw', 'off'); return; }
@@ -114,34 +116,48 @@ export function init(options = {}) {
     quiet();
   }
 
-  /* ---------- draw-on timing ---------- */
+  /* ---------- draw-on timing ----------
+     State lives in data attributes, not classes: a framework that re-renders an element's className
+     (React, Vue) leaves attributes it does not own alone. */
   const DRAWABLE = '.pt-anno, .pt-btn, .pt-rule, .pt-link, .pt-mark, .pt-stamp, .pt-tape, .pt-sticky, .pt-flag, .pt-torn, .pt-ticket, .pt-photo, .pt-postage, .pt-label, .pt-progress, .pt-diagram, .pt-draw-path';
   let drawIO = null;
   if (o.motion !== 'none' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    html.classList.add('pt-motion');
+    html.dataset.ptMotion = '';
     if (o.motion === 'scroll' && 'IntersectionObserver' in window) {
       drawIO = new IntersectionObserver(entries => {
-        for (const e of entries) if (e.isIntersecting) { e.target.classList.add('is-drawn'); drawIO.unobserve(e.target); }
+        for (const e of entries) if (e.isIntersecting) { e.target.dataset.ptDrawn = ''; drawIO.unobserve(e.target); }
       }, { threshold: .2 });
     }
   }
+  // kept per kit, so a kit started after another one was destroyed (a remount) prepares the blocks again
+  const prepared = new WeakSet();
   function prepareDraw(block) {
-    if (block.dataset.ptDrawReady) return;
-    block.dataset.ptDrawReady = '1';
+    if (prepared.has(block)) return;
+    prepared.add(block);
     const items = block.matches(DRAWABLE) ? [block] : [];
     items.push(...block.querySelectorAll(DRAWABLE));
     items.forEach((it, i) => it.style.setProperty('--pt-delay', Math.min(i * o.stagger, 1.4).toFixed(2) + 's'));
-    if (drawIO) drawIO.observe(block); else block.classList.add('is-drawn');
+    if (drawIO) drawIO.observe(block); else block.dataset.ptDrawn = '';
   }
   function replay(scope = root) {
     const blocks = (scope.matches && scope.matches(o.drawSelector) ? [scope] : []).concat(Array.from(scope.querySelectorAll(o.drawSelector)))
       .filter(b => b.dataset.ptDraw !== 'off');
-    blocks.forEach(b => b.classList.remove('is-drawn'));
+    blocks.forEach(b => { delete b.dataset.ptDrawn; });
     void document.body.offsetWidth;
     blocks.forEach(b => {
       const r = b.getBoundingClientRect();
-      if (!drawIO || (r.bottom > 0 && r.top < innerHeight)) b.classList.add('is-drawn'); else drawIO.observe(b);
+      if (!drawIO || (r.bottom > 0 && r.top < innerHeight)) b.dataset.ptDrawn = ''; else drawIO.observe(b);
     });
+  }
+  /** Show everything in scope as drawn, without drawing it on: for content swapped in by a route or tab change. */
+  function settle(scope = root) {
+    scan(scope);   // the observer may not have reached content added a moment ago
+    const sel = `${o.drawSelector}, [data-pt-draw]`;
+    (scope.matches && scope.matches(sel) ? [scope] : []).concat(Array.from(scope.querySelectorAll(sel))).forEach(b => {
+      if (drawIO) drawIO.unobserve(b);
+      b.setAttribute('data-pt-draw', 'off');
+    });
+    quiet();
   }
 
   /* ---------- baseline snapping ---------- */
@@ -206,7 +222,7 @@ export function init(options = {}) {
 
   return {
     options: o,
-    refresh, replay, snap, scan,
+    refresh, replay, settle, snap, scan,
     // shapes drawn into images bake their ink in, so every change of instrument redraws them
     setPen: after(setPen), setPencil: after(setPencil), setRibbon: after(setRibbon), setHighlighter: after(setHighlighter),
     setFilters: params => injectFilters(params),
@@ -220,8 +236,8 @@ export function init(options = {}) {
       watchers.disconnect(); if (drawIO) drawIO.disconnect(); if (sheetRO) sheetRO.disconnect(); if (mo) mo.disconnect();
       watched.forEach(s => s.removeEventListener('contentvisibilityautostatechange', onVisibility, true));
       watched.clear();
-      selected.forEach(el => el.classList.remove('pt-selecting'));
-      html.classList.remove('pt-motion');
+      selected.forEach(el => { delete el.dataset.ptSelecting; });
+      delete html.dataset.ptMotion;
     }
   };
 }
