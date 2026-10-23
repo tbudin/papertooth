@@ -4,8 +4,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## 0.4.0 - 2026-10-23
 
-0.3.1 was prepared but never published; its fixes are part of this release.
-
 ### Added
 - Picture stamps in the stylesheet, no script needed: `<span class="pt-stamp" data-pic="frog">`. Six new animals (frog, bear, tiger, rabbit, tanuki, owl) join tick, star, heart, arrow, cat, paw, daruma, Fuji, sakura, onigiri, cloud and sun.
 - Date stamps, `.pt-datestamp` and `<DateStamp>`, in the manner of Japanese stationery stamps: a week strip to fill in (with rows and a title line), a month calendar with the 1st on its weekday and a month selector, a year of months, and single-row bars. Fine printed lines in one ink, labels in any language through Intl; today circled, boxed or highlighted, the days gone by crossed out or struck through in pencil.
@@ -25,7 +23,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Date helpers with no DOM, in any locale and from any first day of the week: `weekDates`, `firstDayOf`, `dayParts`, `sameDay`, `stampCells`, `stampLabel` (and `isoWeek`, as before). `dayHead()` and `week()` take `{ locale }` and `{ locale, weekStart }`.
 - `papertooth/shapes` and `papertooth/tokens`: the shape generators, picture stamps and colours with no DOM, for React Native, canvas or a server.
 - `papertooth/layer.css`: the stylesheet inside `@layer papertooth`, so utility classes (Tailwind v4) can win over it.
-- `drawInserted` option: `false` shows content added on screen (a route or tab change) as already drawn. `kit.settle(element)` does the same for one part of the page.
 - Browser tests (Playwright) and CI. Releases are published from a version tag by a GitHub workflow with npm trusted publishing, and copied to GitHub Packages as `@tbudin/papertooth`.
 
 ### Changed
@@ -36,8 +33,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - The sheet's text styles, headings included, weigh as little as one class (through `:where()`), so an app's own class wins over them when it loads later. Within papertooth, the per-part stylesheets can load in any order.
 - `.pt-sheet--page` is an ordinary block instead of a column with a grid line of gap between everything on it. Its blocks of text keep that line between them, but an app's header, tabs and views no longer get it added on top of their own spacing.
 - A `<section>` on a sheet is no longer a flex column. It puts a grid line between its blocks of text with margins, which an app can override and which merge with the app's own margins instead of adding to them. Before, every section in an app became a flex column, which shrank centred children with a `max-width` and stacked its gap on the app's margins.
-- The script keeps its state in `data-pt-*` attributes instead of classes (`is-drawn`, `is-painted`, `is-ready`, `pt-selecting`, `pt-motion` and others), so a framework changing `className` no longer undoes it. `class="pt-filters"` still works for pages that paste the filters themselves.
-- A picture the printer cannot read gets `data-pt-blocked` instead of the `pt-print--blocked` class.
 - Hovering a highlighter button underlines it in pen instead of adding a second highlighter pass, which is now `data-hover="pass"`. Outlined buttons still bring out the highlighter.
 - Hover marks on buttons and links are drawn only where a pointer can hover, so a tap on a phone no longer leaves one stuck; a tap draws it while the finger is down.
 - A highlighted link (`data-ul="hl"`) is highlighted from the start, and hovering draws a pen underline under it instead of more highlighter.
@@ -47,10 +42,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - On `.pt-sheet--page`, a `--pt-sheet-pad` smaller than a grid cell rounded the side margins to nothing on phones; they are now at least one cell.
 - A to-do that wraps onto several lines is struck through line by line and takes as many grid lines as it needs, instead of overflowing into the next one. The strike now sits on an inline `.pt-check__ink` inside `.pt-check__text` (the script and `<Check>` add it).
 - A sticky note in a flex row or grid that stretches its items kept its shadows at the bottom of the stretched box, below the paper.
+
+## 0.3.1 - 2026-10-23
+
+### Added
+- `drawInserted` option: `false` shows content added on screen (a route or tab change) as already drawn. `kit.settle(element)` does the same for one part of the page.
+
+### Changed
+- The script keeps its state in `data-pt-*` attributes instead of classes (`is-drawn`, `is-painted`, `is-ready`, `pt-selecting`, `pt-motion` and others), so a framework changing `className` no longer undoes it. `class="pt-filters"` still works for pages that paste the filters themselves.
+- A picture the printer cannot read gets `data-pt-blocked` instead of the `pt-print--blocked` class.
+
+### Fixed
 - `init()` after `destroy()` (a remount, React StrictMode) left blocks below the fold invisible.
 - `<Wobble>` did not split `Hello {name}`; screen readers now get the whole text and the letters are hidden from them.
 - `<Btn>` rendered its children twice (duplicate ids, duplicated state); the smear is now text only.
-- React components forward refs on React 18 (`<Check>` and `<Habit>` to their input).
+- React components forward refs on React 18 (`<Check>` to its input).
 
 ## 0.3.0 - 2026-10-23
 
