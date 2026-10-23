@@ -28,7 +28,7 @@ Or from a CDN, with no build step:
 
 `data-pt-auto` starts the script on load. It accepts options as JSON: `data-pt-auto='{"seed": 7}'`. The running instance is `window.Papertooth.kit`.
 
-The module does nothing when it is imported, so it is safe to import during server rendering; call `init()` in the browser (in React, from an effect).
+The module does nothing when it is imported, so it is safe to import during server rendering; call `init()` in the browser. With React or Next.js, use [`papertooth/react`](#react-and-nextjs). TypeScript types are included.
 
 Fonts are not bundled. The defaults are Courier Prime, Special Elite and Caveat from Google Fonts, plus Shippori Mincho B1 and Zen Maru Gothic for Japanese stamps. Change them with the `--pt-font-*` settings.
 
@@ -168,6 +168,53 @@ Also exported:
 ### Without the script
 
 Everything still renders, with a fixed version of each shape. To get the textures too, paste `dist/papertooth-filters.svg` into the page and add `class="pt-filters"` to `<html>`.
+
+## React and Next.js
+
+The script adds markup to a few elements: a label inside a button, one span per letter in a wobbly heading, the svg a circle is drawn in. React owns those elements, so when their text changes it replaces their contents and that markup is lost. `papertooth/react` has components that render the markup themselves, and a hook that starts and stops the script. React 18 or later; nothing extra is installed if you don't use it.
+
+```tsx
+// app/layout.tsx
+import 'papertooth/css';
+import { Papertooth } from 'papertooth/react';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body className="pt-desk">
+        <Papertooth seed={7} />
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+
+`<Papertooth />` takes the same options as `init()` and renders nothing. `papertooth/react` is marked `"use client"`, so it can be imported from server components such as a layout. In a component of your own, `const kit = usePapertooth(options)` does the same and returns the kit once it is running.
+
+```tsx
+import { Btn, Mark, Anno, Wobble, Check } from 'papertooth/react';
+
+<main className="pt-sheet">
+  <Wobble as="h1">{title}</Wobble>
+  <p>Ship the <Mark hl="dry">{feature}</Mark> and <Anno anno="box" tool="pen">review</Anno> it.</p>
+  <Btn href="/start">Get started</Btn>
+  <Btn outline="circled" hover="circle" onClick={more}>Read more</Btn>
+  <Check checked={done} onChange={e => setDone(e.target.checked)}>Write the announcement</Check>
+</main>
+```
+
+| Component | Renders | Props |
+| --- | --- | --- |
+| `Btn` | `.pt-btn`: an `<a>` with `href`, otherwise a `<button>` (or `as`) | `outline` (true or a style), `hl`, `color`, `size`, `hover`, `tool` |
+| `Mark` | `mark.pt-mark` | `hl`, `color`, `size` |
+| `Anno` | `span.pt-anno` | `anno` (default circle), `tool` |
+| `Wobble` | `.pt-wobble`, as any element (`as`) | `seed`; plain text only, anything else is passed through |
+| `Check` | `label.pt-check` (or `.pt-radio` with `type="radio"`) | `tool`, `seed`; `className` and `style` go on the label, every other prop on the input |
+
+Everything else is plain classes: `<div className="pt-sticky">`, `<span className="pt-stamp">` and so on need no component. Two cases to know about: a `pre.pt-diagram` is replaced by its drawing, so give it `key={source}` if the source can change; and planner pieces with `data-today` fill in their own dates, so leave their date elements empty. Shapes are seeded from React's `useId`, so the server and the browser draw the same thing and hydration matches.
+
+For Vue, Svelte or Angular, the same rule applies: for elements whose content changes, write the markup the script would add (`.pt-btn__label` and `.pt-btn__smear` inside a button, `.pt-mark__ink` inside a mark, an empty `svg.pt-anno__ink` inside an annotation) and it will paint that markup in place. Start the script with `init()` when the page mounts and call `kit.destroy()` when it unmounts.
 
 ## Performance
 

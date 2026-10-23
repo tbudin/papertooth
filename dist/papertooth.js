@@ -477,10 +477,12 @@ function lenticular(w, h, r, t) {
   };
   return inkFill(side(5, 1) + " " + side(w - 5, -1), t);
 }
+var broken = (w, h, r, t) => inkPath(sketchBox(w, h, r, true), t);
 var OUTLINE = {
   sketch: (w, h, r, t) => inkPath(sketchBox(w, h, r), t),
   double: (w, h, r, t) => inkPath(sketchBox(w, h, r), t) + inkPath(sketchBox(w, h, r), t, { op: 0.55, scale: 0.8 }),
-  broken: (w, h, r, t) => inkPath(sketchBox(w, h, r, true), t),
+  broken,
+  pencil: broken,
   circled: (w, h, r, t) => inkPath(loop(w, h, r, 4), t),
   corners: (w, h, r, t) => {
     const x0 = 4, y0 = 7, x1 = w - 4, y1 = h - 7, lx = Math.min(16, w * 0.15), ly = 10;
@@ -497,7 +499,6 @@ var OUTLINE = {
   kagi: (w, h, r, t) => kagi(w, h, r, t),
   lenticular: (w, h, r, t) => lenticular(w, h, r, t)
 };
-OUTLINE.pencil = OUTLINE.broken;
 function wobble(x0, x1, y, r, amp = 1.6) {
   const n = Math.max(3, Math.round((x1 - x0) / 60)), pts = [];
   for (let i = 0; i <= n; i++) pts.push([x0 + (x1 - x0) * i / n, y + (r() - 0.5) * amp * 2 - i / n * (r() - 0.4) * 1.5]);

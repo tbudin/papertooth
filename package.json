@@ -13,7 +13,9 @@
     "washi",
     "hanko",
     "japanese",
-    "ui-kit"
+    "ui-kit",
+    "react",
+    "nextjs"
   ],
   "license": "MIT",
   "author": "Thomas Budin",
@@ -31,10 +33,17 @@
   "style": "./dist/papertooth.css",
   "unpkg": "./dist/papertooth.min.js",
   "jsdelivr": "./dist/papertooth.min.js",
+  "types": "./types/papertooth.d.ts",
   "exports": {
     ".": {
+      "types": "./types/papertooth.d.ts",
       "import": "./dist/papertooth.js",
       "default": "./dist/papertooth.js"
+    },
+    "./react": {
+      "types": "./types/react.d.ts",
+      "import": "./dist/react.js",
+      "default": "./dist/react.js"
     },
     "./css": "./dist/papertooth.css",
     "./min.css": "./dist/papertooth.min.css",
@@ -45,6 +54,7 @@
   "files": [
     "dist",
     "src",
+    "types",
     "README.md",
     "LICENSE"
   ],
@@ -56,6 +66,14 @@
     "build": "node scripts/build.mjs",
     "dev": "node scripts/build.mjs && node scripts/serve.mjs",
     "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "esbuild": "0.28.2"

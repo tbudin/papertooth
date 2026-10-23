@@ -15,12 +15,22 @@ if (!readFileSync('src/js/index.js', 'utf8').includes(`VERSION = '${version}'`))
 const notice = `/*! papertooth v${version} | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */`;
 const banner = { css: notice, js: notice };
 
+// papertooth/react takes the kit from the main entry ("papertooth"), so a page never runs two copies of it;
+// the small pure helpers it draws with (seeded randomness, checkbox shapes) are bundled in
+const useMainEntry = {
+  name: 'use-main-entry',
+  setup(b) { b.onResolve({ filter: /\/js\/index\.js$/ }, () => ({ path: 'papertooth', external: true })); }
+};
+
 await Promise.all([
   build({ entryPoints: ['src/css/index.css'], bundle: true, outfile: 'dist/papertooth.css', banner, logLevel: 'warning', charset: 'ascii' }),
   build({ entryPoints: ['src/css/index.css'], bundle: true, minify: true, outfile: 'dist/papertooth.min.css', banner, logLevel: 'warning', charset: 'ascii' }),
   build({ entryPoints: ['src/js/index.js'], bundle: true, format: 'esm', target: 'es2020', outfile: 'dist/papertooth.js', banner, logLevel: 'warning', charset: 'ascii' }),
   build({ entryPoints: ['src/js/index.js'], bundle: true, format: 'esm', target: 'es2020', minify: true, outfile: 'dist/papertooth.min.mjs', banner, logLevel: 'warning', charset: 'ascii' }),
-  build({ entryPoints: ['src/js/auto.js'], bundle: true, format: 'iife', target: 'es2020', minify: true, outfile: 'dist/papertooth.min.js', banner, logLevel: 'warning', charset: 'ascii' })
+  build({ entryPoints: ['src/js/auto.js'], bundle: true, format: 'iife', target: 'es2020', minify: true, outfile: 'dist/papertooth.min.js', banner, logLevel: 'warning', charset: 'ascii' }),
+  // "use client" lets Next.js server components import it; a directive may follow a comment but nothing else
+  build({ entryPoints: ['src/react/index.js'], bundle: true, format: 'esm', target: 'es2020', external: ['react'], plugins: [useMainEntry],
+    outfile: 'dist/react.js', banner: { js: notice + '\n"use client";' }, logLevel: 'warning', charset: 'ascii' })
 ]);
 writeFileSync('dist/papertooth-filters.svg', filtersMarkup() + '\n');
 
