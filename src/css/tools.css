@@ -29,7 +29,8 @@
 .pt-diagram[data-tool]:not([data-tool="type"]) { color: var(--pt-t-color); }
 
 /* marks drawn straight into the page (inline SVG) follow the same instrument */
-.pt-anno__ink path { stroke: var(--pt-t-color); stroke-width: calc(var(--pt-t-w) * var(--pt-k, 1) * 1px); stroke-opacity: calc(var(--pt-t-op) * var(--pt-o, 1)); }
+/* specific enough to win over marks.css whichever loads first, as the per-part stylesheets may */
+.pt-anno > .pt-anno__ink path { stroke: var(--pt-t-color); stroke-width: calc(var(--pt-t-w) * var(--pt-k, 1) * 1px); stroke-opacity: calc(var(--pt-t-op) * var(--pt-o, 1)); }
 :is(.pt-anno, .pt-diagram, .pt-check, .pt-radio):is([data-tool="graphite"], [data-tool="pencil"]) :is(.pt-anno__ink, .pt-diagram__svg, svg),
 .pt-anno:not([data-tool]) > .pt-anno__ink { filter: var(--pt-graphite, ); }
 .pt-anno[data-tool="marker"] .pt-anno__ink { mix-blend-mode: var(--pt-blend, multiply); }

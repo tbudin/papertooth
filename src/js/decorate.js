@@ -1,11 +1,14 @@
 // One-off markup each component needs: wrappers, inline SVG for things that draw on, letter spans.
-import { rng, seedOf, f } from './core.js';
+import { rng, seedOf, f, hoverOf } from './core.js';
 import { spiral, wobblyBox, wobblyRing, TICK, DOT } from './shapes.js';
 import { svgEl } from './painter.js';
+import { dateStamp } from './planner.js';
 
 const UL_MIX = ['wobble', 'slant', 'swash'];
 
 export const DECORATORS = [
+  // first, so the marks it asks for (annotations, highlights) are decorated in the same pass
+  ['.pt-datestamp', el => { if (el.dataset.ptReady == null) dateStamp(el); }],
   ['.pt-btn', el => {
     if (!el.querySelector(':scope > .pt-btn__label')) {
       const label = document.createElement('span');
@@ -20,9 +23,9 @@ export const DECORATORS = [
       el.appendChild(sm);
     }
   }],
-  ['.pt-btn[data-hover], .pt-link[data-hover]', el => {
+  ['.pt-btn, .pt-link[data-hover]', el => {
     // a mark drawn on hover: circled or underlined, in the element's writing instrument
-    if (!['circle', 'underline'].includes(el.dataset.hover) || el.querySelector(':scope > .pt-hover-ink')) return;
+    if (!['circle', 'underline'].includes(hoverOf(el)) || el.querySelector(':scope > .pt-hover-ink')) return;
     const svg = svgEl('svg', { class: 'pt-hover-ink', 'aria-hidden': 'true', focusable: 'false', preserveAspectRatio: 'none' });
     svg.appendChild(svgEl('path', { pathLength: '1' }));
     el.appendChild(svg);
@@ -47,12 +50,21 @@ export const DECORATORS = [
     svg.appendChild(svgEl('path', { d: radio ? wobblyRing(r) : wobblyBox(r) }));
     svg.appendChild(svgEl('path', { class: 'pt-tick', pathLength: '1', d: radio ? DOT : TICK }));
     input.after(svg);
-    // wrap loose text so a ticked item can be struck through
-    if (!radio && !el.querySelector('.pt-check__text')) {
-      const t = document.createElement('span'); t.className = 'pt-check__text';
-      let n = svg.nextSibling;
-      while (n) { const next = n.nextSibling; t.appendChild(n); n = next; }
-      el.appendChild(t);
+    // wrap loose text so a ticked item can be struck through: the strike sits on an inline span inside, so a
+    // task that wraps gets a stroke on each of its lines
+    if (!radio) {
+      let t = el.querySelector('.pt-check__text');
+      if (!t) {
+        t = document.createElement('span'); t.className = 'pt-check__text';
+        let n = svg.nextSibling;
+        while (n) { const next = n.nextSibling; t.appendChild(n); n = next; }
+        el.appendChild(t);
+      }
+      if (!t.querySelector(':scope > .pt-check__ink')) {
+        const ink = document.createElement('span'); ink.className = 'pt-check__ink';
+        while (t.firstChild) ink.appendChild(t.firstChild);
+        t.appendChild(ink);
+      }
     }
     el.dataset.ptReady = '';
   }],

@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>An app laid out on a sheet</title>
+<link rel="stylesheet" href="/dist/papertooth.css">
+<style>
+  /* an app's own styles, one class each, loaded after papertooth */
+  .bar { max-width: 600px; margin: 0 auto; }
+  .h2 { font-size: 13px; }
+  .panel-title { margin: 0 0 8px; }
+</style>
+<body class="pt-desk"><main class="pt-sheet">
+  <section id="doc"><h2>A document</h2><p id="docP">Text under a heading.</p><ul id="docList"><li>one</li></ul></section>
+  <section id="pane" class="pane">
+    <h2 id="title" class="h2 panel-title">Notes</h2>
+    <div id="bar" class="bar">Take a note…</div>
+    <div id="after">Below the bar</div>
+  </section>
+</main></body></html>

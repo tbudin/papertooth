@@ -345,6 +345,8 @@ export const ANNO = {
     return curve(pts, true);
   },
   hatch: (w, h, r) => hatchD(0, 0, w, h, r, 3.6, .6),
+  // an X through something that is over, such as a day gone by
+  x: (w, h, r) => stroke([2, 2], [w - 2, h - 2], r, 1.5, 2) + ' ' + stroke([w - 2, 2], [2, h - 2], r, 1.5, 2),
   hanamaru: (w, h, r) => {
     const cx = w / 2, cy = h / 2, rx = w / 2 - 3, ry = h / 2 - 3, pts = [];
     const t0 = Math.PI * (.9 + r() * .2), spin = Math.PI * 3.1;

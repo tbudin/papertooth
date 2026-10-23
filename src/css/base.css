@@ -1,0 +1,8 @@
+/* papertooth/css/base: what every part needs. Settings and inks, the desk and the paper, writing on the grid,
+   the writing instruments and the draw-on timing. Add the parts you use after it:
+   import 'papertooth/css/base'; import 'papertooth/css/highlight'; import 'papertooth/css/marks'; … */
+@import "./tokens.css";
+@import "./paper.css";
+@import "./type.css";
+@import "./tools.css";
+@import "./motion.css";

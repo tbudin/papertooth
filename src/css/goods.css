@@ -35,6 +35,9 @@
   --pt-rot: 0deg; --pt-note-paper: #fff4a3; --pt-note-w: 8; --pt-note-h: 8;
   --pt-note-shadow: color-mix(in srgb, var(--pt-note-paper) 25%, rgba(48, 40, 20, .55));
   position: relative; width: calc(var(--pt-grid) * var(--pt-note-w));
+  /* the shadows and the sheets underneath hang off this box, so it must never be stretched taller than the paper
+     (a flex row or grid would); fit-content keeps whatever alignment the layout asks for */
+  height: fit-content;
   transform: rotate(calc(var(--pt-rot) * var(--pt-tilt))); z-index: 0;
 }
 .pt-sticky[data-ratio="wide"]  { --pt-note-w: 12; --pt-note-h: 7; }

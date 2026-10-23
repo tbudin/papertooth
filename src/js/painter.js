@@ -1,13 +1,29 @@
 // Draws shapes at each element's real size, only when the element is near the screen,
 // and only again when its size or style changes. Reads and writes are batched per frame.
-import { enc, svgDoc, rng, seedOf, cssVar, f } from './core.js';
+import { enc, svgDoc, rng, seedOf, cssVar, f, hoverOf } from './core.js';
 import { HIGHLIGHT, POOL_Y, HEAVY_START, secondPass, gradient, OUTLINE, RULE, ANNO, SWATCH, LINK, STRIKE, WAVE_TILE, WAVE_W, waveD, progressSVG } from './shapes.js';
 import { toolOf, toolKey, toolDefs, inkPath, passes } from './tools.js';
-import { lithoParams, lithoFilterId, printParams, renderPrint, sourceImage } from './images.js';
-import { renderDiagram, kindOf } from './diagram.js';
 
 // set by the scheduler, so a painter can ask to be called again (for example when an image loads)
 let repaint = () => {};
+
+/* Diagrams and the image effects are a third of the script, so they are fetched the first time a page has one.
+   Until then the element is measured as pending, and painted again once the code is in. */
+const onDemand = load => {
+  let mod = null, loading = null;
+  return el => {
+    if (mod) return mod;
+    loading = loading || load().then(m => { mod = m; });
+    loading.then(() => repaint(el, true));
+    return null;
+  };
+};
+const imagesFor = onDemand(() => import('./images.js'));
+const diagramFor = onDemand(() => import('./diagram.js'));
+
+// marks that follow the text line by line when the phrase wraps; the others go around the whole phrase
+const LINE_MARKS = new Set(['strike', 'under', 'cross']);
+const shiftPath = (d, dx, dy) => d.replace(/(-?[\d.]+) (-?[\d.]+)/g, (_, x, y) => `${f(+x + dx)} ${f(+y + dy)}`);
 
 const SVGNS = 'http://www.w3.org/2000/svg';
 
@@ -100,11 +116,11 @@ export const PAINTERS = [
     }
   },
   {
-    sel: '.pt-btn[data-hover="circle"], .pt-btn[data-hover="underline"], .pt-link[data-hover="circle"], .pt-link[data-hover="underline"]',
+    sel: '.pt-btn:not(.pt-btn--outline, [data-hover]), .pt-btn[data-hover="circle"], .pt-btn[data-hover="underline"], .pt-link[data-hover="circle"], .pt-link[data-hover="underline"]',
     measure: el => {
       const svg = el.querySelector(':scope > .pt-hover-ink'), label = el.querySelector(':scope > .pt-btn__label') || el;
       const b = label.getBoundingClientRect(), o = el.getBoundingClientRect();
-      return { svg, kind: el.dataset.hover, w: Math.round(b.width), h: Math.round(b.height), x: Math.round(b.left - o.left), y: Math.round(b.top - o.top) };
+      return { svg, kind: hoverOf(el), w: Math.round(b.width), h: Math.round(b.height), x: Math.round(b.left - o.left), y: Math.round(b.top - o.top) };
     },
     key: m => `${m.kind}|${m.w}|${m.h}|${m.x}|${m.y}`,
     draw: (el, m) => {
@@ -169,13 +185,35 @@ export const PAINTERS = [
     measure: el => {
       const svg = el.querySelector(':scope > .pt-anno__ink');
       const b = svg ? svg.getBoundingClientRect() : { width: 0, height: 0 };
-      return { w: Math.round(b.width * 2) / 2, h: Math.round(b.height * 2) / 2, style: el.dataset.anno, svg, t: toolOf(el) };
+      const m = { w: Math.round(b.width * 2) / 2, h: Math.round(b.height * 2) / 2, style: el.dataset.anno, svg, t: toolOf(el), lines: null };
+      // a phrase allowed to wrap (data-wrap) gets a strike, underline or scribble on each of its lines
+      if (svg && el.hasAttribute('data-wrap') && LINE_MARKS.has(m.style)) {
+        const range = document.createRange();
+        range.setStart(el, 0); range.setEndBefore(svg);
+        const rows = [];
+        for (const r of range.getClientRects()) {
+          if (!r.width) continue;
+          const row = rows.find(q => Math.abs(q.top - r.top) < r.height / 2);
+          if (row) { row.left = Math.min(row.left, r.left); row.right = Math.max(row.right, r.right); row.bottom = Math.max(row.bottom, r.bottom); }
+          else rows.push({ left: r.left, right: r.right, top: r.top, bottom: r.bottom });
+        }
+        const half = v => Math.round(v * 2) / 2;
+        if (rows.length > 1) m.lines = rows.map(q => [half(q.left - b.left), half(q.top - b.top), half(q.right - q.left), half(q.bottom - q.top)]);
+        m.ox = parseFloat(cssVar(el, '--pt-ox')) || 0; m.oy = parseFloat(cssVar(el, '--pt-oy')) || 0;
+      }
+      return m;
     },
-    key: m => `${m.style}|${m.w}|${m.h}|${m.t.kind}|${m.t.w}`,
+    key: m => `${m.style}|${m.w}|${m.h}|${m.t.kind}|${m.t.w}|${m.lines ? m.lines.join(';') : ''}`,
     draw: (el, m) => {
       if (!m.svg || !ANNO[m.style] || m.w < 2) return;
       m.svg.setAttribute('viewBox', `0 0 ${m.w} ${m.h}`);
-      const d = ANNO[m.style](m.w, m.h, rng(seedOf(el)));
+      const r = rng(seedOf(el));
+      // the svg overflows, so the strokes for the other lines are drawn outside its box, where those lines are
+      const d = m.lines
+        ? m.lines.map(([x, y, w, h]) => m.style === 'under'
+          ? shiftPath(ANNO.under(w + 4, 11, r), x - 2, y + h - 4)
+          : shiftPath(ANNO[m.style](w + 2 * m.ox, h + 2 * m.oy, r), x - m.ox, y - m.oy)).join(' ')
+        : ANNO[m.style](m.w, m.h, r);
       // one path per pass of the instrument; colour and weight stay in CSS so the draw-on animation still works
       const ps = m.style === 'hatch' ? [[0, 0, 1, 1]] : passes(m.t);
       while (m.svg.childNodes.length > ps.length) m.svg.lastChild.remove();
@@ -214,14 +252,16 @@ export const PAINTERS = [
 PAINTERS.push(
   {
     sel: '.pt-litho',
-    measure: el => ({ p: lithoParams(el) }),
-    key: m => JSON.stringify(m.p),
-    draw: (el, m) => { el.style.filter = `url(#${lithoFilterId(m.p)})`; }
+    measure: el => { const I = imagesFor(el); return I ? { I, p: I.lithoParams(el) } : { pending: true }; },
+    key: m => m.pending ? 'pending' : JSON.stringify(m.p),
+    draw: (el, m) => { if (!m.pending) el.style.filter = `url(#${m.I.lithoFilterId(m.p)})`; }
   },
   {
     // the print replaces the picture's pixels; the original is kept in data-pt-src for reprints
     sel: 'img.pt-print',
     measure: el => {
+      const I = imagesFor(el);
+      if (!I) return { pending: true };
       if (!el.dataset.ptSrc) {
         if (!el.currentSrc && !el.getAttribute('src')) return { src: '' };
         el.dataset.ptSrc = el.currentSrc || el.src;
@@ -231,28 +271,31 @@ PAINTERS.push(
         const w = el.getBoundingClientRect().width;
         el.dataset.ptW = Math.abs(w - el.naturalWidth) < 1 && !el.style.width && !el.getAttribute('width') ? String(Math.round(w)) : 'css';
       }
-      const rec = sourceImage(el.dataset.ptSrc, () => repaint(el, true));
-      return { src: el.dataset.ptSrc, rec, ready: rec.ready, failed: rec.failed, p: printParams(el) };
+      const rec = I.sourceImage(el.dataset.ptSrc, () => repaint(el, true));
+      return { I, src: el.dataset.ptSrc, rec, ready: rec.ready, failed: rec.failed, p: I.printParams(el) };
     },
-    key: m => `${m.ready}|${m.failed}|${m.src}|${JSON.stringify(m.p)}`,
+    key: m => m.pending ? 'pending' : `${m.ready}|${m.failed}|${m.src}|${JSON.stringify(m.p)}`,
     draw: (el, m) => {
+      if (m.pending) return;
       if (m.failed) el.dataset.ptBlocked = ''; else delete el.dataset.ptBlocked;
       if (!m.src || !m.ready) return;
       if (el.dataset.ptW && el.dataset.ptW !== 'css' && !el.style.width) el.style.width = el.dataset.ptW + 'px';
-      renderPrint(el, m.rec.img, m.p);
+      m.I.renderPrint(el, m.rec.img, m.p);
     }
   },
   {
     sel: '.pt-diagram',
     measure: el => {
+      const D = diagramFor(el);
+      if (!D) return { pending: true };
       if (el.dataset.ptSrc == null) el.dataset.ptSrc = el.textContent.trim();
       const cs = getComputedStyle(el);
-      return { src: el.dataset.ptSrc, w: Math.round(el.clientWidth), font: `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`, lh: parseFloat(cs.lineHeight) || 24, fill: el.dataset.fill || 'none' };
+      return { D, src: el.dataset.ptSrc, w: Math.round(el.clientWidth), font: `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`, lh: parseFloat(cs.lineHeight) || 24, fill: el.dataset.fill || 'none' };
     },
-    key: m => `${m.w}|${m.font}|${m.fill}|${m.src}`,
+    key: m => m.pending ? 'pending' : `${m.w}|${m.font}|${m.fill}|${m.src}`,
     draw: (el, m) => {
-      if (!kindOf(m.src)) return;
-      el.innerHTML = renderDiagram(m.src, { seed: seedOf(el), font: m.font, lineHeight: m.lh, fill: m.fill, width: m.w });
+      if (m.pending || !m.D.kindOf(m.src)) return;
+      el.innerHTML = m.D.renderDiagram(m.src, { seed: seedOf(el), font: m.font, lineHeight: m.lh, fill: m.fill, width: m.w });
       el.dataset.ptPainted = '';
     }
   }

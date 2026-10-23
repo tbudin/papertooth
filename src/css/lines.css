@@ -1,7 +1,9 @@
 /* papertooth: link underlines and separators
    <a class="pt-link" data-ul="wobble|slant|double|swash|marker|wave|hl">
    <div class="pt-rule" role="separator" data-rule="wobble|double|dashes|brush|coil|scrawl|short|stars"> */
+@property --pt-wipe { syntax: '<number>'; inherits: true; initial-value: 0; }
 .pt-link {
+  --pt-wipe: 0;
   --pt-u: var(--pt-u-wobble);
   --pt-u-size: 100% 9px;
   --pt-u-repeat: no-repeat;
@@ -13,23 +15,41 @@
   background-image: var(--pt-u), var(--pt-u-second);
   background-repeat: var(--pt-u-repeat), no-repeat;
   background-position: 0 100%, 0 100%;
-  background-size: var(--pt-u-size), 0% 9px;
-  transition: background-size .45s cubic-bezier(.4,.6,.2,1);
+  /* the second stroke, drawn as far as --pt-wipe has got */
+  background-size: var(--pt-u-size), calc(var(--pt-wipe) * 100%) 9px;
+  transition: --pt-wipe .45s cubic-bezier(.4,.6,.2,1);
 }
-.pt-link:is(:hover, :focus-visible) { background-size: var(--pt-u-size), 100% 9px; }
+/* drawn on hover only where a pointer hovers, so a tap on a phone leaves nothing stuck; drawn while pressed down,
+   on keyboard focus, and kept for the current page or a link that is on (pressed, selected, expanded, open) */
+@media (hover: hover) { .pt-link:hover:not(:disabled, [aria-disabled="true"]) { --pt-wipe: 1; } }
+.pt-link:active:not(:disabled, [aria-disabled="true"]) { --pt-wipe: 1; }
+.pt-link:is(:focus-visible, [aria-pressed="true"], [aria-selected="true"], [aria-expanded="true"], [aria-current]:not([aria-current="false"])), details[open] > summary.pt-link { --pt-wipe: 1; }
 .pt-link:focus-visible { outline: 2px dashed var(--pt-pen); outline-offset: 4px; }
+.pt-link:visited { color: var(--pt-visited, color-mix(in srgb, var(--pt-pen) 70%, var(--pt-ink))); }
+.pt-link:is(:disabled, [aria-disabled="true"]) { cursor: not-allowed; opacity: .5; }
+/* a link that is a button underneath: none of the button's own box */
+button.pt-link { margin: 0; padding: 0 0 3px; border: 0; border-radius: 0; background-color: transparent; font: inherit; letter-spacing: inherit; text-align: inherit; cursor: pointer; }
+summary.pt-link { cursor: pointer; }
+summary.pt-link::-webkit-details-marker { display: none; }
 .pt-link[data-ul="slant"]  { --pt-u: var(--pt-u-slant); }
 .pt-link[data-ul="double"] { --pt-u: var(--pt-u-double); --pt-u-size: 100% 10px; }
 .pt-link[data-ul="swash"]  { --pt-u: var(--pt-u-swash); }
 .pt-link[data-ul="marker"] { --pt-u: var(--pt-u-marker); }
 .pt-link[data-ul="wave"]   { --pt-u: var(--pt-u-wave); --pt-u-size: 18px 9px; --pt-u-repeat: repeat-x; }
-.pt-link[data-ul="double"]:is(:hover, :focus-visible) { background-size: 100% 10px, 0% 9px; }
+/* a double underline has its second line already, so it keeps still */
+.pt-link[data-ul="double"] { background-size: 100% 10px, 0% 9px; }
+/* a highlighted link is already inked: hovering draws a pen underline under it, never more highlighter */
 .pt-link[data-ul="hl"] {
   background-image: var(--pt-mark-y), var(--pt-u-wobble);
-  background-size: 0% 82%, 100% 9px;
+  background-size: 100% 82%, calc(var(--pt-wipe) * 100%) 9px;
   background-position: 0 70%, 0 100%;
 }
-.pt-link[data-ul="hl"]:is(:hover, :focus-visible) { background-size: 100% 82%, 100% 9px; }
+@media (prefers-reduced-motion: reduce) { .pt-link { transition: none; } }
+/* high contrast: the drawn underline is a background image, so the link also gets a plain one */
+@media (forced-colors: active) {
+  .pt-link { text-decoration: underline; }
+  .pt-link:is(:hover, :focus-visible, [aria-pressed="true"], [aria-selected="true"], [aria-expanded="true"], [aria-current]:not([aria-current="false"])) { text-decoration-thickness: 3px; }
+}
 
 .pt-rule { --pt-r: var(--pt-r-wobble); height: var(--pt-grid); border: 0; margin: 0; background: var(--pt-r) center / 100% 12px no-repeat; }
 .pt-rule[data-rule="double"] { --pt-r: var(--pt-r-double); }

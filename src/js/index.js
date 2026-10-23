@@ -9,7 +9,7 @@ import { snapSheet } from './baseline.js';
 import { setPen, setPencil, setRibbon, setHighlighter } from './ink.js';
 import { dayHead, week, isoWeek } from './planner.js';
 
-export const VERSION = '0.3.1';
+export const VERSION = '0.4.0';
 
 export const DEFAULTS = {
   root: null,              // element to enhance; defaults to document.body
@@ -242,8 +242,8 @@ export function init(options = {}) {
   };
 }
 
-export { renderDiagram } from './diagram.js';
 export { PALETTE } from './palette.js';
 export { lithoFilter } from './filters.js';
-export { weekDates, firstDayOf, dayParts, sameDay } from './dates.js';
+export { weekDates, firstDayOf, dayParts, sameDay, stampCells, stampLabel, stampLayout } from './dates.js';
+export { dateStamp } from './planner.js';
 export { filtersMarkup, typewriterFilter, smearColour, FILTER_DEFAULTS, setPen, setPencil, setRibbon, setHighlighter, dayHead, week, isoWeek };

@@ -1,6 +1,6 @@
 {
   "name": "papertooth",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Hand-drawn Japanese stationery for the web: dotted paper, highlighters, ink, pencil, hanko stamps, washi tape and planner pieces, in CSS with an optional script.",
   "keywords": [
     "css",
@@ -45,10 +45,27 @@
       "import": "./dist/react.js",
       "default": "./dist/react.js"
     },
+    "./shapes": {
+      "types": "./types/shapes.d.ts",
+      "import": "./dist/shapes.js",
+      "default": "./dist/shapes.js"
+    },
+    "./tokens": {
+      "types": "./types/tokens.d.ts",
+      "import": "./dist/tokens.js",
+      "default": "./dist/tokens.js"
+    },
+    "./diagram": {
+      "types": "./types/diagram.d.ts",
+      "import": "./dist/diagram.js",
+      "default": "./dist/diagram.js"
+    },
     "./css": "./dist/papertooth.css",
     "./min.css": "./dist/papertooth.min.css",
     "./layer.css": "./dist/papertooth.layer.css",
+    "./css/*": "./dist/css/*.css",
     "./filters.svg": "./dist/papertooth-filters.svg",
+    "./stamps/*": "./dist/stamps/*",
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },

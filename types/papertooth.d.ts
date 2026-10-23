@@ -105,16 +105,6 @@ export declare const PALETTE: {
   colourPencils: PaletteEntry[]; highlighters: PaletteEntry[]; stamps: PaletteEntry[]; papers: PaletteEntry[];
 };
 
-export interface DiagramOptions {
-  seed?: number;
-  /** A CSS font shorthand, e.g. '20px Caveat, cursive'. */
-  font?: string;
-  lineHeight?: number;
-  fill?: 'none' | 'wash' | 'highlight' | 'pencil' | 'hatch' | 'cross' | 'scribble' | 'stipple';
-  width?: number;
-}
-/** Render Mermaid-style source (flowchart/graph, pie, xychart-beta) to an SVG string. Empty for anything else. */
-export declare function renderDiagram(source: string, options?: DiagramOptions): string;
 
 export interface LithoParams {
   mode: 'mono' | 'duo' | 'tri';
@@ -152,3 +142,15 @@ export declare function weekDates(date?: Date, weekStart?: Weekday): Date[];
 export declare function sameDay(a: Date, b: Date): boolean;
 /** What a day heading shows, in a locale (default 'en-GB'). */
 export declare function dayParts(date?: Date, locale?: string): { day: number; month: string; weekday: string; short: string; kanji: string; week: number };
+
+export type StampUnit = 'week' | 'month' | 'year' | 'day';
+export interface StampCell { label: string; state: 'past' | 'current' | 'future' }
+/** The cells of a date stamp: seven weekdays, twelve months, a run of years (default 5 around the date) or the days of the month. */
+export declare function stampCells(unit?: StampUnit, date?: Date, options?: { locale?: string; weekStart?: Weekday; years?: number; from?: number }): StampCell[];
+/** What a date stamp says, read whole (for screen readers). */
+export declare function stampLabel(unit?: StampUnit, date?: Date, locale?: string): string;
+/** Fill a .pt-datestamp from its data attributes (data-unit, data-date, data-mark, data-past, data-locale…). The script does this for you. */
+export declare function dateStamp(el: Element, date?: Date, options?: { locale?: string; weekStart?: Weekday; years?: number; from?: number }): void;
+export interface StampLayout { sections: { part: 'bar' | 'head' | 'write' | 'months' | 'days' | 'title' | 'year'; rows: { label: string; state: StampCell['state'] | ''; side?: boolean }[][] }[] }
+/** Everything a date stamp prints, as sections of rows of cells, with no DOM: for drawing one in another renderer. */
+export declare function stampLayout(unit?: StampUnit, date?: Date, options?: { variant?: 'bar' | 'wide'; locale?: string; weekStart?: Weekday; years?: number; from?: number; rows?: number; title?: string }): StampLayout;

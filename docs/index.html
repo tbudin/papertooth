@@ -181,6 +181,12 @@ table.ref { width: 100%; min-width: 520px; border-collapse: collapse; font-size:
 .pt-sheet p.lab-sample { filter: url(#tw-lab); }
 .pt-sheet p.lab-plain { filter: none; }
 .lab-sample .c { display: inline-block; }
+.stamp-files { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; margin: 12px 0 28px; }
+.stamp-files a { display: grid; justify-items: center; gap: 6px; padding: 12px 6px 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--fg); text-decoration: none; font-size: 12px; }
+.stamp-files a:hover { border-color: var(--accent); }
+/* the files are black ink: lighten them where the site is dark */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .stamp-files img { filter: invert(.9); } }
+:root[data-theme="dark"] .stamp-files img { filter: invert(.9); }
 /* playground */
 .pg { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); border: 1px solid var(--line); border-radius: 8px; overflow: clip; min-height: 560px; }
 .pg-code { display: flex; flex-direction: column; min-width: 0; border-right: 1px solid var(--line); background: var(--code); }
@@ -301,21 +307,11 @@ const STAMP_INKS = ['red', 'vermilion', 'blue', 'green', 'pink', 'brown'];
 const INK_OPTIONS = PENS.concat(PENCILS, [['stamp-vermilion', 'Vermilion'], ['stamp-blue', 'Stamp blue']]);
 const PLATES = [['#3a82c4', 'Litho blue'], ['#d8466c', 'Litho rose'], ['#f2c640', 'Litho yellow'], ['#23558f', 'Prussian blue'], ['#c8343f', 'Carmine'], ['#eebd2c', 'Chrome yellow'], ['#2a7c8c', 'Teal'], ['#e0558a', 'Rose'], ['#d97a2b', 'Orange'], ['#3c7a4c', 'Bamboo green'], ['#232429', 'Sumi black']];
 
-/* ---------- stamp artwork ---------- */
-const petal = 'M28 27 C 21 20, 21 11, 25.5 8.5 L28 11.5 L30.5 8.5 C 35 11, 35 20, 28 27 Z';
+/* ---------- stamp artwork ----------
+   Picture stamps come from the library (<span class="pt-stamp" data-pic="frog">). The text stamps stay here as inline
+   SVG, because they need the page's fonts, which a CSS image cannot use. */
+const PIC_STAMPS = [['tick', 'Tick'], ['star', 'Star'], ['heart', 'Heart'], ['arrow', 'Arrow'], ['cat', 'Cat 猫'], ['frog', 'Frog 蛙'], ['bear', 'Bear 熊'], ['tiger', 'Tiger 虎'], ['rabbit', 'Rabbit 兎'], ['tanuki', 'Tanuki 狸'], ['owl', 'Owl 梟'], ['paw', 'Cat paw 肉球'], ['onigiri', 'Onigiri'], ['sakura', 'Sakura'], ['cloud', 'Smiling cloud'], ['sun', 'Smiling sun'], ['daruma', 'Daruma'], ['fuji', 'Mount Fuji']];
 const ICONS = {
-  tick: ['Tick', '<svg width="60" height="60" viewBox="0 0 56 56" role="img" aria-label="Tick"><circle cx="28" cy="28" r="25" fill="none" stroke="currentColor" stroke-width="3"/><path d="M16 29 L25 38 L41 19" fill="none" stroke="currentColor" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
-  star: ['Star', '<svg width="60" height="60" viewBox="0 0 56 56" role="img" aria-label="Star"><circle cx="28" cy="28" r="25" fill="none" stroke="currentColor" stroke-width="3"/><path d="M28 12 L32.6 22.6 L44 23.6 L35.3 31.1 L38 42.4 L28 36.4 L18 42.4 L20.7 31.1 L12 23.6 L23.4 22.6 Z" fill="currentColor"/></svg>'],
-  heart: ['Heart', '<svg width="60" height="60" viewBox="0 0 56 56" role="img" aria-label="Heart"><circle cx="28" cy="28" r="25" fill="none" stroke="currentColor" stroke-width="3"/><path d="M28 41 C 14 32, 13 24, 16 19.5 C 19.5 14.5, 26 15.5, 28 21 C 30 15.5, 36.5 14.5, 40 19.5 C 43 24, 42 32, 28 41 Z" fill="currentColor"/></svg>'],
-  arrow: ['Arrow', '<svg width="60" height="60" viewBox="0 0 56 56" role="img" aria-label="Arrow"><circle cx="28" cy="28" r="25" fill="none" stroke="currentColor" stroke-width="3"/><path d="M14 28 H40 M31 19 L41 28 L31 37" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
-  cat: ['Cat', '<svg width="60" height="60" viewBox="0 0 56 56" role="img" aria-label="Cat"><path d="M11 26 L13 10 L22.5 17 Q28 15.5 33.5 17 L43 10 L45 26 Q46.5 42 28 43 Q9.5 42 11 26 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><circle cx="22" cy="28" r="2" fill="currentColor"/><circle cx="34" cy="28" r="2" fill="currentColor"/><path d="M26.6 32 H29.4 L28 33.8 Z" fill="currentColor"/><path d="M6 31 L17 32.4 M6 36.5 L17 34.4 M50 31 L39 32.4 M50 36.5 L39 34.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'],
-  onigiri: ['Onigiri', '<svg width="60" height="60" viewBox="0 0 56 56" role="img" aria-label="Onigiri"><path d="M28 8 C 31 8, 33 10, 35 13 L 46 33 C 49 39, 46 46, 39 46 L 17 46 C 10 46, 7 39, 10 33 L 21 13 C 23 10, 25 8, 28 8 Z" fill="none" stroke="currentColor" stroke-width="3"/><rect x="21" y="35" width="14" height="11" fill="currentColor"/><circle cx="23" cy="27" r="1.9" fill="currentColor"/><circle cx="33" cy="27" r="1.9" fill="currentColor"/><path d="M25.5 30.5 Q28 33 30.5 30.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'],
-  sakura: ['Sakura', `<svg width="60" height="60" viewBox="0 0 56 56" role="img" aria-label="Sakura"><g fill="currentColor">${[0, 72, 144, 216, 288].map(a => `<path d="${petal}" transform="rotate(${a} 28 28)"/>`).join('')}</g><circle cx="28" cy="28" r="3" fill="#fcfbf7"/></svg>`],
-  cloud: ['Cloud', '<svg width="66" height="56" viewBox="0 0 66 56" role="img" aria-label="Smiling cloud"><path d="M15 44 C 7.5 44, 5 35.5, 11 32 C 9 24, 17 18.5, 24 22 C 26 13, 39 11, 43 19.5 C 49 16, 57 21, 55 28.5 C 61.5 30.5, 61 44, 52 44 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><circle cx="26" cy="32" r="2" fill="currentColor"/><circle cx="40" cy="32" r="2" fill="currentColor"/><path d="M29.5 36.5 Q33 39.5 36.5 36.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><ellipse cx="21" cy="37" rx="2.6" ry="1.4" fill="currentColor" opacity=".45"/><ellipse cx="45" cy="37" rx="2.6" ry="1.4" fill="currentColor" opacity=".45"/></svg>'],
-  paw: ['Cat paw 肉球', '<svg width="60" height="60" viewBox="0 0 56 56" role="img" aria-label="Cat paw"><g fill="currentColor"><path d="M28 30 C 36 30, 42 36, 41 42 C 40 47, 34 47.5, 28 46 C 22 47.5, 16 47, 15 42 C 14 36, 20 30, 28 30 Z"/><ellipse cx="14.5" cy="27" rx="4.2" ry="5.4" transform="rotate(-18 14.5 27)"/><ellipse cx="23" cy="18.5" rx="4.4" ry="5.8" transform="rotate(-6 23 18.5)"/><ellipse cx="33" cy="18.5" rx="4.4" ry="5.8" transform="rotate(6 33 18.5)"/><ellipse cx="41.5" cy="27" rx="4.2" ry="5.4" transform="rotate(18 41.5 27)"/></g></svg>'],
-  daruma: ['Daruma', '<svg width="56" height="60" viewBox="0 0 56 60" role="img" aria-label="Daruma"><defs><mask id="dm"><rect width="56" height="60" fill="#fff"/><ellipse cx="28" cy="27" rx="13" ry="11" fill="#000"/></mask></defs><path d="M28 5 C 43 5, 50 17, 50 31 C 50 46, 41 55, 28 55 C 15 55, 6 46, 6 31 C 6 17, 13 5, 28 5 Z" fill="currentColor" mask="url(#dm)"/><circle cx="22" cy="26" r="3.6" fill="currentColor"/><circle cx="34" cy="26" r="3.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M17 20.5 Q22 18 26 21 M30 21 Q34 18 39 20.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M21 33 Q25 30.5 28 33 Q31 30.5 35 33" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M20 46 Q28 41 36 46" fill="none" stroke="#fcfbf7" stroke-width="2" stroke-linecap="round" opacity=".9"/></svg>'],
-  fuji: ['Mount Fuji', '<svg width="64" height="56" viewBox="0 0 64 56" role="img" aria-label="Mount Fuji with the sun"><defs><mask id="fm"><rect width="64" height="56" fill="#fff"/><path d="M24.5 21 C 28 17, 36 17, 39.5 21 L 44 27.5 L 39.5 25.5 L 36 29 L 32 25.5 L 28 29 L 24.5 25.5 L 20 27.5 Z" fill="#000"/></mask></defs><circle cx="48" cy="13" r="6" fill="currentColor"/><path d="M4 48 L 24.5 21 C 28 17, 36 17, 39.5 21 L 60 48 Z" fill="currentColor" mask="url(#fm)"/><path d="M4 52 H60" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'],
-  sun: ['Smiling sun', `<svg width="60" height="60" viewBox="0 0 56 56" role="img" aria-label="Smiling sun"><circle cx="28" cy="28" r="12.5" fill="none" stroke="currentColor" stroke-width="3"/><g stroke="currentColor" stroke-width="3" stroke-linecap="round">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => `<path d="M28 7.5 V11.5" transform="rotate(${a} 28 28)"/>`).join('')}</g><circle cx="23.5" cy="26" r="1.8" fill="currentColor"/><circle cx="32.5" cy="26" r="1.8" fill="currentColor"/><path d="M23 31 Q28 35.5 33 31" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`],
   thanks: ['ありがとう', '<svg width="76" height="54" viewBox="0 0 76 54" role="img" aria-label="Arigatou: thank you"><path d="M10 6 H66 C 70 6, 72 8, 72 12 V34 C 72 38, 70 40, 66 40 H30 L20 49 L22 40 H10 C 6 40, 4 38, 4 34 V12 C 4 8, 6 6, 10 6 Z" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linejoin="round"/><text class="pt-jp-round" x="38" y="28.5" text-anchor="middle" font-size="12.5" fill="currentColor">ありがとう</text></svg>'],
   tea: ['お茶 tea', '<svg width="58" height="60" viewBox="0 0 56 58" role="img" aria-label="A cup of tea"><path d="M12 24 H44 L41 46 C 40.5 50, 37.5 52, 34 52 H22 C 18.5 52, 15.5 50, 15 46 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><text class="pt-jp" x="28" y="44" text-anchor="middle" font-size="14" fill="currentColor">茶</text><path d="M21 19 C 18 15, 24 13, 21 8 M28 19 C 25 15, 31 13, 28 8 M35 19 C 32 15, 38 13, 35 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'],
   kakunin: ['確認 checked', '<svg width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Kakunin: checked"><circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="3"/><text class="pt-jp" x="32" y="30" text-anchor="middle" font-size="21" fill="currentColor">確</text><text class="pt-jp" x="32" y="53" text-anchor="middle" font-size="21" fill="currentColor">認</text></svg>'],
@@ -453,8 +449,8 @@ import { init } from 'papertooth';
 
 const kit = init({ pen: 'ink-ai', motion: 'scroll' });`)}
     <p class="code-label">CDN, no build step</p>
-    ${codeBox(`<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/papertooth@0.3/dist/papertooth.min.css">
-<script src="https://cdn.jsdelivr.net/npm/papertooth@0.3/dist/papertooth.min.js" defer data-pt-auto><\/script>`)}
+    ${codeBox(`<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/papertooth@0.4/dist/papertooth.min.css">
+<script src="https://cdn.jsdelivr.net/npm/papertooth@0.4/dist/papertooth.min.js" defer data-pt-auto><\/script>`)}
     <p><code>data-pt-auto</code> starts the script on load. Pass options as JSON: <code>data-pt-auto='{"seed": 7}'</code>. The running instance is <code>window.Papertooth.kit</code>.</p>
     <h2>Fonts</h2>
     <p>Fonts are not bundled. The defaults are Courier Prime, Special Elite and Caveat, plus Shippori Mincho B1 and Zen Maru Gothic for Japanese stamps. Swap any of them in <a href="#theming">Theming</a>.</p>
@@ -519,7 +515,7 @@ page({ id: 'theming', group: 'Getting started', title: 'Theming', lead: 'Every e
     { k: 'grid', label: 'Grid', type: 'range', min: 16, max: 32, step: 2, unit: 'px', v: 24 },
     { k: 'dot', label: 'Dot size', type: 'range', min: .4, max: 1.4, step: .05, unit: 'px', v: .8 },
     { k: 'dotAlpha', label: 'Dot strength', type: 'range', min: .08, max: .5, step: .02, v: .26 },
-    { k: 'grain', label: 'Paper grain', type: 'range', min: 0, max: 1, step: .05, v: .28 },
+    { k: 'grain', label: 'Paper grain', type: 'range', min: 0, max: 1, step: .05, v: .1 },
     { k: 'wobble', label: 'Letter wobble', type: 'range', min: 0, max: 2, step: .1, v: 1 },
     { k: 'typeFont', label: 'Typewriter font', type: 'select', options: [['"Courier Prime", monospace', 'Courier Prime'], ['"IBM Plex Mono", monospace', 'IBM Plex Mono'], ['"JetBrains Mono", monospace', 'JetBrains Mono'], ['"Space Mono", monospace', 'Space Mono']], v: '"Courier Prime", monospace' },
     { k: 'handFont', label: 'Handwriting font', type: 'select', options: [['"Caveat", cursive', 'Caveat'], ['"Kalam", cursive', 'Kalam'], ['"Nanum Pen Script", cursive', 'Nanum Pen Script']], v: '"Caveat", cursive' }
@@ -543,23 +539,23 @@ page({ id: 'theming', group: 'Getting started', title: 'Theming', lead: 'Every e
   --pt-font-hand: ${s.handFont};
 }`,
   after: () => `<p>Pens, pencils, ribbons and highlighters: see <a href="#colours">Inks and colours</a>.</p>
-    ${refTable([['--pt-grid', '24px', 'Dot pitch and line height. Text snaps to it.'], ['--pt-sheet-width', '720px', 'Widest the sheet gets, rounded down to whole cells.'], ['--pt-paper, --pt-desk', '#fcfbf7, #cdcbc5', 'Paper and desk colours.'], ['--pt-dot, --pt-dot-size', 'warm grey, .8px', 'Printed dots.'], ['--pt-line', 'pale blue', 'Ruling on grid, graph and lined paper.'], ['--pt-grain', '.28', 'Paper grain, 0 to 1.'], ['--pt-pen, --pt-pencil, --pt-ribbon', 'indigo, red pencil, black', 'Current tools.'], ['--pt-hl', 'yellow', 'Highlighter colour.'], ['--pt-wobble', '1', 'Letter wobble, 0 to 2.'], ['--pt-tilt', '1', 'Multiplies every --pt-rot, 0 to 2.'], ['--pt-draw, --pt-ease', '.75s', 'Drawing-on timing.'], ['--pt-font-type, -hand, -type-head, -jp', 'Courier Prime, Caveat…', 'Fonts.'], ['--pt-s-body, -small, -h1, -h2', '20, 16, 36, 26px', 'Type sizes.']])}` });
+    ${refTable([['--pt-grid', '24px', 'Dot pitch and line height. Text snaps to it.'], ['--pt-sheet-width', '720px', 'Widest the sheet gets, rounded down to whole cells.'], ['--pt-paper, --pt-desk', '#fefefe, #cdcbc5', 'Paper and desk colours.'], ['--pt-dot, --pt-dot-size', 'warm grey, .8px', 'Printed dots.'], ['--pt-line', 'pale blue', 'Ruling on grid, graph and lined paper.'], ['--pt-grain', '.1', 'Paper grain, 0 to 1.'], ['--pt-pen, --pt-pencil, --pt-ribbon', 'indigo, red pencil, black', 'Current tools.'], ['--pt-hl', 'yellow', 'Highlighter colour.'], ['--pt-wobble', '1', 'Letter wobble, 0 to 2.'], ['--pt-tilt', '1', 'Multiplies every --pt-rot, 0 to 2.'], ['--pt-draw, --pt-ease', '.75s', 'Drawing-on timing.'], ['--pt-font-type, -hand, -type-head, -jp', 'Courier Prime, Caveat…', 'Fonts.'], ['--pt-s-body, -small, -h1, -h2', '20, 16, 36, 26px', 'Type sizes.']])}` });
 
 page({ id: 'paper', group: 'Paper and writing', title: 'Paper', lead: 'Two separate choices: the paper itself (its colour and grain) and the ruling printed on it. The grid sets both the dot pitch and the line height, so text always sits on the ruling.',
   controls: [
     { k: 'paper', label: 'Paper', type: 'select', options: [['white', 'white'], ['cream', 'cream'], ['washi', 'washi 和紙'], ['kraft', 'kraft'], ['recycled', 'recycled'], ['tracing', 'tracing']], v: 'white' },
     { k: 'ruling', label: 'Ruling', type: 'select', options: [['dot', 'dots'], ['grid', 'grid 方眼'], ['graph', 'graph'], ['lined', 'lined'], ['blank', 'blank']], v: 'dot' },
     { k: 'grid', label: 'Grid', type: 'range', min: 16, max: 32, step: 2, unit: 'px', v: 24 },
-    { k: 'grain', label: 'Grain', type: 'range', min: 0, max: 1, step: .05, v: .28 },
+    { k: 'grain', label: 'Grain', type: 'range', min: 0, max: 1, step: .05, v: .1 },
     { k: 'guides', label: 'Show baselines', type: 'toggle', v: false }
   ],
   frame: 'desk',
-  render: s => `<main class="pt-sheet${s.guides ? ' pt-guides' : ''}"${attr('data-paper', s.paper, 'white')} data-ruling="${s.ruling}"${style({ '--pt-grid': s.grid !== 24 ? s.grid + 'px' : '', '--pt-grain': s.grain !== .28 ? s.grain : '' })}>
+  render: s => `<main class="pt-sheet${s.guides ? ' pt-guides' : ''}"${attr('data-paper', s.paper, 'white')} data-ruling="${s.ruling}"${style({ '--pt-grid': s.grid !== 24 ? s.grid + 'px' : '', '--pt-grain': s.grain !== .1 ? s.grain : '' })}>
   <h2>Thursday</h2>
   <p>Every line of text lands on the ruling, whatever the font or size.</p>
   <p class="pt-pen-text">Handwriting sits on the same rows.</p>
 </main>`,
-  ref: [['data-paper', 'white', 'white, cream, washi, kraft, recycled, tracing'], ['data-ruling', 'dot', 'dot, grid, graph, lined, blank'], ['--pt-grid', '24px', 'Dot pitch and line height'], ['--pt-grain', '.28', 'Grain strength'], ['--pt-dot, --pt-line', 'per paper', 'Ruling colours; each paper sets its own'], ['.pt-guides', '', 'Show the baselines'], ['.pt-desk', '', 'The desk colour, on body or any container. Dark at night, unless .pt-day.']] });
+  ref: [['data-paper', 'white', 'white, cream, washi, kraft, recycled, tracing'], ['data-ruling', 'dot', 'dot, grid, graph, lined, blank'], ['--pt-grid', '24px', 'Dot pitch and line height'], ['--pt-grain', '.1', 'Grain strength (each stock has its own)'], ['--pt-dot, --pt-line', 'per paper', 'Ruling colours; each paper sets its own'], ['.pt-guides', '', 'Show the baselines'], ['.pt-desk', '', 'The desk colour, on body or any container. Dark at night, unless .pt-day.']] });
 
 page({ id: 'writing', group: 'Paper and writing', title: 'Writing', lead: 'Typed or handwritten, in ribbon, pen or pencil. The texture varies the ink a little from letter to letter.',
   controls: [
@@ -585,19 +581,20 @@ page({ id: 'highlighter', group: 'Marks', title: 'Highlighter', lead: 'A felt-ti
     { k: 'size', label: 'Tip', type: 'select', options: [['fine', 'fine'], ['', 'regular chisel'], ['broad', 'broad']], v: '' },
     { k: 'color', label: 'Colour', type: 'select', options: HLS, v: 'yellow' },
     { k: 'label', label: 'Label', type: 'text', v: 'Hire a fractional CMO' },
-    { k: 'hover', label: 'On hover', type: 'select', options: [['', 'a second pass'], ['underline', 'underlined'], ['circle', 'circled'], ['none', 'nothing']], v: '' },
-    { k: 'tool', label: 'Hover drawn with', type: 'select', options: [['', 'fountain pen']].concat(TOOLS.slice(1)), v: '', when: s => s.hover === 'underline' || s.hover === 'circle' },
+    { k: 'hover', label: 'On hover', type: 'select', options: [['', 'underlined'], ['pass', 'a second pass'], ['circle', 'circled'], ['none', 'nothing']], v: '' },
+    { k: 'tool', label: 'Hover drawn with', type: 'select', options: [['', 'fountain pen']].concat(TOOLS.slice(1)), v: '', when: s => s.hover !== 'pass' && s.hover !== 'none' },
+    { k: 'state', label: 'State', type: 'select', options: [['', 'ready'], ['on', 'on (aria-pressed)'], ['disabled', 'disabled']], v: '' },
     { k: 'smudge', label: 'Fresh ink smudge', type: 'toggle', v: true }
   ],
   render: s => {
     const a = `${attr('data-hl', s.hl, 'swipe')}${attr('data-size', s.size)}${attr('data-color', s.color, 'yellow')}`;
-    const hv = `${attr('data-hover', s.hover)}${s.hover === 'underline' || s.hover === 'circle' ? attr('data-tool', s.tool) : ''}`;
+    const hv = `${attr('data-hover', s.hover)}${s.hover !== 'pass' && s.hover !== 'none' ? attr('data-tool', s.tool) : ''}`;
     return `<div class="pt-row${s.smudge ? '' : ' pt-dry'}">
-  <a class="pt-btn"${a}${hv} href="#">${esc(s.label)}</a>
+  <a class="pt-btn"${a}${hv}${s.state === 'on' ? ' aria-pressed="true"' : s.state === 'disabled' ? ' aria-disabled="true"' : ''} href="#">${esc(s.label)}</a>
 </div>
 <p${s.smudge ? '' : ' class="pt-dry"'}>In running text, a phrase can be <mark class="pt-mark"${a}>picked out with a highlighter</mark>.</p>`;
   },
-  ref: [['data-hl', 'swipe', 'swipe, flick, double, low, dry, scribble'], ['data-size', 'regular', 'fine, broad'], ['data-color', 'yellow', 'yellow, pink, green, orange, blue'], ['data-hover', 'pass', 'pass (a second highlighter pass), underline, circle, none'], ['.pt-dry', '', 'No fresh-ink smudge, on any ancestor'], ['--pt-hl', '', 'Any colour'], ['kit.setFilters({ smudge })', '{ drag: 4.2, blur: 3.4, strength: .78 }', 'How far and how strongly the ink drags']] });
+  ref: [['data-hl', 'swipe', 'swipe, flick, double, low, dry, scribble'], ['data-size', 'regular', 'fine, broad'], ['data-color', 'yellow', 'yellow, pink, green, orange, blue'], ['data-hover', 'underline', 'underline (in pen), pass (a second highlighter pass), circle, none'], ['aria-pressed, aria-current, aria-expanded, aria-selected', '', 'The button is on: its hover mark stays drawn (an open <details> too)'], [':disabled, aria-disabled', '', 'Faded, with no hover'], ['.pt-dry', '', 'No fresh-ink smudge, on any ancestor'], ['--pt-hl', '', 'Any colour'], ['kit.setFilters({ smudge })', '{ drag: 4.2, blur: 3.4, strength: .78 }', 'How far and how strongly the ink drags']] });
 
 page({ id: 'outline', group: 'Marks', title: 'Outlined button', lead: 'A drawn outline at rest, the highlighter on hover. Boxes, a loop, corners, or brackets of several kinds, including the Japanese 「」 and 【】.',
   controls: [
@@ -605,20 +602,22 @@ page({ id: 'outline', group: 'Marks', title: 'Outlined button', lead: 'A drawn o
     toolCtl('ink'),
     { k: 'color', label: 'Hover colour', type: 'select', options: HLS, v: 'yellow' },
     { k: 'hover', label: 'On hover', type: 'select', options: [['', 'highlighted'], ['underline', 'underlined'], ['circle', 'circled'], ['none', 'nothing']], v: '' },
+    { k: 'state', label: 'State', type: 'select', options: [['', 'ready'], ['on', 'on (aria-pressed)'], ['disabled', 'disabled']], v: '' },
     { k: 'label', label: 'Label', type: 'text', v: 'Read the essays' }
   ],
-  render: s => `<button class="pt-btn pt-btn--outline"${attr('data-outline', s.ol, 'sketch')}${attr('data-tool', s.tool)}${attr('data-color', s.color, 'yellow')}${attr('data-hover', s.hover)} type="button">${esc(s.label)}</button>`,
-  ref: [['data-outline', 'sketch', 'sketch, double, broken, circled, corners, brackets, parens, braces, angles, kagi, lenticular'], ['data-tool', 'ink', 'pen, ballpoint, brush, marker, graphite, pencil'], ['data-color', 'yellow', 'Hover highlighter colour'], ['data-hover', 'pass', 'pass (highlighted), underline, circle, none']] });
+  render: s => `<button class="pt-btn pt-btn--outline"${attr('data-outline', s.ol, 'sketch')}${attr('data-tool', s.tool)}${attr('data-color', s.color, 'yellow')}${attr('data-hover', s.hover)}${s.state === 'on' ? ' aria-pressed="true"' : s.state === 'disabled' ? ' disabled' : ''} type="button">${esc(s.label)}</button>`,
+  ref: [['data-outline', 'sketch', 'sketch, double, broken, circled, corners, brackets, parens, braces, angles, kagi, lenticular'], ['data-tool', 'ink', 'pen, ballpoint, brush, marker, graphite, pencil'], ['data-color', 'yellow', 'Hover highlighter colour'], ['data-hover', 'pass', 'pass (highlighted), underline, circle, none'], ['aria-pressed, aria-current, aria-expanded, aria-selected', '', 'The button is on: its hover mark stays drawn (an open <details> too)'], [':disabled, aria-disabled', '', 'Faded, with no hover']] });
 
 page({ id: 'link', group: 'Marks', title: 'Link underline', lead: 'A pen stroke under each line of a link. Hover adds a second stroke, or circles the link.',
   controls: [
     { k: 'ul', label: 'Underline', type: 'select', options: ['wobble', 'slant', 'double', 'swash', ['marker', 'heavy'], 'wave', ['hl', 'highlight']], v: 'wobble' },
     toolCtl('fountain pen'),
     { k: 'hover', label: 'On hover', type: 'select', options: [['', 'a second stroke'], ['circle', 'circled'], ['none', 'nothing']], v: '' },
+    { k: 'state', label: 'State', type: 'select', options: [['', 'ready'], ['current', 'current page (aria-current)'], ['disabled', 'disabled (aria-disabled)']], v: '' },
     { k: 'long', label: 'Wrap onto two lines', type: 'toggle', v: false }
   ],
-  render: s => `<p>Read <a class="pt-link"${attr('data-ul', s.ul, 'wobble')}${attr('data-tool', s.tool)}${attr('data-hover', s.hover)} href="#">${s.long ? 'the essay on pricing a retainer honestly, and what changed when we stopped discounting' : 'the essay'}</a> before the call.</p>`,
-  ref: [['data-ul', 'wobble', 'wobble, slant, double, swash, marker, wave, hl'], ['data-tool', 'pen', 'ballpoint, brush, marker, graphite, pencil'], ['data-hover', 'second', 'second (another stroke), circle, none'], ['.pt-links-mix', '', 'On a container: a natural mix of styles']] });
+  render: s => `<p>Read <a class="pt-link"${attr('data-ul', s.ul, 'wobble')}${attr('data-tool', s.tool)}${attr('data-hover', s.hover)}${s.state === 'current' ? ' aria-current="page"' : s.state === 'disabled' ? ' aria-disabled="true"' : ''} href="#">${s.long ? 'the essay on pricing a retainer honestly, and what changed when we stopped discounting' : 'the essay'}</a> before the call.</p>`,
+  ref: [['data-ul', 'wobble', 'wobble, slant, double, swash, marker, wave, hl (highlighted; hover adds a pen underline)'], ['data-tool', 'pen', 'ballpoint, brush, marker, graphite, pencil'], ['data-hover', 'second', 'second (another stroke), circle, none'], ['aria-current', '', 'The current page: its hover mark stays drawn (also aria-pressed, aria-expanded, aria-selected, an open <details>)'], ['aria-disabled', '', 'Faded, with no hover'], ['--pt-visited', 'the pen, a little darker', 'Colour of a visited link'], ['button.pt-link', '', 'A button that reads as a link: none of the button’s own box'], ['.pt-links-mix', '', 'On a container: a natural mix of styles']] });
 
 page({ id: 'separator', group: 'Marks', title: 'Separator', lead: 'A line drawn across the page, at its real width, so no two repeat.',
   controls: [{ k: 'rule', label: 'Style', type: 'select', options: ['wobble', 'double', 'dashes', ['brush', 'pressure stroke'], 'coil', 'scrawl', ['short', 'short stroke'], ['stars', 'typed stars']], v: 'wobble' }, toolCtl('ribbon ink')],
@@ -634,11 +633,11 @@ page({ id: 'marks', group: 'Marks', title: 'Marks on text', lead: 'Circle, box, 
     { k: 'word', label: 'Word', type: 'text', v: 'important' }
   ],
   render: s => `<p>This is <span class="pt-anno" data-anno="${s.anno}"${attr('data-tool', s.tool)}>${esc(s.word)}</span>, so read it twice.</p>`,
-  ref: [['data-anno', '', 'circle, box, under, strike, cross, hatch, hanamaru'], ['data-tool', 'coloured pencil', 'pen, ballpoint, brush, marker, graphite'], ['--pt-anno', '', 'Any colour']] });
+  ref: [['data-anno', '', 'circle, box, under, strike, cross, hatch, hanamaru, x'], ['data-wrap', '', 'Let a longer phrase wrap: strike, under and cross follow each line; circle, box and hanamaru go around the whole phrase'], ['data-tool', 'coloured pencil', 'pen, ballpoint, brush, marker, graphite'], ['--pt-anno', '', 'Any colour']] });
 
 page({ id: 'stamps', group: 'Marks', title: 'Stamps', lead: 'Rubber stamps with real ink: heavier at the rim, uneven in the middle, with small gaps where the paper did not take it.',
   controls: [
-    { k: 'kind', label: 'Stamp', type: 'select', options: [['box', 'Text in a box'], ['round', 'Round kanji'], ['seal', 'Name seal 印鑑']].concat(Object.entries(ICONS).filter(([k]) => k !== 'name').map(([k, [l]]) => [k, l])), v: 'box' },
+    { k: 'kind', label: 'Stamp', type: 'select', options: [['box', 'Text in a box'], ['round', 'Round kanji'], ['seal', 'Name seal 印鑑']].concat(PIC_STAMPS, Object.entries(ICONS).filter(([k]) => k !== 'name').map(([k, [l]]) => [k, l])), v: 'box' },
     { k: 'text', label: 'Text', type: 'text', v: 'Approved', when: s => s.kind === 'box' || s.kind === 'round' },
     { k: 'seal', label: 'Name on the seal', type: 'text', v: 'トマス', when: s => s.kind === 'seal', note: 'Japanese names run down the seal; Latin names go across.' },
     { k: 'ink', label: 'Ink', type: 'select', options: STAMP_INKS, v: 'red' },
@@ -654,17 +653,38 @@ page({ id: 'stamps', group: 'Marks', title: 'Stamps', lead: 'Rubber stamps with 
     if (s.kind === 'box') return `<span class="pt-stamp pt-stamp--box"${attr('data-ink', s.ink, 'red')}${st}>${esc(s.text)}</span>`;
     if (s.kind === 'round') return `<span class="pt-stamp pt-stamp--round"${attr('data-ink', s.ink, 'red')}${st}>${esc([...(s.text || '済')][0])}</span>`;
     if (s.kind === 'seal') return `<span class="pt-stamp"${attr('data-ink', s.ink, 'red')}${st}>${nameSeal(s.seal)}</span>`;
+    const pic = PIC_STAMPS.find(([k]) => k === s.kind);
+    if (pic) return `<span class="pt-stamp" data-pic="${s.kind}"${attr('data-ink', s.ink, 'red')}${st} role="img" aria-label="${pic[1]}"></span>`;
     return `<span class="pt-stamp"${attr('data-ink', s.ink, 'red')}${st}>${ICONS[s.kind][1]}</span>`;
   },
   code: s => PAGES_BY.stamps.render(s) + `\n\n// texture, for every stamp on the page\nkit.setFilters({ stamp: { wear: ${s.wear}, edge: ${s.edge}, mottle: ${s.mottle} } });`,
-  after: () => `<h2>Approval boxes</h2><p>The 承認 / 確認 / 作成 boxes found on Japanese office documents.</p>
+  after: () => `<h2>Download the pictures</h2><p>Each picture stamp is also a file of its own: one ink (it takes the colour around it, or black as an image) with real holes, so it sits on any paper. In a project they are <code>papertooth/stamps/frog.svg</code> and so on, and the stylesheet with all of them is optional (<code>papertooth/css/pictures</code>).</p>
+    <div class="stamp-files">${PIC_STAMPS.map(([k, l]) => `<a href="stamps/${k}.svg" download="papertooth-${k}.svg"><img src="stamps/${k}.svg" alt="" width="48" height="48"><span>${esc(l)}</span></a>`).join('')}</div>
+    <h2>Approval boxes</h2><p>The 承認 / 確認 / 作成 boxes found on Japanese office documents.</p>
     <div class="play" style="grid-template-columns:1fr"><div class="stage"><div class="pt-sheet" ${sheetAttrs()}><div><div class="pt-approval">
       <div><span class="pt-approval__head">承認</span><span class="pt-approval__cell"></span></div>
       <div><span class="pt-approval__head">確認</span><span class="pt-approval__cell"><span class="pt-stamp" data-ink="vermilion" style="--pt-rot:-8deg">${ICONS.kakunin[1].replace('width="64" height="64"', 'width="46" height="46"')}</span></span></div>
       <div><span class="pt-approval__head">作成</span><span class="pt-approval__cell"><span class="pt-stamp" data-ink="vermilion">${nameSeal((STATE.stamps || {}).seal, 30)}</span></span></div>
     </div></div></div></div></div>`,
-  ref: [['.pt-stamp--box, .pt-stamp--round', '', 'Text stamps. Any inline SVG drawn in currentColor works too'], ['data-ink', 'red', 'red, vermilion, blue, green, pink, brown'], ['--pt-rot', '0deg', 'Rotation'], ['--pt-stamp-opacity', '.86', 'How much ink'], ['kit.setFilters({ stamp })', '{ wear: .55, edge: .5, mottle: .5, rough: 1.3 }', 'Texture']] });
+  ref: [['.pt-stamp--box, .pt-stamp--round', '', 'Text stamps. Any inline SVG drawn in currentColor works too'], ['data-pic', '', 'A picture stamp, no script needed: ' + PIC_STAMPS.map(([k]) => k).join(', ') + '. Give it role="img" and an aria-label; size with --pt-pic-size (60px)'], ['data-ink', 'red', 'red, vermilion, blue, green, pink, brown'], ['--pt-rot', '0deg', 'Rotation'], ['--pt-stamp-opacity', '.86', 'How much ink'], ['kit.setFilters({ stamp })', '{ wear: .55, edge: .5, mottle: .5, rough: 1.3 }', 'Texture']] });
 
+page({ id: 'datestamps', group: 'Marks', title: 'Date stamps', keywords: 'date stamp week month year day calendar today weekday habit tracker check-in 曜日 日付 カレンダー', lead: 'The calendar stamps of Japanese stationery: a week strip to fill in, a month calendar, a year of months, or a single row. Fine printed lines in one ink, with today circled and the days gone by crossed out in pencil.',
+  controls: [
+    { k: 'unit', label: 'Stamp', type: 'select', options: [['week', 'Week strip'], ['month', 'Month calendar'], ['year', 'Year'], ['day', 'Days of the month']], v: 'week' },
+    { k: 'variant', label: 'Style', type: 'select', options: [['', 'Printed grid'], ['bar', 'One row'], ['wide', 'Wide (month)']], v: '', when: s => s.unit !== 'day' },
+    { k: 'rows', label: 'Rows to fill in', type: 'range', min: 1, max: 6, step: 1, v: 2, when: s => (s.unit === 'week' && !s.variant) || (s.unit === 'month' && s.variant === 'wide') },
+    { k: 'title', label: 'Title line', type: 'toggle', v: true, when: s => s.unit === 'week' && !s.variant },
+    { k: 'mark', label: 'Today', type: 'select', options: [['circle', 'Circled'], ['box', 'Boxed'], ['highlight', 'Highlighted'], ['none', 'Not marked']], v: 'circle' },
+    { k: 'past', label: 'Gone by', type: 'select', options: [['x', 'Crossed out'], ['strike', 'Struck through'], ['none', 'Not marked']], v: 'x' },
+    { k: 'locale', label: 'Language', type: 'select', options: [['en-GB', 'English'], ['ja-JP', '日本語'], ['fr-FR', 'Français'], ['de-DE', 'Deutsch'], ['es-ES', 'Español'], ['en-US', 'English (US)']], v: 'en-GB' },
+    { k: 'date', label: 'Date', type: 'text', v: 'today', note: 'today, or a date such as 2026-10-21' },
+    { k: 'ink', label: 'Ink', type: 'select', options: STAMP_INKS, v: 'red' }
+  ],
+  render: s => {
+    const grid = s.unit === 'week' && !s.variant, wide = s.unit === 'month' && s.variant === 'wide';
+    return `<div class="pt-datestamp" data-unit="${s.unit}"${attr('data-variant', s.unit !== 'day' ? s.variant : '')}${grid || wide ? attr('data-rows', s.rows, 1) : ''}${grid && s.title ? ' data-title=""' : ''}${attr('data-date', s.date, 'today')}${attr('data-mark', s.mark, 'circle')}${attr('data-past', s.past, 'none')}${attr('data-locale', s.locale)}${attr('data-ink', s.ink, 'red')}></div>`;
+  },
+  ref: [['data-unit', 'week', 'week (a strip to fill in), month (a calendar), year (its months), day (1 to 31 in a row)'], ['data-variant', '', 'bar: a single row for week, month or year; wide: a month as one long row of days'], ['data-rows', '1', 'Week strip and wide month: rows to fill in'], ['data-title', '', 'Week strip: a title line on top (empty to write in, or printed text)'], ['data-date', 'today', 'The day to mark, as 2026-10-21'], ['data-mark', 'circle', 'How today is marked: circle, box, highlight, none'], ['data-past', 'none', 'How the past is marked: x, strike, none'], ['data-locale', 'the page’s lang', 'Labels come from Intl in this language'], ['data-week-start', 'the locale’s', '0 = Sunday … 6 = Saturday'], ['data-years, data-from', '5, around today', 'Year bar'], ['data-mark-tool, data-past-tool', 'pencil, graphite', 'The instruments the marks are drawn with'], ['data-ink', 'red', 'red, vermilion, blue, green, pink, brown'], ['<DateStamp>', '', 'The same in papertooth/react']] });
 page({ id: 'sticky', group: 'Paper goods', title: 'Sticky notes', lead: 'Flat along the glue strip at the top. There is no outline: the edge you see is the shadow underneath. Four ways a note sits on a page, in the usual sizes.',
   controls: [
     { k: 'color', label: 'Colour', type: 'select', options: ['yellow', 'pink', 'mint', 'blue', 'orange'], v: 'yellow' },

@@ -6,7 +6,8 @@ import { createElement as h, forwardRef, useEffect, useId, useState } from 'reac
 import { init } from '../js/index.js';
 import { rng, f } from '../js/core.js';
 import { wobblyBox, wobblyRing, spiral, TICK, DOT } from '../js/shapes.js';
-import { firstDayOf, weekDates, sameDay, dayParts } from '../js/dates.js';
+import { firstDayOf, weekDates, sameDay, dayParts, stampLayout, stampLabel } from '../js/dates.js';
+import { stampMark } from '../js/planner.js';
 
 /** Start papertooth when the component mounts and stop it when it unmounts. Returns the kit once running. */
 export function usePapertooth(options) {
@@ -57,7 +58,7 @@ const ink = (className) => h('svg', { className, 'aria-hidden': 'true', focusabl
 
 /** A highlighter button, or an outlined one with `outline`. Renders an <a> with href, otherwise a <button>. */
 export const Btn = named('Btn', ({ as, outline, hl, color, size, hover, tool, className, children, ...rest }, ref) => {
-  const Tag = as || (rest.href != null ? 'a' : 'button');
+  const Tag = as || (rest.href != null ? 'a' : 'button'), drawn = hover || (outline ? '' : 'underline');
   return h(Tag, {
     ...(Tag === 'button' && rest.type == null ? { type: 'button' } : null),
     ...rest, ref,
@@ -67,7 +68,7 @@ export const Btn = named('Btn', ({ as, outline, hl, color, size, hover, tool, cl
   h('span', { className: 'pt-btn__label' }, children),
   // text only: rendering children twice would duplicate ids and the state of anything stateful inside
   h('span', { className: 'pt-btn__smear', 'aria-hidden': 'true' }, textOf(children)),
-  hover === 'circle' || hover === 'underline' ? ink('pt-hover-ink') : null);
+  drawn === 'circle' || drawn === 'underline' ? ink('pt-hover-ink') : null);
 });
 
 /** A highlighted phrase. */
@@ -76,9 +77,9 @@ export const Mark = named('Mark', ({ hl, color, size, className, children, ...re
     h('span', { className: 'pt-mark__ink' }, children)));
 
 /** A mark drawn on text: circle, box, strike, cross, under, hatch or hanamaru. */
-export const Anno = named('Anno', ({ anno = 'circle', tool, className, children, ...rest }, ref) =>
+export const Anno = named('Anno', ({ anno = 'circle', tool, wrap, className, children, ...rest }, ref) =>
   // the svg is left empty: the script draws one path in it per pass of the instrument
-  h('span', { ...rest, ref, className: cls('pt-anno', className), ...data({ anno, tool }) },
+  h('span', { ...rest, ref, className: cls('pt-anno', className), ...data({ anno, tool }), 'data-wrap': wrap ? '' : undefined },
     children, h('svg', { className: 'pt-anno__ink', 'aria-hidden': 'true', focusable: 'false' })));
 
 /** Typed text whose letters sit a little unevenly. Takes text (including 'Hello ' + name); anything else is passed through. */
@@ -104,7 +105,7 @@ export const Check = named('Check', ({ type = 'checkbox', tool, seed, className,
     h('input', { type, ...input, ref }),
     h('svg', { width: 22, height: 22, viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' },
       h('path', { d: box }), h('path', { className: 'pt-tick', pathLength: 1, d: radio ? DOT : TICK })),
-    radio ? children : h('span', { className: 'pt-check__text' }, children));
+    radio ? children : h('span', { className: 'pt-check__text' }, h('span', { className: 'pt-check__ink' }, children)));
 });
 
 /* ---------- planner ----------
@@ -164,4 +165,32 @@ export const Habits = named('Habits', ({ days, head, habits, onToggle, title = '
       key: d, style: s, seed: (i + 1) * 101 + d, checked: !!x.done[d], 'aria-label': `${x.name}, ${labels[d]}`,
       onChange: onToggle ? e => onToggle(i, d, e.target.checked) : undefined, readOnly: !onToggle
     })), x.ink))));
+});
+
+/**
+ * A date stamp: a week strip to fill in, a month calendar (or a whole month in one row, variant="wide"), a year of months, or one row (variant="bar"; unit="day"
+ * is always a bar). The current one is circled, boxed or highlighted (mark); past ones crossed or struck (past).
+ */
+export const DateStamp = named('DateStamp', ({ unit = 'week', variant, date = new Date(), mark = 'circle', past = 'none', locale = 'en-GB', weekStart,
+  years, from, rows = 1, title, markTool = 'pencil', pastTool = 'graphite', ink, className, style, ...rest }, ref) => {
+  const { sections } = stampLayout(unit, date, { variant, locale, weekStart, years, from, rows, title });
+  // printed twice from the same cells: in stamp ink, then the pencil marks alone on top
+  const layer = marks => h('div', { className: marks ? 'pt-datestamp__marks' : 'pt-datestamp__print', 'aria-hidden': marks ? 'true' : undefined },
+    sections.map(s => h('div', { key: s.part, className: 'pt-datestamp__section', 'data-part': s.part },
+      s.rows.map((row, r) => h('div', { key: r, className: 'pt-datestamp__row' }, row.map((c, i) => {
+        const m = marks ? stampMark(s.part, c.state, mark, past) : {};
+        const label = m.label && m.label !== 'highlight'
+          ? h(Anno, { anno: m.label, tool: markTool, className: 'pt-datestamp__label' }, c.label)
+          : h('span', { className: 'pt-datestamp__label' }, c.label);
+        const inner = m.label === 'highlight' ? h(Mark, null, label) : label;
+        return m.cell
+          ? h(Anno, { key: i, anno: m.cell, tool: pastTool, className: 'pt-datestamp__cell', 'data-state': c.state }, inner)
+          : h('span', { key: i, className: 'pt-datestamp__cell', 'data-state': c.state, 'data-side': c.side ? '' : undefined }, inner);
+      }))))));
+  return h('div', {
+    ...rest, ref, role: 'img', 'aria-label': stampLabel(unit, date, locale), lang: /^ja\b/.test(locale) ? 'ja' : undefined,
+    // the full date's punctuation depends on each runtime's date data (Node 23 drops the comma Chrome writes)
+    suppressHydrationWarning: true,
+    className: cls('pt-datestamp', className), 'data-unit': unit, 'data-variant': variant, 'data-ink': ink, 'data-pt-ready': '', style
+  }, layer(false), layer(true));
 });

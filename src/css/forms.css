@@ -4,9 +4,13 @@
    <input class="pt-input" type="text">
    Without the script the native controls stay visible and still work. */
 .pt-todo { list-style: none; padding: 0; display: flex; flex-direction: column; }
-.pt-todo li { max-width: none; height: var(--pt-grid); line-height: var(--pt-grid); }
-.pt-check, .pt-radio { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; min-height: var(--pt-grid); }
-.pt-todo .pt-check { height: var(--pt-grid); }
+/* a task that wraps takes as many grid lines as it needs; the box stays level with its first line */
+.pt-todo li { max-width: none; min-height: var(--pt-grid); line-height: var(--pt-grid); }
+.pt-check, .pt-radio { display: inline-flex; align-items: flex-start; gap: 10px; cursor: pointer; min-height: var(--pt-grid); }
+:is(.pt-check, .pt-radio) > svg { margin-block: max(0px, calc((var(--pt-grid) - 22px) / 2)); }
+.pt-check__text { min-width: 0; }
+/* in a list the label is the whole row, not an inline box on a line of its own, so nothing adds a descender's height */
+.pt-todo :is(.pt-check, .pt-radio) { display: flex; }
 :is(.pt-check, .pt-radio)[data-pt-ready] input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 :is(.pt-check, .pt-radio) svg { flex: none; overflow: visible; }
 :is(.pt-check, .pt-radio) svg path { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
@@ -16,13 +20,16 @@
 /* a round cap leaves a dot at the start of an undrawn path: hide the mark until it is drawn */
 :is(.pt-check, .pt-radio) input:not(:checked) ~ svg .pt-tick { visibility: hidden; transition: stroke-dashoffset .35s var(--pt-ease), visibility 0s .35s; }
 :is(.pt-check, .pt-radio) input:focus-visible ~ svg { outline: 2px dashed var(--pt-pen); outline-offset: 3px; }
-.pt-check__text {
+/* the strike is drawn on the inline span inside the text, cloned onto every line of a task that wraps.
+   (Text written before .pt-check__ink existed, with no span inside, is struck as one block, as it was.) */
+:is(.pt-check__ink, .pt-check__text:not(:has(> .pt-check__ink))) {
   background: var(--pt-strike) 0 var(--pt-strike-y, 55%) / 0% var(--pt-strike-h, 10px) no-repeat;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
   transition: background-size .4s .15s var(--pt-ease);
 }
-.pt-check input:checked ~ .pt-check__text { background-size: 100% var(--pt-strike-h, 10px); }
+.pt-check input:checked ~ .pt-check__text .pt-check__ink, .pt-check input:checked ~ .pt-check__text:not(:has(> .pt-check__ink)) { background-size: 100% var(--pt-strike-h, 10px); }
 /* <ul class="pt-todo" data-strike="none|line|double|scribble|under" data-ul="wobble|slant|swash|double|marker|wave"> */
-[data-strike="none"] .pt-check__text, .pt-check__text[data-strike="none"] { background: none; }
+:is([data-strike="none"] .pt-check__text, .pt-check__text[data-strike="none"]), :is([data-strike="none"] .pt-check__text, .pt-check__text[data-strike="none"]) .pt-check__ink { background: none; }
 .pt-radios { display: flex; flex-wrap: wrap; gap: 0 var(--pt-grid); font-size: var(--pt-s-body); line-height: var(--pt-grid); }
 
 /* text fields: a line on the page to write on. At rest a dotted pencil line, as on a printed form;

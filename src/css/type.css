@@ -1,19 +1,26 @@
 /* papertooth: writing on the sheet
    Text inside .pt-sheet sits on the grid. The script nudges each block onto a dot row. */
-.pt-sheet :is(h1, h2, h3, h4, p, ul, ol, li, figure, blockquote) { margin: 0; }
-.pt-sheet :is(p, li) { font-size: var(--pt-s-body); line-height: var(--pt-grid); max-width: 52ch; }
-.pt-mode-hand .pt-sheet :is(p, li), .pt-sheet.pt-mode-hand :is(p, li) { max-width: 34em; }
-.pt-sheet :is(h1, h2) { font-family: var(--pt-f-head); font-weight: 400; line-height: calc(var(--pt-grid) * 2); text-wrap: balance; }
-.pt-sheet h1 { font-size: var(--pt-s-h1); max-width: 18em; }
-.pt-sheet h2 { font-size: var(--pt-s-h2); }
-.pt-sheet h3 { font-family: var(--pt-font-type); font-weight: 400; font-size: var(--pt-s-small); line-height: var(--pt-grid); opacity: .7; }
-:is(.pt-mode-hand) .pt-sheet :is(h1, h2), .pt-sheet.pt-mode-hand :is(h1, h2) { font-weight: 700; }
-.pt-sheet section { display: flex; flex-direction: column; gap: var(--pt-grid); }
+/* the text on a sheet is styled through :where(), as weakly as one class: it wins over a bare reset (h2 { … }), and a
+   component's or an app's own class wins over it when it loads later, as an app's styles do. Within papertooth the
+   per-part stylesheets can come in any order. */
+.pt-sheet :where(h1, h2, h3, h4, p, ul, ol, li, figure, blockquote) { margin: 0; }
+.pt-sheet :where(p, li) { font-size: var(--pt-s-body); line-height: var(--pt-grid); max-width: 52ch; }
+.pt-mode-hand .pt-sheet :where(p, li), .pt-sheet.pt-mode-hand :where(p, li) { max-width: 34em; }
+.pt-sheet :where(h1, h2) { font-family: var(--pt-f-head); font-weight: 400; line-height: calc(var(--pt-grid) * 2); text-wrap: balance; }
+.pt-sheet :where(h1) { font-size: var(--pt-s-h1); max-width: 18em; }
+.pt-sheet :where(h2) { font-size: var(--pt-s-h2); }
+.pt-sheet :where(h3) { font-family: var(--pt-font-type); font-weight: 400; font-size: var(--pt-s-small); line-height: var(--pt-grid); opacity: .7; }
+.pt-mode-hand .pt-sheet :where(h1, h2), .pt-sheet.pt-mode-hand :where(h1, h2) { font-weight: 700; }
+/* a <section>, and a whole .pt-sheet--page, keep the sheet's rhythm between their blocks of text, a line of the grid
+   above each after the first. They stay ordinary blocks and space only text, as weakly as one class, so an app's
+   sections and parts keep their own layout */
+.pt-sheet :where(section > :is(h1, h2, h3, h4, h5, h6, p, ul, ol, dl, figure, blockquote, pre, table, hr, details):not(:first-child)),
+.pt-sheet--page > :where(:is(h1, h2, h3, h4, h5, h6, p, ul, ol, dl, figure, blockquote, pre, table, hr, details):not(:first-child)) { margin-top: var(--pt-grid); }
 .pt-row { display: flex; flex-wrap: wrap; gap: 0 var(--pt-grid); align-items: center; }
 
 /* ink texture: body text varies in density only; headings also get a fine rough edge */
-.pt-sheet :is(p, li) { filter: var(--pt-text-filter, ); }
-.pt-sheet :is(h1, h2) { filter: var(--pt-head-filter, ); }
+.pt-sheet :where(p, li) { filter: var(--pt-text-filter, ); }
+.pt-sheet :where(h1, h2) { filter: var(--pt-head-filter, ); }
 
 /* per-letter wobble: the script wraps each letter of .pt-wobble in a span */
 .pt-c {

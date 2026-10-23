@@ -16,11 +16,20 @@
 }
 .pt-mode-hand .pt-btn, .pt-btn.pt-mode-hand { font-weight: 600; }
 .pt-btn { isolation: isolate; }
-/* --pt-wipe runs from 0 to 1 as the second pass is drawn on hover. The highlighter and the ink it drags
-   both follow it, so the smudge appears exactly where the tip is, at the speed it moves. */
+/* --pt-wipe runs from 0 to 1 as the hover mark is drawn (the underline, the circle, the second pass or an outlined
+   button's highlighter). The highlighter and the ink it drags both follow it, so the smudge appears exactly where
+   the tip is, at the speed it moves. */
 @property --pt-wipe { syntax: '<number>'; inherits: true; initial-value: 0; }
-.pt-btn { --pt-wipe: 0; transition: --pt-wipe .45s cubic-bezier(.4,.6,.2,1); }
-.pt-btn:is(:hover, :focus-visible) { --pt-wipe: 1; }
+.pt-btn { --pt-wipe: 0; transition: --pt-wipe .45s cubic-bezier(.4,.6,.2,1), translate .1s; }
+/* drawn on hover only where a pointer hovers, so a tap on a phone leaves nothing stuck; drawn while pressed down,
+   on keyboard focus, and kept while the button is on: pressed, selected, expanded, open or the current page */
+@media (hover: hover) { .pt-btn:hover:not(:disabled, [aria-disabled="true"]) { --pt-wipe: 1; } }
+.pt-btn:active:not(:disabled, [aria-disabled="true"]) { --pt-wipe: 1; translate: 0 1px; }
+.pt-btn:is(:focus-visible, [aria-pressed="true"], [aria-selected="true"], [aria-expanded="true"], [aria-current]:not([aria-current="false"])), details[open] > summary.pt-btn { --pt-wipe: 1; }
+.pt-btn:is(:disabled, [aria-disabled="true"]) { cursor: not-allowed; opacity: .5; }
+.pt-btn:is(:disabled, [aria-disabled="true"])::before { filter: grayscale(1); }
+summary.pt-btn { list-style: none; }
+summary.pt-btn::-webkit-details-marker { display: none; }
 /* the label keeps its own layer from the start, so the hover never re-rasterises it on a different pixel (Safari) */
 .pt-btn__label { position: relative; filter: var(--pt-text-filter, ) var(--pt-smudge, ); transform: translateZ(0); }
 .pt-btn--outline .pt-btn__label { filter: var(--pt-text-filter, ); }
@@ -97,23 +106,31 @@
 .pt-mark[data-size="fine"]  { --pt-mark-h: 46%; --pt-mark-y-pos: 92%; }
 .pt-mark[data-size="broad"] { --pt-mark-h: 112%; --pt-mark-y-pos: 50%; }
 
-/* a highlighted button is already inked: hovering adds a second pass, but drags no more ink */
+/* a highlighted button is already inked: hovering underlines it in pen (painted by the script), and
+   data-hover="pass" adds a second highlighter pass instead, which still drags no more ink */
 .pt-btn:not(.pt-btn--outline) .pt-btn__smear { display: none; }
+.pt-btn:not([data-hover="pass"])::after { display: none; }
 
-/* data-hover on a button or link: "circle" or "underline" draws that mark on hover instead,
+/* data-hover on a button or link: "circle" or "underline" draws that mark on hover,
    in the element's writing instrument (data-tool); "none" keeps it still */
-.pt-btn[data-hover]:not([data-hover="pass"])::after { display: none; }
 .pt-btn--outline[data-hover]:not([data-hover="pass"])::before { display: none; }
 .pt-btn--outline[data-hover]:not([data-hover="pass"]) .pt-btn__smear { display: none; }
 .pt-link[data-hover] { position: relative; }
-.pt-link[data-hover]:not([data-hover="second"]):is(:hover, :focus-visible) { background-size: var(--pt-u-size), 0% 9px; }
-.pt-link[data-ul="hl"][data-hover]:not([data-hover="second"]):is(:hover, :focus-visible) { background-size: 0% 82%, 100% 9px; }
+.pt-link[data-hover]:not([data-hover="second"]) { background-size: var(--pt-u-size), 0% 9px; }
+.pt-link[data-ul="hl"][data-hover]:not([data-hover="second"]) { background-size: 100% 82%, 0% 9px; }
 .pt-hover-ink { position: absolute; overflow: visible; pointer-events: none; z-index: 1; }
 .pt-hover-ink path {
   fill: none; stroke: var(--pt-t-color, var(--pt-pen)); stroke-width: calc(var(--pt-t-w, 1.8) * 1px); stroke-opacity: var(--pt-t-op, 1);
   stroke-linecap: round; stroke-linejoin: round;
-  stroke-dasharray: 1 1; stroke-dashoffset: 1; visibility: hidden;
-  transition: stroke-dashoffset .3s var(--pt-ease), visibility 0s .3s;
+  /* drawn as far as the hover has got; hidden at rest, where the round cap would leave a dot */
+  stroke-dasharray: 1 1; stroke-dashoffset: calc(1 - var(--pt-wipe, 0)); opacity: clamp(0, var(--pt-wipe, 0) * 40, 1);
 }
-:is(.pt-btn, .pt-link):is(:hover, :focus-visible) > .pt-hover-ink path { stroke-dashoffset: 0; visibility: visible; transition: stroke-dashoffset .5s var(--pt-ease); }
 .pt-btn:is([data-tool="graphite"], [data-tool="pencil"]) > .pt-hover-ink, .pt-link:is([data-tool="graphite"], [data-tool="pencil"]) > .pt-hover-ink { filter: var(--pt-graphite, ); }
+
+@media (prefers-reduced-motion: reduce) { .pt-btn { transition: none; } }
+/* high contrast: the highlighter is a background, which the system paints over, so the button gets a plain border */
+@media (forced-colors: active) {
+  .pt-btn { border: 1px solid ButtonBorder; }
+  .pt-btn:is([aria-pressed="true"], [aria-selected="true"], [aria-expanded="true"], [aria-current]:not([aria-current="false"])), details[open] > summary.pt-btn { outline: 2px solid Highlight; outline-offset: 2px; }
+  .pt-btn:is(:disabled, [aria-disabled="true"]) { color: GrayText; border-color: GrayText; }
+}

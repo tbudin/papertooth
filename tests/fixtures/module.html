@@ -1,0 +1,25 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><title>papertooth as modules</title>
+<!-- only the parts this page uses -->
+<link rel="stylesheet" href="/dist/css/base.css"><link rel="stylesheet" href="/dist/css/marks.css"><link rel="stylesheet" href="/dist/css/pictures.css"><link rel="stylesheet" href="/dist/css/diagram.css"><link rel="stylesheet" href="/dist/css/images.css"></head>
+<body class="pt-desk pt-day"><main class="pt-sheet"><p>A <span class="pt-anno" data-anno="circle">word</span>.</p>
+<span id="frog" class="pt-stamp" data-pic="frog" role="img" aria-label="Frog"></span>
+<pre class="pt-diagram">flowchart LR
+  A[Start] --> B[Done]</pre>
+<img class="pt-litho" src="/docs/img/lake.jpg" alt="Lake" width="200"></main>
+<script type="module">
+  const fetched = () => performance.getEntriesByType('resource').map(r => r.name.split('/').pop());
+  const { init, renderDiagram } = await import('/dist/papertooth.min.mjs');
+  const before = fetched().filter(n => /^(diagram|images)-/.test(n));
+  init({ seed: 3, motion: 'none', lazy: false });
+  const until = async check => { for (const end = Date.now() + 8000; !check() && Date.now() < end;) await new Promise(r => setTimeout(r, 25)); };
+  await until(() => document.querySelector('.pt-diagram svg') && document.querySelector('.pt-litho').style.filter);
+  const { renderDiagram: own } = await import('/dist/diagram.min.mjs');
+  document.body.setAttribute('data-result', JSON.stringify({
+    mainHasRenderDiagram: typeof renderDiagram !== 'undefined', loadedBeforeInit: before,
+    loadedAfter: fetched().filter(n => /^(diagram|images)-/.test(n)).map(n => n.split('-')[0]).sort(),
+    anno: !!document.querySelector('.pt-anno__ink path'), diagram: !!document.querySelector('.pt-diagram svg'),
+    litho: /pt-litho-/.test(document.querySelector('.pt-litho').style.filter),
+    frog: /svg/.test(getComputedStyle(document.getElementById('frog'), '::before').maskImage || ''),
+    ownDiagram: own('graph LR; A --> B', { width: 300 }).startsWith('<svg')
+  }));
+</script></body></html>

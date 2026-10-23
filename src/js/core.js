@@ -67,4 +67,6 @@ export function toRgb(c) {
 }
 export const rgbHex = c => '#' + c.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
 export const toHex = c => rgbHex(toRgb(c));
+// a highlighter button is already inked, so unless told otherwise it is underlined in pen on hover
+export const hoverOf = el => el.dataset.hover || (el.classList.contains('pt-btn') && !el.classList.contains('pt-btn--outline') ? 'underline' : '');
 export const cssVar = (el, name) => getComputedStyle(el).getPropertyValue(name).trim();

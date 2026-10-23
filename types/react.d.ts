@@ -1,10 +1,10 @@
 // Types for papertooth/react.
 import type { ComponentPropsWithRef, ElementType, InputHTMLAttributes, CSSProperties, ReactNode, ReactElement, Ref } from 'react';
-import type { Options, Kit, HighlightStyle, OutlineStyle, Weekday } from 'papertooth';
+import type { Options, Kit, HighlightStyle, OutlineStyle, Weekday, StampUnit } from 'papertooth';
 
 export type HighlighterColor = 'yellow' | 'pink' | 'green' | 'orange' | 'blue';
 export type Tool = 'pen' | 'ballpoint' | 'brush' | 'marker' | 'graphite' | 'pencil';
-export type AnnoStyle = 'circle' | 'box' | 'strike' | 'cross' | 'under' | 'hatch' | 'hanamaru';
+export type AnnoStyle = 'circle' | 'box' | 'strike' | 'cross' | 'under' | 'hatch' | 'hanamaru' | 'x';
 
 /** Start papertooth when the component mounts and stop it when it unmounts. Options are read once. */
 export declare function usePapertooth(options?: Options): Kit | null;
@@ -22,7 +22,7 @@ export type BtnProps<E extends ElementType = 'button'> = As<E, {
   /** Hover highlighter colour. */
   color?: HighlighterColor;
   size?: 'fine' | 'broad';
-  /** What happens on hover. Default: a second highlighter pass. */
+  /** What happens on hover. Default: a pen underline; on an outlined button, the highlighter. */
   hover?: 'pass' | 'underline' | 'circle' | 'none';
   /** The instrument an outline, underline or circle is drawn with. */
   tool?: Tool;
@@ -45,6 +45,8 @@ export type AnnoProps = ComponentPropsWithRef<'span'> & {
   anno?: AnnoStyle;
   /** Default: the marking pencil. */
   tool?: Tool;
+  /** Let a longer phrase wrap: circle, box and hanamaru go around all of it; strike, under and cross follow each line. */
+  wrap?: boolean;
 };
 /** A mark drawn on text. */
 export declare function Anno(props: AnnoProps): ReactElement;
@@ -134,3 +136,34 @@ export type HabitsProps = Omit<ComponentPropsWithRef<'div'>, 'children'> & {
 };
 /** A habit tracker: a row per habit and a column per day, swapped on narrow screens. */
 export declare function Habits(props: HabitsProps): ReactElement;
+
+export type StampInk = 'red' | 'vermilion' | 'blue' | 'green' | 'pink' | 'brown';
+export type DateStampProps = Omit<ComponentPropsWithRef<'div'>, 'title'> & {
+  /** Default: 'week'. week: a strip to fill in; month: a calendar; year: its months; day: 1 to 31 in a row. */
+  unit?: StampUnit;
+  /** 'bar' prints a week, the months or a run of years as one row; 'wide' prints a month as one long row of days. */
+  variant?: 'bar' | 'wide';
+  /** Week strip and wide month: how many rows to fill in. Default: 1. */
+  rows?: number;
+  /** Week strip: a title line on top ('' to write in by hand). */
+  title?: string;
+  /** The day, month or year to mark. Default: today. */
+  date?: Date;
+  /** How the current one is marked. Default: 'circle'. */
+  mark?: 'circle' | 'box' | 'highlight' | 'none';
+  /** How the past ones are marked. Default: 'none'. */
+  past?: 'x' | 'strike' | 'none';
+  /** Labels come from Intl in this locale. Default: 'en-GB'. */
+  locale?: string;
+  /** Week stamps: the first day. Default: the locale's when the runtime knows it, Monday otherwise. */
+  weekStart?: Weekday;
+  /** Year bar: how many years (default 5) and the first (default: the date's year in the middle). */
+  years?: number;
+  from?: number;
+  /** The instruments the marks are drawn with. Default: 'pencil' for the current one, 'graphite' for the past. */
+  markTool?: Tool;
+  pastTool?: Tool;
+  ink?: StampInk;
+};
+/** A date stamp: a week, the months, a run of years or the days of a month, with the current one marked and the past crossed out. */
+export declare function DateStamp(props: DateStampProps): ReactElement;

@@ -72,7 +72,7 @@ export const PALETTE = {
     ['stamp-brown', 'Brown pad', '', '', '#8a5a3c']
   ],
   papers: [
-    ['white', 'White', '', '', '#fcfbf7'],
+    ['white', 'White', '', '', '#fefefe'],
     ['cream', 'Cream', '', '', '#f8f1df'],
     ['washi', 'Washi', '和紙', 'Japanese paper', '#f6f2e6'],
     ['kraft', 'Kraft', '', '', '#c9a67a'],

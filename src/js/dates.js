@@ -48,3 +48,78 @@ export function dayParts(date = new Date(), locale = 'en-GB') {
     week: isoWeek(date)
   };
 }
+
+const sign = n => (n < 0 ? 'past' : n > 0 ? 'future' : 'current');
+const midnight = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+
+/**
+ * The cells of a date stamp, each { label, state } with state 'past', 'current' or 'future' relative to `date`:
+ * unit 'week' (seven weekdays), 'month' (the twelve months), 'year' (a run of years) or 'day' (the days of the month).
+ */
+export function stampCells(unit = 'week', date = new Date(), { locale = 'en-GB', weekStart = firstDayOf(locale), years = 5, from } = {}) {
+  if (unit === 'month') {
+    const name = fmt(locale, { month: 'short' });
+    return Array.from({ length: 12 }, (_, m) => ({ label: name.format(new Date(date.getFullYear(), m, 1)), state: sign(m - date.getMonth()) }));
+  }
+  if (unit === 'year') {
+    const first = from == null ? date.getFullYear() - Math.floor((years - 1) / 2) : from;
+    return Array.from({ length: years }, (_, k) => ({ label: String(first + k), state: sign(first + k - date.getFullYear()) }));
+  }
+  if (unit === 'day') {
+    const days = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    return Array.from({ length: days }, (_, k) => ({ label: String(k + 1), state: sign(k + 1 - date.getDate()) }));
+  }
+  const name = fmt(locale, { weekday: 'short' });
+  return weekDates(date, weekStart).map(d => ({ label: name.format(d), state: sign(midnight(d) - midnight(date)) }));
+}
+
+/** What a date stamp says, read whole: the date for a week or day stamp, the month or the year for the others. */
+export function stampLabel(unit, date = new Date(), locale = 'en-GB') {
+  const opts = unit === 'month' ? { month: 'long', year: 'numeric' } : unit === 'year' ? { year: 'numeric' } : { dateStyle: 'full' };
+  return fmt(locale, opts).format(date);
+}
+
+/**
+ * Everything a date stamp prints, with no DOM: { sections: [{ part, rows: [[{ label, state }]] }] }, state being
+ * 'past', 'current', 'future' or '' (no date, such as a blank before the 1st).
+ *   variant 'bar': one row (week days, the months, a run of years, or the days of the month);
+ *   unit 'week': a weekday header over rows of empty cells to fill in (a title line on top with `title`);
+ *   unit 'month': the twelve months over the month's calendar, the 1st on its weekday;
+ *   unit 'month', variant 'wide': the whole month in one long row, each day under its weekday, with rows to fill in;
+ *     its first column (cells with `side`) names the month and the year;
+ *   unit 'year': the year over its twelve months.
+ */
+export function stampLayout(unit = 'week', date = new Date(), { variant, locale = 'en-GB', weekStart = firstDayOf(locale), years, from, rows = 1, title } = {}) {
+  const opts = { locale, weekStart, years, from };
+  if (variant === 'bar' || unit === 'day') return { sections: [{ part: 'bar', rows: unit === 'day' ? chunk(stampCells('day', date, opts), 16) : [stampCells(unit, date, opts)] }] };
+  const narrow = fmt(locale, { weekday: 'narrow' });
+  const weekdays = weekDates(date, weekStart).map(d => ({ label: narrow.format(d), state: sign(midnight(d) - midnight(date)) }));
+  const months = stampCells('month', date, opts);
+  if (unit === 'month' && variant === 'wide') {
+    const days = stampCells('day', date, opts), side = label => ({ label, state: '', side: true });
+    return { sections: [
+      { part: 'head', rows: [[side(fmt(locale, { month: 'short' }).format(date)), ...days.map((_, k) => ({ label: narrow.format(new Date(date.getFullYear(), date.getMonth(), k + 1)), state: '' }))]] },
+      { part: 'days', rows: [[side(String(date.getFullYear())), ...days]] },
+      // rows to tick off day by day, so the days gone by are crossed out only on the dates
+      { part: 'write', rows: Array.from({ length: rows }, () => [side(''), ...days.map(() => ({ label: '', state: '' }))]) }
+    ] };
+  }
+  if (unit === 'month') {
+    const first = new Date(date.getFullYear(), date.getMonth(), 1), lead = (first.getDay() - weekStart + 7) % 7;
+    const days = stampCells('day', date, opts), blank = { label: '', state: '' };
+    const cells = [...Array(lead).fill(blank), ...days];
+    while (cells.length % 7) cells.push(blank);
+    return { sections: [
+      { part: 'months', rows: chunk(months, 6) },
+      { part: 'head', rows: [weekdays.map(d => ({ label: d.label, state: '' }))] },
+      { part: 'days', rows: chunk(cells, 7) }
+    ] };
+  }
+  if (unit === 'year') {
+    return { sections: [{ part: 'title', rows: [[{ label: String(date.getFullYear()), state: '' }]] }, { part: 'year', rows: chunk(months, 4) }] };
+  }
+  const sections = [{ part: 'head', rows: [weekdays] }, { part: 'write', rows: Array.from({ length: rows }, () => weekdays.map(d => ({ label: '', state: d.state }))) }];
+  if (title != null) sections.unshift({ part: 'title', rows: [[{ label: title, state: '' }]] });
+  return { sections };
+}
+const chunk = (list, n) => Array.from({ length: Math.ceil(list.length / n) }, (_, i) => list.slice(i * n, i * n + n));

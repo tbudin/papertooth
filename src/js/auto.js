@@ -1,9 +1,11 @@
 // Browser build: exposes window.Papertooth. Add data-pt-auto to the script tag to start on load,
 // optionally with JSON options: <script src="papertooth.min.js" data-pt-auto='{"seed": 7}'></script>
 import * as Papertooth from './index.js';
+// the browser build is one file with everything in it, renderDiagram included
+import { renderDiagram } from './diagram.js';
 
 const script = document.currentScript;
-const api = { ...Papertooth, kit: null };
+const api = { ...Papertooth, renderDiagram, kit: null };
 window.Papertooth = api;
 
 if (script && script.hasAttribute('data-pt-auto')) {

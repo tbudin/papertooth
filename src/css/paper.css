@@ -74,16 +74,20 @@
 }
 .pt-sheet--flat { box-shadow: none; }
 /* the page is the paper: fills the window, no desk and no shadow. Content keeps --pt-page-width,
-   centred, with the side margins rounded to whole grid cells so the text still lines up with the dots */
+   centred, with the side margins rounded down to whole grid cells so the text still lines up with the dots,
+   and never less than one cell (a --pt-sheet-pad smaller than a cell would otherwise round to nothing on a phone) */
 .pt-sheet--page {
   width: 100%; min-height: 100vh; min-height: 100dvh; margin: 0; box-shadow: none;
   --pt-side: max(var(--pt-sheet-pad), calc((100% - var(--pt-page-width, 720px)) / 2));
   padding-inline: var(--pt-side);
 }
 @supports (width: round(down, 100%, 1px)) {
-  .pt-sheet--page { width: 100%; padding-inline: round(down, var(--pt-side), var(--pt-grid)); }
+  .pt-sheet--page { width: 100%; padding-inline: max(var(--pt-grid), round(down, var(--pt-side), var(--pt-grid))); }
 }
 body:has(> .pt-sheet--page) { margin: 0; background: var(--pt-paper); }
+/* a page is usually laid out by the site or app on it, so it is an ordinary block rather than a column with a gap:
+   only its blocks of text get a grid line between them (type.css), and its other parts keep their own spacing */
+.pt-sheet--page { display: block; }
 
 /* grain in the paper itself: under the writing, never over notes, tape or stamps */
 .pt-sheet::after {
@@ -124,7 +128,7 @@ body:has(> .pt-sheet--page) { margin: 0; background: var(--pt-paper); }
 
 /* paper stock: colour and grain; the ruling takes a colour that suits it */
 .pt-sheet[data-paper="cream"] {          /* thin ivory paper */
-  --pt-paper: #f8f1df; --pt-grain: .2;
+  --pt-paper: #f8f1df; --pt-grain: .2; --pt-grain-image: var(--pt-grain-warm-image);
   --pt-dot: rgba(110, 92, 66, .24); --pt-line: rgba(150, 120, 80, .22); --pt-line-strong: rgba(150, 120, 80, .38);
 }
 .pt-sheet[data-paper="washi"] {          /* handmade paper with long fibres */
@@ -133,7 +137,7 @@ body:has(> .pt-sheet--page) { margin: 0; background: var(--pt-paper); }
   --pt-dot: rgba(96, 86, 70, .22); --pt-line: rgba(110, 100, 80, .2); --pt-line-strong: rgba(110, 100, 80, .34);
 }
 .pt-sheet[data-paper="kraft"] {          /* brown kraft */
-  --pt-paper: #c9a67a; --pt-grain: .55;
+  --pt-paper: #c9a67a; --pt-grain: .55; --pt-grain-image: var(--pt-grain-warm-image);
   --pt-dot: rgba(70, 44, 18, .3); --pt-line: rgba(70, 44, 18, .22); --pt-line-strong: rgba(70, 44, 18, .38); --pt-margin-line: rgba(140, 40, 30, .4);
 }
 .pt-sheet[data-paper="recycled"] {       /* grey recycled stock with flecks */

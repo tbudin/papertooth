@@ -1,0 +1,66 @@
+name: Publish
+
+# Pushing a version tag (git tag v0.4.0 && git push origin v0.4.0) tests the release, stages it on npm with
+# trusted publishing (no token: npm trusts this workflow), copies it to GitHub Packages, and creates the
+# GitHub release from CHANGELOG.md. The npm release goes public once a maintainer approves it on npmjs.com.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # the GitHub release
+      id-token: write   # npm trusted publishing
+      packages: write   # the copy on GitHub Packages
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      # trusted publishing needs npm 11.5.1 or later, and npm stage needs 11.15
+      - run: npm install -g npm@11.21.0
+      - run: npm ci
+
+      - name: The tag matches package.json
+        run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+
+      - run: npm run build
+      - name: Built files match the source
+        run: git diff --exit-code -- dist docs/papertooth.min.css docs/papertooth.min.js
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+
+      - name: Stage on npm (approve it on npmjs.com, Staged Packages)
+        run: npm stage publish
+
+      - name: Release notes from CHANGELOG.md
+        run: |
+          node -e '
+            const v = process.env.GITHUB_REF_NAME.slice(1), s = require("fs").readFileSync("CHANGELOG.md", "utf8");
+            const m = s.match(new RegExp("^## " + v.replace(/\./g, "\\.") + " - [0-9-]+\\n([\\s\\S]*?)(?=^## |$(?![\\s\\S]))", "m"));
+            if (!m) { console.error("No section for " + v + " in CHANGELOG.md"); process.exit(1); }
+            require("fs").writeFileSync("notes.md", m[1].trim() + "\n\nnpm: `npm i papertooth@" + v + "` · [full changelog](https://github.com/" + process.env.GITHUB_REPOSITORY + "/blob/main/CHANGELOG.md)\n");
+          '
+      - name: GitHub release
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md --verify-tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      # GitHub only lists packages from its own registry on the repository page, under a scoped name
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: '@tbudin'
+      - name: Copy to GitHub Packages as @tbudin/papertooth
+        run: |
+          npm pkg set name=@tbudin/papertooth
+          npm publish --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}

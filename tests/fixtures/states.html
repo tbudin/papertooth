@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Button and link states</title>
+<link rel="stylesheet" href="/dist/papertooth.css">
+<body class="pt-desk"><main class="pt-sheet">
+  <p>
+    <a id="btn" class="pt-btn" href="#a">Default</a>
+    <button id="pressed" class="pt-btn" type="button" aria-pressed="true">Pressed</button>
+    <button id="disabled" class="pt-btn" type="button" disabled>Disabled</button>
+    <a id="ariaDisabled" class="pt-btn" href="#b" aria-disabled="true">Off</a>
+    <button id="outline" class="pt-btn pt-btn--outline" type="button">Outlined</button>
+  </p>
+  <p>
+    <a id="link" class="pt-link" href="#c">a link</a>, <a id="current" class="pt-link" href="#d" aria-current="page">this page</a>,
+    <button id="linkButton" class="pt-link" type="button">a button</button>
+  </p>
+  <details open><summary id="summary" class="pt-btn">Open</summary><p>Inside.</p></details>
+</main>
+<script src="/dist/papertooth.min.js"></script>
+<script>Papertooth.init({ motion: 'none', lazy: false });</script>
+</body></html>

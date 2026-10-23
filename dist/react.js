@@ -1,4 +1,4 @@
-/*! papertooth v0.3.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.4.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 "use client";
 
 // src/react/index.js
@@ -86,6 +86,71 @@ function dayParts(date = /* @__PURE__ */ new Date(), locale = "en-GB") {
     week: isoWeek(date)
   };
 }
+var sign = (n) => n < 0 ? "past" : n > 0 ? "future" : "current";
+var midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+function stampCells(unit = "week", date = /* @__PURE__ */ new Date(), { locale = "en-GB", weekStart = firstDayOf(locale), years = 5, from } = {}) {
+  if (unit === "month") {
+    const name2 = fmt(locale, { month: "short" });
+    return Array.from({ length: 12 }, (_, m) => ({ label: name2.format(new Date(date.getFullYear(), m, 1)), state: sign(m - date.getMonth()) }));
+  }
+  if (unit === "year") {
+    const first = from == null ? date.getFullYear() - Math.floor((years - 1) / 2) : from;
+    return Array.from({ length: years }, (_, k) => ({ label: String(first + k), state: sign(first + k - date.getFullYear()) }));
+  }
+  if (unit === "day") {
+    const days = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    return Array.from({ length: days }, (_, k) => ({ label: String(k + 1), state: sign(k + 1 - date.getDate()) }));
+  }
+  const name = fmt(locale, { weekday: "short" });
+  return weekDates(date, weekStart).map((d) => ({ label: name.format(d), state: sign(midnight(d) - midnight(date)) }));
+}
+function stampLabel(unit, date = /* @__PURE__ */ new Date(), locale = "en-GB") {
+  const opts = unit === "month" ? { month: "long", year: "numeric" } : unit === "year" ? { year: "numeric" } : { dateStyle: "full" };
+  return fmt(locale, opts).format(date);
+}
+function stampLayout(unit = "week", date = /* @__PURE__ */ new Date(), { variant, locale = "en-GB", weekStart = firstDayOf(locale), years, from, rows = 1, title } = {}) {
+  const opts = { locale, weekStart, years, from };
+  if (variant === "bar" || unit === "day") return { sections: [{ part: "bar", rows: unit === "day" ? chunk(stampCells("day", date, opts), 16) : [stampCells(unit, date, opts)] }] };
+  const narrow = fmt(locale, { weekday: "narrow" });
+  const weekdays = weekDates(date, weekStart).map((d) => ({ label: narrow.format(d), state: sign(midnight(d) - midnight(date)) }));
+  const months = stampCells("month", date, opts);
+  if (unit === "month" && variant === "wide") {
+    const days = stampCells("day", date, opts), side = (label) => ({ label, state: "", side: true });
+    return { sections: [
+      { part: "head", rows: [[side(fmt(locale, { month: "short" }).format(date)), ...days.map((_, k) => ({ label: narrow.format(new Date(date.getFullYear(), date.getMonth(), k + 1)), state: "" }))]] },
+      { part: "days", rows: [[side(String(date.getFullYear())), ...days]] },
+      // rows to tick off day by day, so the days gone by are crossed out only on the dates
+      { part: "write", rows: Array.from({ length: rows }, () => [side(""), ...days.map(() => ({ label: "", state: "" }))]) }
+    ] };
+  }
+  if (unit === "month") {
+    const first = new Date(date.getFullYear(), date.getMonth(), 1), lead = (first.getDay() - weekStart + 7) % 7;
+    const days = stampCells("day", date, opts), blank = { label: "", state: "" };
+    const cells = [...Array(lead).fill(blank), ...days];
+    while (cells.length % 7) cells.push(blank);
+    return { sections: [
+      { part: "months", rows: chunk(months, 6) },
+      { part: "head", rows: [weekdays.map((d) => ({ label: d.label, state: "" }))] },
+      { part: "days", rows: chunk(cells, 7) }
+    ] };
+  }
+  if (unit === "year") {
+    return { sections: [{ part: "title", rows: [[{ label: String(date.getFullYear()), state: "" }]] }, { part: "year", rows: chunk(months, 4) }] };
+  }
+  const sections = [{ part: "head", rows: [weekdays] }, { part: "write", rows: Array.from({ length: rows }, () => weekdays.map((d) => ({ label: "", state: d.state }))) }];
+  if (title != null) sections.unshift({ part: "title", rows: [[{ label: title, state: "" }]] });
+  return { sections };
+}
+var chunk = (list, n) => Array.from({ length: Math.ceil(list.length / n) }, (_, i) => list.slice(i * n, i * n + n));
+
+// src/js/planner.js
+function stampMark(part, state, mark = "circle", past = "none") {
+  return {
+    label: state === "current" && part !== "write" && part !== "title" && mark !== "none" ? mark : null,
+    // the month selector above a calendar is only circled: crossing out its past months reads as clutter
+    cell: state === "past" && part !== "head" && part !== "months" && (past === "x" || past === "strike") ? past : null
+  };
+}
 
 // src/react/index.js
 function usePapertooth(options) {
@@ -122,7 +187,7 @@ var plainText = (children) => {
 var named = (name, fn) => Object.assign(forwardRef(fn), { displayName: name });
 var ink = (className) => h("svg", { className, "aria-hidden": "true", focusable: "false", preserveAspectRatio: "none" }, h("path", { pathLength: 1 }));
 var Btn = named("Btn", ({ as, outline, hl, color, size, hover, tool, className, children, ...rest }, ref) => {
-  const Tag = as || (rest.href != null ? "a" : "button");
+  const Tag = as || (rest.href != null ? "a" : "button"), drawn = hover || (outline ? "" : "underline");
   return h(
     Tag,
     {
@@ -135,7 +200,7 @@ var Btn = named("Btn", ({ as, outline, hl, color, size, hover, tool, className, 
     h("span", { className: "pt-btn__label" }, children),
     // text only: rendering children twice would duplicate ids and the state of anything stateful inside
     h("span", { className: "pt-btn__smear", "aria-hidden": "true" }, textOf(children)),
-    hover === "circle" || hover === "underline" ? ink("pt-hover-ink") : null
+    drawn === "circle" || drawn === "underline" ? ink("pt-hover-ink") : null
   );
 });
 var Mark = named("Mark", ({ hl, color, size, className, children, ...rest }, ref) => h(
@@ -143,11 +208,11 @@ var Mark = named("Mark", ({ hl, color, size, className, children, ...rest }, ref
   { ...rest, ref, className: cls("pt-mark", className), ...data({ hl, color, size }) },
   h("span", { className: "pt-mark__ink" }, children)
 ));
-var Anno = named("Anno", ({ anno = "circle", tool, className, children, ...rest }, ref) => (
+var Anno = named("Anno", ({ anno = "circle", tool, wrap, className, children, ...rest }, ref) => (
   // the svg is left empty: the script draws one path in it per pass of the instrument
   h(
     "span",
-    { ...rest, ref, className: cls("pt-anno", className), ...data({ anno, tool }) },
+    { ...rest, ref, className: cls("pt-anno", className), ...data({ anno, tool }), "data-wrap": wrap ? "" : void 0 },
     children,
     h("svg", { className: "pt-anno__ink", "aria-hidden": "true", focusable: "false" })
   )
@@ -176,7 +241,7 @@ var Check = named("Check", ({ type = "checkbox", tool, seed, className, style, c
       h("path", { d: box }),
       h("path", { className: "pt-tick", pathLength: 1, d: radio ? DOT : TICK })
     ),
-    radio ? children : h("span", { className: "pt-check__text" }, children)
+    radio ? children : h("span", { className: "pt-check__text" }, h("span", { className: "pt-check__ink" }, children))
   );
 });
 var DayHead = named("DayHead", ({ date = /* @__PURE__ */ new Date(), locale = "en-GB", weekLabel = (n) => `Week ${n}`, className, ...rest }, ref) => {
@@ -248,10 +313,61 @@ var Habits = named("Habits", ({ days, head, habits, onToggle, title = "Habit", c
     })), x.ink))
   ));
 });
+var DateStamp = named("DateStamp", ({
+  unit = "week",
+  variant,
+  date = /* @__PURE__ */ new Date(),
+  mark = "circle",
+  past = "none",
+  locale = "en-GB",
+  weekStart,
+  years,
+  from,
+  rows = 1,
+  title,
+  markTool = "pencil",
+  pastTool = "graphite",
+  ink: ink2,
+  className,
+  style,
+  ...rest
+}, ref) => {
+  const { sections } = stampLayout(unit, date, { variant, locale, weekStart, years, from, rows, title });
+  const layer = (marks) => h(
+    "div",
+    { className: marks ? "pt-datestamp__marks" : "pt-datestamp__print", "aria-hidden": marks ? "true" : void 0 },
+    sections.map((s) => h(
+      "div",
+      { key: s.part, className: "pt-datestamp__section", "data-part": s.part },
+      s.rows.map((row, r) => h("div", { key: r, className: "pt-datestamp__row" }, row.map((c, i) => {
+        const m = marks ? stampMark(s.part, c.state, mark, past) : {};
+        const label = m.label && m.label !== "highlight" ? h(Anno, { anno: m.label, tool: markTool, className: "pt-datestamp__label" }, c.label) : h("span", { className: "pt-datestamp__label" }, c.label);
+        const inner = m.label === "highlight" ? h(Mark, null, label) : label;
+        return m.cell ? h(Anno, { key: i, anno: m.cell, tool: pastTool, className: "pt-datestamp__cell", "data-state": c.state }, inner) : h("span", { key: i, className: "pt-datestamp__cell", "data-state": c.state, "data-side": c.side ? "" : void 0 }, inner);
+      })))
+    ))
+  );
+  return h("div", {
+    ...rest,
+    ref,
+    role: "img",
+    "aria-label": stampLabel(unit, date, locale),
+    lang: /^ja\b/.test(locale) ? "ja" : void 0,
+    // the full date's punctuation depends on each runtime's date data (Node 23 drops the comma Chrome writes)
+    suppressHydrationWarning: true,
+    className: cls("pt-datestamp", className),
+    "data-unit": unit,
+    "data-variant": variant,
+    "data-ink": ink2,
+    "data-pt-ready": "",
+    style
+  }, layer(false), layer(true));
+});
 export {
   Anno,
   Btn,
   Check,
+  DateStamp,
   DayHead,
   Habit,
   Habits,

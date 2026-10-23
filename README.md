@@ -22,13 +22,40 @@ const kit = init({ pen: 'ink-ai', motion: 'scroll' });
 Or from a CDN, with no build step:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/papertooth@0.3/dist/papertooth.min.css">
-<script src="https://cdn.jsdelivr.net/npm/papertooth@0.3/dist/papertooth.min.js" defer data-pt-auto></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/papertooth@0.4/dist/papertooth.min.css">
+<script src="https://cdn.jsdelivr.net/npm/papertooth@0.4/dist/papertooth.min.js" defer data-pt-auto></script>
 ```
 
 `data-pt-auto` starts the script on load. It accepts options as JSON: `data-pt-auto='{"seed": 7}'`. The running instance is `window.Papertooth.kit`.
 
 The module does nothing when it is imported, so it is safe to import during server rendering; call `init()` in the browser. With React or Next.js, use [`papertooth/react`](#react-and-nextjs). TypeScript types are included.
+
+### Only what you use
+
+`papertooth/css` is everything (about 18 KB gzipped). To load less, import `papertooth/css/base` (6.8 KB: settings, inks, paper, writing, instruments, draw-on) and then only the parts the page uses, in any order:
+
+```js
+import 'papertooth/css/base';
+import 'papertooth/css/highlight';   // highlighter buttons and marks
+import 'papertooth/css/marks';       // marks on text and stamps
+```
+
+| Part | What is in it | gzip |
+| --- | --- | --- |
+| `highlight` | `.pt-btn`, `.pt-mark` | 1.6 KB |
+| `lines` | `.pt-link`, `.pt-rule` | 0.8 KB |
+| `marks` | `.pt-anno`, `.pt-stamp`, approval boxes | 1.3 KB |
+| `pictures` | picture stamps (`data-pic`), needs `marks` | 2.7 KB |
+| `goods` | sticky notes, tape, flags, tabs, cards, torn memos, tickets | 3.0 KB |
+| `planner` | day headings, weeks, habit trackers, date stamps (date stamps need `marks`, and `highlight` for `data-mark="highlight"`) | 2.0 KB |
+| `forms` | checkboxes, radios, to-dos, text fields, ink samples | 1.4 KB |
+| `extras` | photos, postage, labels, bullet journal, progress | 2.6 KB |
+| `images` | lithograph, printer | 0.4 KB |
+| `diagram` | `.pt-diagram` | 0.8 KB |
+
+The script is one module (`import { init } from 'papertooth'`, about 23 KB gzipped); the code for diagrams and the image effects is fetched only the first time a page has one. The browser build for a `<script>` tag (`dist/papertooth.min.js`) is a single file with everything in it.
+
+A sheet gives the text on it a document's typography: headings, paragraphs and lists, with a grid line between the blocks of text in a `<section>`. These styles weigh as little as one class, so an app's own class wins over them when the app's styles load after papertooth. A `<section>` stays an ordinary block, so an app's panels keep their own layout.
 
 With Tailwind v4 or anything else that orders CSS in cascade layers, import `papertooth/layer.css` instead of `papertooth/css`: it is the same stylesheet inside `@layer papertooth`. Declare the order once, before both, so utilities such as `p-4` win over papertooth and papertooth wins over the base reset:
 
@@ -55,13 +82,15 @@ Fonts are not bundled. The defaults are Courier Prime, Special Elite and Caveat 
 | Component | Markup | Options |
 | --- | --- | --- |
 | Sheet | `.pt-sheet` | `data-paper` (the stock): white, cream, washi, kraft, recycled, tracing; `data-ruling` (what is printed on it): dot, grid, graph, lined, blank |
-| Highlighter button | `.pt-btn` | `data-hover`: pass (default), underline, circle, none; `data-hl`: swipe, flick, double, low, dry, scribble; `data-color`: yellow, pink, green, orange, blue; `data-size`: fine, broad |
+| Highlighter button | `.pt-btn` | `data-hover`: underline (default, in pen), pass (a second highlighter pass), circle, none; `data-hl`: swipe, flick, double, low, dry, scribble; `data-color`: yellow, pink, green, orange, blue; `data-size`: fine, broad |
 | Outlined button | `.pt-btn.pt-btn--outline` | `data-outline`: sketch, double, broken, circled, corners, brackets, parens, braces, angles, kagi, lenticular; `data-tool` |
 | Inline highlight | `mark.pt-mark` | `data-hl`, `data-color`, `data-size`: fine, broad |
-| Link | `a.pt-link` | `data-ul`: wobble, slant, double, swash, marker, wave, hl. `.pt-links-mix` on a container mixes them; `data-tool`; `data-hover`: second (default), underline, circle, none |
+| Link | `a.pt-link` | `data-ul`: wobble, slant, double, swash, marker, wave, hl (highlighted; hover adds a pen underline, not more highlighter). `.pt-links-mix` on a container mixes them; `data-tool`; `data-hover`: second (default), underline, circle, none |
 | Separator | `.pt-rule` | `data-rule`: wobble, double, dashes, brush, coil, scrawl, short, stars; `data-tool` |
-| Mark on text | `span.pt-anno` | `data-anno`: circle, box, strike, cross, under, hatch, hanamaru; `data-tool` (default: the marking pencil) |
-| Stamp | `.pt-stamp`, `.pt-stamp--box`, `.pt-stamp--round` | `data-ink`: red, vermilion, blue, green, pink, brown; `--pt-rot`. The playground has picture stamps (cloud, paw, daruma, Fuji, sun, thanks, tea) and a name seal with your own text to copy |
+| Mark on text | `span.pt-anno` | `data-anno`: circle, box, strike, cross, under, hatch, hanamaru, x; `data-tool` (default: the marking pencil); `data-wrap` lets a longer phrase wrap (strike, under and cross follow each line; circle, box and hanamaru go around the whole phrase) |
+| Stamp | `.pt-stamp`, `.pt-stamp--box`, `.pt-stamp--round` | `data-ink`: red, vermilion, blue, green, pink, brown; `--pt-rot`. The playground also has text stamps (ありがとう, 確認, 重要…) and a name seal with your own text to copy |
+| Picture stamp | `<span class="pt-stamp" data-pic="frog" role="img" aria-label="Frog"></span>` | `data-pic`: frog, bear, tiger, rabbit, tanuki, owl, cat, paw, daruma, fuji, sakura, onigiri, cloud, sun, tick, star, heart, arrow; `data-ink`; `--pt-pic-size` (60px). No script needed. Each is also a file of its own: `papertooth/stamps/frog.svg` |
+| Date stamp | `.pt-datestamp` (the script fills it) | `data-unit`: week (a strip of days to fill in), month (a calendar, the 1st on its weekday), year (its twelve months), day (1 to 31 in a row); `data-variant="bar"` prints a week, the months or a run of years as one row, and `data-variant="wide"` a month as one long row of days, each under its weekday; `data-rows` (the week strip and the wide month) and `data-title` (the week strip); `data-date`: today (default) or 2026-10-21; `data-mark` (today): circle, box, highlight, none; `data-past`: x, strike, none; `data-locale` (default: the page's `lang`); `data-week-start`; `data-years`, `data-from`; `data-mark-tool`, `data-past-tool`; `data-ink` |
 | Approval boxes | `.pt-approval` | 承認 / 確認 / 作成 columns |
 | Tape | `.pt-tape` | `data-tape`: masking, kraft, stripes, dots, gingham, seigaiha, clear |
 | Sticky note | `.pt-sticky > .pt-sticky__paper` | `data-color`: yellow, pink, mint, blue, orange; `data-sticky`: flat, lifted, pad, stack; `data-ratio`: square, wide, tall, small, strip (or `--pt-note-w`, `--pt-note-h`) |
@@ -69,7 +98,7 @@ Fonts are not bundled. The defaults are Courier Prime, Special Elite and Caveat 
 | Card, clip | `.pt-card`, `.pt-clip` | |
 | Torn memo, ticket | `.pt-torn`, `.pt-ticket` | |
 | Planner | `.pt-dayhead`, `.pt-week`, `.pt-habits` | `data-today` fills in today |
-| Forms | `.pt-check`, `.pt-radio`, `.pt-field` > `.pt-field__label` + `.pt-input` (input or textarea), `.pt-todo` | native controls stay underneath; `data-tool` on the tick; on a to-do list `data-strike`: line, double, scribble, under (with any `data-ul`), none |
+| Forms | `.pt-check`, `.pt-radio`, `.pt-field` > `.pt-field__label` + `.pt-input` (input or textarea), `.pt-todo` | native controls stay underneath; `data-tool` on the tick; on a to-do list `data-strike`: line, double, scribble, under (with any `data-ul`), none; a task that wraps takes as many grid lines as it needs and is struck through line by line |
 | Ink sample | `.pt-swatch` | `data-tool`: fountain, ballpoint, pencil; `--pt-swatch` |
 | Frame | `figure.pt-photo` | `data-mount`: polaroid, corners, or a `.pt-tape` inside; `--pt-photo-w`, `--pt-photo-ratio` |
 | Postage frame | `.pt-postage` inside `.pt-lift` | `--pt-perf` |
@@ -81,7 +110,18 @@ Fonts are not bundled. The defaults are Courier Prime, Special Elite and Caveat 
 | Diagram | `pre.pt-diagram` with Mermaid source | flowchart/graph, pie, xychart-beta; `data-fill`: wash, highlight, pencil, hatch, cross, scribble, stipple; `data-tool` (or `type` for typed labels) |
 | Text tools | `.pt-type`, `.pt-pen-text`, `.pt-pencil-text`, `.pt-note`, `.pt-typewriter` | |
 
-A `.pt-sheet` is a sheet lying on a desk (`.pt-desk`), so it has a shadow and the edge of a second sheet under it. For a website where the page itself is the paper, use `.pt-sheet--page`: it fills the window with no desk or shadow, and keeps the content to `--pt-page-width` (720px), centred on whole grid cells. `.pt-sheet--flat` keeps the sheet's size but drops the shadow.
+Buttons and links work on `<a>`, `<button>` and `<summary>` (`button.pt-link` loses the button's own box, so it reads as a link). `<input type="submit">` can't hold the drawn marks, so use `<button type="submit">` instead. Every state is drawn:
+
+- **Hover:** the hover mark is drawn only where a pointer can hover, so a tap on a phone doesn't leave a mark stuck.
+- **Pressing:** the mark is drawn while the element is pressed down, and a button sinks a pixel.
+- **Keyboard focus:** a dashed outline, and the mark is drawn too.
+- **On:** `aria-pressed="true"`, `aria-selected="true"`, `aria-expanded="true"`, `aria-current` (such as `"page"`) or an open `<details>` keep the mark drawn.
+- **Disabled:** `disabled` or `aria-disabled="true"` fades the element, greys a highlighter and drops the hover. An `aria-disabled` link still follows its `href`; stopping it is up to your app.
+- **Visited links:** a slightly darker pen, changed with `--pt-visited`.
+- **Reduced motion:** the marks appear without being drawn.
+- **High contrast** (forced colours): a plain underline under links and a border around buttons.
+
+A `.pt-sheet` is a sheet lying on a desk (`.pt-desk`), so it has a shadow and the edge of a second sheet under it. For a website where the page itself is the paper, use `.pt-sheet--page`: it fills the window with no desk or shadow, and keeps the content to `--pt-page-width` (720px), centred on whole grid cells, with at least one cell of margin on each side. A page is an ordinary block, not a column with a gap like a sheet: only its blocks of text get a grid line between them, so the parts of a site or app laid out on it keep their own spacing. `.pt-sheet--flat` keeps the sheet's size but drops the shadow.
 
 The desk turns dark with the system's dark mode while the paper stays paper; force it with `.pt-night` or `.pt-day` on `<html>`. Anything written straight on the dark desk (text, links, highlights, ticks, rules, stamps, tape) switches to light night inks (`--pt-night-pen`, `--pt-night-pencil`, `--pt-night-graphite`, `--pt-night-ballpoint`) and text under a highlighter stays dark (`--pt-night-hl-ink`). Paper lying on the desk (sheets, cards, notes, tickets, photos, labels, flags, tabs) keeps its day inks. The script redraws when the system switches between light and dark; call `kit.refresh()` after toggling `.pt-night` yourself. Pages print without the desk, shadows or tabs.
 
@@ -109,9 +149,9 @@ Every effect is a custom property. Put them on `:root`, on a sheet, or on one el
 | --- | --- | --- |
 | `--pt-grid` | `24px` | Dot pitch and line height |
 | `--pt-sheet-width`, `--pt-sheet-pad` | `720px`, two cells | Sheet size |
-| `--pt-paper`, `--pt-desk`, `--pt-desk-ink` | `#fcfbf7`, `#cdcbc5`, `#3a3c42` | Paper, desk, and text written straight on the desk (light at night) |
+| `--pt-paper`, `--pt-desk`, `--pt-desk-ink` | `#fefefe`, `#cdcbc5`, `#3a3c42` | Paper, desk, and text written straight on the desk (light at night) |
 | `--pt-dot`, `--pt-dot-size`, `--pt-line` | | Ruling |
-| `--pt-grain` | `.28` | Paper grain, 0 to 1 |
+| `--pt-grain` | `.1` | Paper grain, 0 to 1 (each stock sets its own) |
 | `--pt-pen`, `--pt-pencil`, `--pt-ribbon`, `--pt-hl` | indigo, red pencil, black, yellow | Writing tools: pen ink, marking pencil, typewriter ribbon, highlighter |
 | `--pt-wobble` | `1` | Letter wobble, 0 to 2 |
 | `--pt-tilt` | `1` | How crooked things sit, 0 to 2 |
@@ -168,7 +208,7 @@ kit.destroy();                   // stop observing; what is drawn stays drawn
 Also exported:
 
 - `VERSION`, `DEFAULTS` (the options above), `PALETTE` (every colour as data), `FILTER_DEFAULTS`
-- `renderDiagram(source, options)`: a diagram as an SVG string
+- `renderDiagram(source, options)`, from `papertooth/diagram`: a diagram as an SVG string (in the `<script>` build it is `Papertooth.renderDiagram`)
 - `filtersMarkup(params)`, `typewriterFilter(id, params)`, `lithoFilter(id, params)`, `smearColour(ink, highlighter)`
 - `setPen`, `setPencil`, `setRibbon`, `setHighlighter` (colour, target): change the ink on any element without a kit. They do not redraw what is already drawn; the kit's methods do.
 - `dayHead(el, date, { locale })`, `week(el, date, { locale, weekStart })`: fill planner pieces with any date, in any language, from any first day of the week (0 = Sunday … 6 = Saturday; by default the locale's own when the browser knows it, Monday otherwise)
@@ -223,9 +263,12 @@ import { Btn, Mark, Anno, Wobble, Check } from 'papertooth/react';
 | `Week` | `.pt-week` | `date`, `today`, `locale`, `weekStart`; `children` is a function that fills each day: `{day => <p>{tasks[day.index]}</p>}` |
 | `Habits` | a habit tracker, cells placed for wide and narrow screens | `habits` (`[{ name, ink, done: [] }]`), `days`, `head`, `title`, `onToggle(habit, day, checked)` |
 | `Habit` | one tracker cell, for your own layout | input props and `ref` go on the checkbox; give it an `aria-label` |
+| `DateStamp` | `.pt-datestamp` | `unit`, `variant`, `rows`, `title`, `date`, `mark`, `past`, `locale`, `weekStart`, `years`, `from`, `markTool`, `pastTool`, `ink` |
 | `Check` | `label.pt-check` (or `.pt-radio` with `type="radio"`) | `tool`, `seed`; `className` and `style` go on the label, every other prop and the `ref` on the input |
 
 Everything else is plain classes: `<div className="pt-sticky">`, `<span className="pt-stamp">` and so on need no component. Two cases to know about: a `pre.pt-diagram` is replaced by its drawing, so give it `key={source}` if the source can change; and for planner pieces use `DayHead`, `Week` and `Habits` rather than `data-today`, which writes the dates in after React has rendered. Their defaults (English, Monday first) are the same on the server and in every browser; when you pass a locale, also pass `weekStart`, and pass `date` (and `today`) from the server if it runs in another time zone, so hydration matches. Shapes are seeded from React's `useId`, so the server and the browser draw the same thing and hydration matches.
+
+The script moves each paragraph, heading and list item a few pixels so its first line sits on a dot row. A to-do list, a bullet journal or anything marked `data-pt-ruled` (say, rows your app sizes and rules itself) moves as one block instead, so its rows keep their own rhythm; `.pt-nosnap` leaves an element alone. If your app lays everything out on the grid itself, turn snapping off with `<Papertooth snap={false} />`.
 
 In an app, pass `drawInserted={false}` to `<Papertooth>` so a page or tab swapped in on screen appears already drawn instead of drawing itself on each time; content that scrolls into view still draws on. `kit.settle(element)` does the same for one part of the page. The script keeps its own state in `data-pt-*` attributes, never in classes, so changing an element's `className` does not undo it, and it starts cleanly again after `destroy()` (a remount, or React's StrictMode in development).
 
@@ -235,12 +278,30 @@ For Vue, Svelte or Angular, the same rule applies: for elements whose content ch
 
 Load the script with `defer` so it never holds up the first paint, and load the fonts without blocking (`<link rel="preload" as="style" onload="this.rel='stylesheet'">`, or self-host them). Most of the extra work on a page comes from drawing marks on. By default only what scrolls into view is drawn on, so the first screen costs no more than a plain page; `motion: 'none'` turns drawing on off entirely, and visitors who ask for reduced motion never get it.
 
+- Import only the stylesheets a page uses (see [Only what you use](#only-what-you-use)); the script fetches diagram and image code only when a page has one.
 - Shapes are drawn only when they come near the screen and redrawn only when their size or style changes.
 - Each frame measures everything first and writes everything after, so the page lays out once.
 - Snapping uses `translate`, which moves text without triggering layout.
 - The script's own DOM changes are ignored by its mutation observer, so it goes fully idle after loading.
 - Animations are pure CSS and stop for people who prefer reduced motion.
 - Textures are SVG filters applied to text only. On very long pages, use `.pt-texture-light`, or `.pt-lazy` on sections so the browser can skip them off screen.
+
+## Shapes and tokens for other renderers
+
+`papertooth/shapes` and `papertooth/tokens` have no DOM in them, so they run anywhere: React Native with Skia or react-native-svg, canvas, a server, a worker.
+
+```js
+import { rng, ANNO, OUTLINE, inkPath, pictureSVG } from 'papertooth/shapes';
+import { TOKENS } from 'papertooth/tokens';
+
+const r = rng(7);                                     // a seed draws the same shape every time
+const circle = ANNO.circle(120, 40, r);               // SVG path data around a 120 × 40 word
+const pen = { kind: 'pen', color: TOKENS['ink-ai'], w: 1.6, op: 1 };
+const box = OUTLINE.sketch(160, 48, r, pen);          // SVG markup, inked with a fountain pen
+const frog = pictureSVG('frog', { width: 60 });       // a picture stamp as SVG in currentColor
+```
+
+`TOKENS` maps every colour token to its value (`'ink-ai': '#213c6b'`); `PALETTE` groups them with their names.
 
 ## Browser support
 
@@ -257,7 +318,9 @@ npm test          # browser tests (Playwright, with the installed Chrome)
 
 Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
-`dist/` is committed so the files can be used straight from GitHub; rebuild before committing a change to `src/`. Bump the version in both `package.json` and `src/js/index.js` (the build checks they match).
+`dist/` is committed so the files can be used straight from GitHub; rebuild before committing a change to `src/` (CI checks they match). The picture stamps are drawn in `src/js/pictures.js`; the build turns them into `src/css/pictures.css`.
+
+To release: bump the version in `package.json` and `src/js/index.js` (the build checks they match), add a section to the CHANGELOG, commit, then push a tag such as `git tag v0.4.0 && git push origin v0.4.0`. The Publish workflow tests it, stages it on npm with trusted publishing (approve it under Staged Packages on npmjs.com), creates the GitHub release from the CHANGELOG and copies the package to GitHub Packages as `@tbudin/papertooth`.
 
 ## Licence
 

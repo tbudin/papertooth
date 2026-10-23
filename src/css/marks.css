@@ -2,6 +2,11 @@
    <span class="pt-anno" data-anno="circle|box|strike|cross|under|hatch|hanamaru" data-tool="pen|graphite">word</span>   (default: the marking pencil)
    <span class="pt-stamp pt-stamp--box" data-ink="red|vermilion|blue|green|pink|brown">Draft</span> */
 .pt-anno { --pt-ox: 4px; --pt-oy: 2px; --pt-anno: var(--pt-pencil); position: relative; white-space: nowrap; }
+/* data-wrap lets a longer phrase wrap. A strike, underline or scribble stays in the run of the text and follows each
+   line; a circle, box or hanamaru turns the phrase into a block it can go around. Without data-wrap a mark stays on
+   one line, at the height of the text. */
+.pt-anno[data-wrap] { white-space: normal; }
+.pt-anno[data-wrap]:not([data-anno="strike"], [data-anno="under"], [data-anno="cross"]) { display: inline-block; max-width: 100%; }
 .pt-anno[data-anno="circle"]   { --pt-ox: 11px; --pt-oy: 7px; }
 .pt-anno[data-anno="box"]      { --pt-ox: 5px;  --pt-oy: 1px; }
 .pt-anno[data-anno="strike"]   { --pt-ox: 3px;  --pt-oy: -2px; }
@@ -9,6 +14,7 @@
 .pt-anno[data-anno="under"]    { --pt-ox: 2px;  --pt-oy: 0px; }
 .pt-anno[data-anno="hatch"]    { --pt-ox: 3px;  --pt-oy: -1px; --pt-anno: var(--pt-pencil-hb); }
 .pt-anno[data-anno="hanamaru"] { --pt-ox: 22px; --pt-oy: 16px; }
+.pt-anno[data-anno="x"]        { --pt-ox: 3px;  --pt-oy: 2px; }
 .pt-anno[data-tool="pen"]    { --pt-anno: var(--pt-pen); }
 .pt-anno[data-tool="graphite"] { --pt-anno: var(--pt-pencil-hb); }
 .pt-anno__ink {
@@ -36,6 +42,14 @@
   mix-blend-mode: var(--pt-blend, multiply);
 }
 .pt-stamp svg { display: block; }
+/* picture stamps: <span class="pt-stamp" data-pic="frog" role="img" aria-label="Frog"></span>. The drawings are
+   masks (pictures.css, made by the build from src/js/pictures.js), so the stamp takes its ink like any other. */
+.pt-stamp[data-pic] { width: var(--pt-pic-size, 60px); aspect-ratio: var(--pt-pic-ratio, 1); vertical-align: middle; }
+.pt-stamp[data-pic]::before {
+  content: ""; display: block; height: 100%; background: currentColor;
+  -webkit-mask: var(--pt-pic) center / contain no-repeat; mask: var(--pt-pic) center / contain no-repeat;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
 .pt-stamp--box {
   font-family: var(--pt-font-type); font-weight: 700; text-transform: uppercase;
   font-size: 22px; line-height: 1; letter-spacing: .14em;
@@ -48,12 +62,12 @@
   border: 3px solid currentColor; border-radius: 50%;
   font-family: var(--pt-font-jp); font-weight: 800; font-size: 30px; line-height: 1;
 }
-.pt-stamp[data-ink="red"]       { --pt-stamp: var(--pt-stamp-red); }
-.pt-stamp[data-ink="vermilion"] { --pt-stamp: var(--pt-stamp-vermilion); }
-.pt-stamp[data-ink="blue"]      { --pt-stamp: var(--pt-stamp-blue); }
-.pt-stamp[data-ink="green"]     { --pt-stamp: var(--pt-stamp-green); }
-.pt-stamp[data-ink="pink"]      { --pt-stamp: var(--pt-stamp-pink); }
-.pt-stamp[data-ink="brown"]     { --pt-stamp: var(--pt-stamp-brown); }
+:is(.pt-stamp, .pt-datestamp)[data-ink="red"]       { --pt-stamp: var(--pt-stamp-red); }
+:is(.pt-stamp, .pt-datestamp)[data-ink="vermilion"] { --pt-stamp: var(--pt-stamp-vermilion); }
+:is(.pt-stamp, .pt-datestamp)[data-ink="blue"]      { --pt-stamp: var(--pt-stamp-blue); }
+:is(.pt-stamp, .pt-datestamp)[data-ink="green"]     { --pt-stamp: var(--pt-stamp-green); }
+:is(.pt-stamp, .pt-datestamp)[data-ink="pink"]      { --pt-stamp: var(--pt-stamp-pink); }
+:is(.pt-stamp, .pt-datestamp)[data-ink="brown"]     { --pt-stamp: var(--pt-stamp-brown); }
 .pt-stamps { display: flex; flex-wrap: wrap; gap: var(--pt-grid); align-items: center; }
 
 /* 承認・確認・作成 approval boxes */
