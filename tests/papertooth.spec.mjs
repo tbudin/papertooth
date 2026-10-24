@@ -61,6 +61,9 @@ test('the server-rendered planner hydrates without warnings and works', async ({
   expect(r.cellPlace).toBe('--pt-ra:2;--pt-ca:2;--pt-rb:2;--pt-cb:2');
   expect(r.dateStamp).toBe('- - circle - - - - x x - - - - -');   // header, then the row to fill in
   expect(r.dateStampInk).toBe('blue');
+  expect(r.weekBox).toBe('box');                                               // a week can mark today with a box
+  expect(r.ownCell).toBe('5k');                                                // and a habit cell can hold anything
+  expect(r.ownCellBoxes).toBe(1);
 });
 
 test('date stamps print a week strip, a month calendar, a year and bars, with the marks laid exactly on top', async ({ page }) => {
@@ -96,8 +99,28 @@ test('date stamps print a week strip, a month calendar, a year and bars, with th
   expect(r.wideWrite).toBe(64);                                                 // two rows of a side cell and 31 days
   expect(r.wideSides).toBe(4);
   expect(r.wideFits).toBe(true);
+  expect(r.habitLabels).toBe('Run Read');                                       // row labels in the first column
+  expect(r.placed).toBe('tick3:write1@3 five:write2@5 star:days1@10 wk:write2@2');  // content lands in the cell it names
+  expect(r.inMarks).toBe(true);
+  expect(r.weekWider).toBe(true);                                               // a labelled week grows by its label column
+  expect(r.refilled).toBe(true);                                                // and keeps its content when filled again
   expect(r.days).toBe(28);
   expect(r.dayMarked).toBe(10);
+});
+
+test('a day heading and a week are filled from their own date, language, label and mark', async ({ page }) => {
+  const r = await scenario(page, 'plannerAttrs');
+  expect(r.head).toBe('21 | octobre 2026 | mercredi | Semaine 43');            // French, from the page, with its own label
+  expect(r.dates).toBe('19 20 21 22 23 24 25');                                // Monday first in French
+  expect(r.first).toEqual({ date: '21', anno: 'box', kept: 'rgb(1, 2, 3)', marked: 1 });   // boxed, its own style kept
+  expect(r.moved).toBe('23');                                                  // filled again, the mark moves
+  expect(r.stillMarked).toBe(1);
+  expect(r.current).toBe(1);
+});
+
+test('the React date stamp draws what cell() returns in that cell', async ({ page }) => {
+  const r = await scenario(page, 'datestampCell');
+  expect(r).toEqual({ part: 'write', column: 3, labels: 'Run Read', inMarks: true, fills: 1, errors: [] });
 });
 
 test('wrapped to-dos grow by whole lines and are struck line by line; marks and sticky notes wrap and stay put', async ({ page }) => {
@@ -203,6 +226,15 @@ test('a brush mark has the texture of brush ink, a pen mark none', async ({ page
     defined: !!document.querySelector('#pt-filters filter#pt-brush')
   }));
   expect(r).toEqual({ brush: 'url("#pt-brush")', pen: 'none', defined: true });
+});
+
+test('your own picture is printed as a stamp', async ({ page }) => {
+  await page.goto('http://localhost:4317/tests/fixtures/states.html');
+  const r = await page.evaluate(() => {
+    const el = document.getElementById('ownPic'), before = getComputedStyle(el, '::before');
+    return { mask: (before.maskImage || before.webkitMaskImage).includes('/docs/stamps/frog.svg'), width: el.getBoundingClientRect().width };
+  });
+  expect(r).toEqual({ mask: true, width: 60 });
 });
 
 test('snapping again puts buttons exactly where they were', async ({ page }) => {

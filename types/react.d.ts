@@ -1,6 +1,6 @@
 // Types for papertooth/react.
 import type { ComponentPropsWithRef, ElementType, InputHTMLAttributes, CSSProperties, ReactNode, ReactElement, Ref } from 'react';
-import type { Options, Kit, HighlightStyle, OutlineStyle, Weekday, StampUnit } from 'papertooth';
+import type { Options, Kit, HighlightStyle, OutlineStyle, Weekday, StampUnit, StampPart } from 'papertooth';
 
 export type HighlighterColor = 'yellow' | 'pink' | 'green' | 'orange' | 'blue';
 export type Tool = 'pen' | 'ballpoint' | 'brush' | 'marker' | 'graphite' | 'pencil';
@@ -84,8 +84,8 @@ export type DayHeadProps = ComponentPropsWithRef<'div'> & {
   date?: Date;
   /** Default: 'en-GB'. */
   locale?: string;
-  /** Default: n => `Week ${n}`. */
-  weekLabel?: (week: number) => ReactNode;
+  /** 'Semaine {n}', or a function of the week number. Default: 'Week {n}'. */
+  weekLabel?: string | ((week: number) => ReactNode);
 };
 /** A day heading: the date, month and weekday, the weekday's kanji as a stamp, and the ISO week. */
 export declare function DayHead(props: DayHeadProps): ReactElement;
@@ -94,8 +94,10 @@ export interface WeekDay { date: Date; index: number; today: boolean }
 export type WeekProps = Omit<ComponentPropsWithRef<'div'>, 'children'> & {
   /** Any day of the week to show. Default: today. */
   date?: Date;
-  /** The day to circle. Default: date. */
+  /** The day to mark. Default: date. */
   today?: Date;
+  /** How that day is marked: circle, box, highlight or none. Default: circle. */
+  mark?: 'circle' | 'box' | 'highlight' | 'none';
   /** Default: 'en-GB'. */
   locale?: string;
   /** Default: the locale's first day when the runtime knows it, Monday otherwise. */
@@ -103,7 +105,7 @@ export type WeekProps = Omit<ComponentPropsWithRef<'div'>, 'children'> & {
   /** Fills each day, e.g. day => tasks[key(day.date)].map(…). */
   children?: (day: WeekDay) => ReactNode;
 };
-/** Seven days around a date, the weekend coloured and today circled. */
+/** Seven days around a date, the weekend coloured and today marked. */
 export declare function Week(props: WeekProps): ReactElement;
 
 export type HabitProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'style' | 'className'> & {
@@ -133,6 +135,8 @@ export type HabitsProps = Omit<ComponentPropsWithRef<'div'>, 'children'> & {
   title?: ReactNode;
   /** Without it the tracker is read-only. */
   onToggle?: (habit: number, day: number, checked: boolean) => void;
+  /** Draws a cell yourself (a stamp, a letter, a mark) in place of its checkbox; return null to keep the checkbox. */
+  cell?: (info: { habit: number; day: number; done: boolean }) => ReactNode;
 };
 /** A habit tracker: a row per habit and a column per day, swapped on narrow screens. */
 export declare function Habits(props: HabitsProps): ReactElement;
@@ -143,8 +147,13 @@ export type DateStampProps = Omit<ComponentPropsWithRef<'div'>, 'title'> & {
   unit?: StampUnit;
   /** 'bar' prints a week, the months or a run of years as one row; 'wide' prints a month as one long row of days. */
   variant?: 'bar' | 'wide';
-  /** Week strip and wide month: how many rows to fill in. Default: 1. */
-  rows?: number;
+  /** Week strip and wide month: how many rows to fill in, or their labels (['Run', 'Read']). Default: 1. */
+  rows?: number | string[];
+  /**
+   * What to draw in a cell: a stamp, a letter, a mark. Called for every dated cell; `row` is 0 on the dates themselves
+   * and 1, 2… in the rows to fill in. Return null to leave the cell as it is.
+   */
+  cell?: (info: { part: StampPart; row: number; date: Date; state: 'past' | 'current' | 'future' | '' }) => ReactNode;
   /** Week strip: a title line on top ('' to write in by hand). */
   title?: string;
   /** The day, month or year to mark. Default: today. */

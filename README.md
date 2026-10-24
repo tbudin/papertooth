@@ -22,8 +22,8 @@ const kit = init({ pen: 'ink-ai', motion: 'scroll' });
 Or from a CDN, with no build step:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/papertooth@0.4/dist/papertooth.min.css">
-<script src="https://cdn.jsdelivr.net/npm/papertooth@0.4/dist/papertooth.min.js" defer data-pt-auto></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/papertooth@0.5/dist/papertooth.min.css">
+<script src="https://cdn.jsdelivr.net/npm/papertooth@0.5/dist/papertooth.min.js" defer data-pt-auto></script>
 ```
 
 `data-pt-auto` starts the script on load. It accepts options as JSON: `data-pt-auto='{"seed": 7}'`. The running instance is `window.Papertooth.kit`.
@@ -89,15 +89,15 @@ Fonts are not bundled. The defaults are Courier Prime, Special Elite and Caveat 
 | Separator | `.pt-rule` | `data-rule`: wobble, double, dashes, brush, coil, scrawl, short, stars; `data-tool` |
 | Mark on text | `span.pt-anno` | `data-anno`: circle, box, strike, cross, under, hatch, hanamaru, x; `data-tool` (default: the marking pencil); `data-wrap` lets a longer phrase wrap (strike, under and cross follow each line; circle, box and hanamaru go around the whole phrase) |
 | Stamp | `.pt-stamp`, `.pt-stamp--box`, `.pt-stamp--round` | `data-ink`: red, vermilion, blue, green, pink, brown; `--pt-rot`. The playground also has text stamps (ありがとう, 確認, 重要…) and a name seal with your own text to copy |
-| Picture stamp | `<span class="pt-stamp" data-pic="frog" role="img" aria-label="Frog"></span>` | `data-pic`: frog, bear, tiger, rabbit, tanuki, owl, cat, paw, daruma, fuji, sakura, onigiri, cloud, sun, tick, star, heart, arrow; `data-ink`; `--pt-pic-size` (60px). No script needed. Each is also a file of its own: `papertooth/stamps/frog.svg` |
-| Date stamp | `.pt-datestamp` (the script fills it) | `data-unit`: week (a strip of days to fill in), month (a calendar, the 1st on its weekday), year (its twelve months), day (1 to 31 in a row); `data-variant="bar"` prints a week, the months or a run of years as one row, and `data-variant="wide"` a month as one long row of days, each under its weekday; `data-rows` (the week strip and the wide month) and `data-title` (the week strip); `data-date`: today (default) or 2026-10-21; `data-mark` (today): circle, box, highlight, none; `data-past`: x, strike, none; `data-locale` (default: the page's `lang`); `data-week-start`; `data-years`, `data-from`; `data-mark-tool`, `data-past-tool`; `data-ink`. Screen readers get it as one image, labelled with what it marks (the date, the month or the year) |
+| Picture stamp | `<span class="pt-stamp" data-pic="frog" role="img" aria-label="Frog"></span>` | `data-pic`: frog, bear, tiger, rabbit, tanuki, owl, cat, paw, daruma, fuji, sakura, onigiri, cloud, sun, tick, star, heart, arrow; `data-ink`; `--pt-pic-size` (60px). No script needed. Each is also a file of its own: `papertooth/stamps/frog.svg`. Your own picture works too: `<span class="pt-stamp" data-pic style="--pt-pic: url(my-picture.svg)">` (one colour, the shape in black on transparent) |
+| Date stamp | `.pt-datestamp` (the script fills it) | `data-unit`: week (a strip of days to fill in), month (a calendar, the 1st on its weekday), year (its twelve months), day (1 to 31 in a row); `data-variant="bar"` prints a week, the months or a run of years as one row, and `data-variant="wide"` a month as one long row of days, each under its weekday; `data-rows` (the week strip and the wide month: a number, or labels such as `Run, Read`) and `data-title` (the week strip); anything inside it with `data-day`, `data-date` or `data-month` (and `data-row` for a row to fill in) is placed in that cell; `data-date`: today (default) or 2026-10-21; `data-mark` (today): circle, box, highlight, none; `data-past`: x, strike, none; `data-locale` (default: the page's `lang`); `data-week-start`; `data-years`, `data-from`; `data-mark-tool`, `data-past-tool`; `data-ink`. Screen readers get it as one image, labelled with what it marks (the date, the month or the year) |
 | Approval boxes | `.pt-approval` | 承認 / 確認 / 作成 columns |
 | Tape | `.pt-tape` | `data-tape`: masking, kraft, stripes, dots, gingham, seigaiha, clear |
 | Sticky note | `.pt-sticky > .pt-sticky__paper` | `data-color`: yellow, pink, mint, blue, orange; `data-sticky`: flat, lifted, pad, stack; `data-ratio`: square, wide, tall, small, strip (or `--pt-note-w`, `--pt-note-h`) |
 | Film flag, index tab | `.pt-flag`, `.pt-tabs > .pt-tab` | `data-color` |
 | Card, clip | `.pt-card`, `.pt-clip` | |
 | Torn memo, ticket | `.pt-torn`, `.pt-ticket` | |
-| Planner | `.pt-dayhead`, `.pt-week`, `.pt-habits` | `data-today` fills in today |
+| Planner | `.pt-dayhead`, `.pt-week`, `.pt-habits` | `data-today` fills in today, or `data-date="2026-10-21"` another day; written in `data-locale` or the page's `lang`; `data-week-label="Semaine {n}"` on a day heading; `data-mark` (circle, box, highlight, none) and `data-week-start` on a week |
 | Forms | `.pt-check`, `.pt-radio`, `.pt-field` > `.pt-field__label` + `.pt-input` (input or textarea), `.pt-todo` | native controls stay underneath; `data-tool` on the tick; on a to-do list `data-strike`: line, double, scribble, under (with any `data-ul`), none; a task that wraps takes as many grid lines as it needs and is struck through line by line |
 | Ink sample | `.pt-swatch` | `data-tool`: fountain, ballpoint, pencil; `--pt-swatch` |
 | Frame | `figure.pt-photo` | `data-mount`: polaroid, corners, or a `.pt-tape` inside; `--pt-photo-w`, `--pt-photo-ratio` |
@@ -120,6 +120,23 @@ Buttons and links work on `<a>`, `<button>` and `<summary>` (`button.pt-link` lo
 - **Visited links:** a slightly darker pen, changed with `--pt-visited`.
 - **Reduced motion:** the marks appear without being drawn.
 - **High contrast** (forced colours): a plain underline under links and a border around buttons.
+
+A date stamp is filled by the script, and you choose what goes in its cells. Give the rows labels, and put any element inside the stamp with the day it belongs to: a stamp picture, a letter, a mark. `data-row` puts it in a row to fill in; without it, it goes on the date itself.
+
+```html
+<div class="pt-datestamp" data-unit="month" data-variant="wide" data-rows="Run, Read, Water">
+  <span class="pt-stamp" data-pic="tick" data-ink="green" data-day="3" data-row="1"></span>
+  <span data-day="5" data-row="2">5k</span>
+  <span class="pt-anno" data-anno="circle" data-date="2026-10-10">★</span>
+</div>
+```
+
+In React, `cell` returns what to draw in each cell:
+
+```jsx
+<DateStamp unit="month" variant="wide" rows={['Run', 'Read', 'Water']}
+  cell={({ row, date }) => done[row]?.has(date.getDate()) ? <span className="pt-stamp" data-pic="tick" data-ink="green" /> : null} />
+```
 
 A `.pt-sheet` is a sheet lying on a desk (`.pt-desk`), so it has a shadow and the edge of a second sheet under it. For a website where the page itself is the paper, use `.pt-sheet--page`: it fills the window with no desk or shadow, and keeps the content to `--pt-page-width` (720px), centred on whole grid cells, with at least one cell of margin on each side. A page is an ordinary block, not a column with a gap like a sheet: only its blocks of text get a grid line between them, so the parts of a site or app laid out on it keep their own spacing. `.pt-sheet--flat` keeps the sheet's size but drops the shadow.
 
@@ -259,11 +276,11 @@ import { Btn, Mark, Anno, Wobble, Check } from 'papertooth/react';
 | `Mark` | `mark.pt-mark` | `hl`, `color`, `size` |
 | `Anno` | `span.pt-anno` | `anno` (default circle), `tool` |
 | `Wobble` | `.pt-wobble`, as any element (`as`) | `seed`; text, including `Hello {name}`, is split into letters (read out whole by screen readers); anything else is passed through |
-| `DayHead` | `.pt-dayhead` | `date`, `locale` (default `en-GB`), `weekLabel` |
-| `Week` | `.pt-week` | `date`, `today`, `locale`, `weekStart`; `children` is a function that fills each day: `{day => <p>{tasks[day.index]}</p>}` |
-| `Habits` | a habit tracker, cells placed for wide and narrow screens | `habits` (`[{ name, ink, done: [] }]`), `days`, `head`, `title`, `onToggle(habit, day, checked)` |
+| `DayHead` | `.pt-dayhead` | `date`, `locale` (default `en-GB`), `weekLabel` (`'Semaine {n}'` or a function) |
+| `Week` | `.pt-week` | `date`, `today`, `mark` (circle, box, highlight, none), `locale`, `weekStart`; `children` is a function that fills each day: `{day => <p>{tasks[day.index]}</p>}` |
+| `Habits` | a habit tracker, cells placed for wide and narrow screens | `habits` (`[{ name, ink, done: [] }]`), `days`, `head`, `title`, `onToggle(habit, day, checked)`, `cell({ habit, day, done })` to draw a cell yourself in place of its checkbox |
 | `Habit` | one tracker cell, for your own layout | input props and `ref` go on the checkbox; give it an `aria-label` |
-| `DateStamp` | `.pt-datestamp` | `unit`, `variant`, `rows`, `title`, `date`, `mark`, `past`, `locale`, `weekStart`, `years`, `from`, `markTool`, `pastTool`, `ink` |
+| `DateStamp` | `.pt-datestamp` | `unit`, `variant`, `rows` (a number or labels), `cell` (what to draw in a cell), `title`, `date`, `mark`, `past`, `locale`, `weekStart`, `years`, `from`, `markTool`, `pastTool`, `ink` |
 | `Check` | `label.pt-check` (or `.pt-radio` with `type="radio"`) | `tool`, `seed`; `className` and `style` go on the label, every other prop and the `ref` on the input |
 
 Everything else is plain classes: `<div className="pt-sticky">`, `<span className="pt-stamp">` and so on need no component. Two cases to know about: a `pre.pt-diagram` is replaced by its drawing, so give it `key={source}` if the source can change; and for planner pieces use `DayHead`, `Week` and `Habits` rather than `data-today`, which writes the dates in after React has rendered. Their defaults (English, Monday first) are the same on the server and in every browser; when you pass a locale, also pass `weekStart`, and pass `date` (and `today`) from the server if it runs in another time zone, so hydration matches. Shapes are seeded from React's `useId`, so the server and the browser draw the same thing and hydration matches.

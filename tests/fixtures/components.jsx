@@ -25,6 +25,8 @@ export function Planner({ onToggle }) {
       <Week id="w-us" date={day} locale="en-US" weekStart={0} />
       <DateStamp id="ds" unit="week" date={day} past="x" ink="blue" />
       <Habits id="h" head={['M', 'T', 'W']} habits={[{ name: 'Read', done: [true, false, true] }, { name: 'Run', ink: 'ink-beni', done: [false, false, false] }]} onToggle={onToggle} />
+      <Week id="w-box" date={day} mark="box" />
+      <Habits id="hc" head={['M', 'T']} habits={[{ name: 'Run', done: [true, false] }]} cell={({ day, done }) => done ? <span className="own">5k</span> : null} />
     </main>
   );
 }

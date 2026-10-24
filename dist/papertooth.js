@@ -1,4 +1,4 @@
-/*! papertooth v0.4.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.5.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 import {
   ANNO,
   DOT,
@@ -24,7 +24,7 @@ import {
   waveD,
   wobblyBox,
   wobblyRing
-} from "./chunks/chunk-Y5X4XYAH.js";
+} from "./chunks/chunk-446YTACK.js";
 import {
   DEFAULTS,
   cssVar,
@@ -41,7 +41,7 @@ import {
   svgDoc,
   toHex,
   typewriterFilter
-} from "./chunks/chunk-TVJQOPJV.js";
+} from "./chunks/chunk-4USTAVRY.js";
 
 // src/js/painter.js
 var repaint = () => {
@@ -57,8 +57,8 @@ var onDemand = (load) => {
     return null;
   };
 };
-var imagesFor = onDemand(() => import("./chunks/images-4KE454GZ.js"));
-var diagramFor = onDemand(() => import("./chunks/diagram-YGOT6HSM.js"));
+var imagesFor = onDemand(() => import("./chunks/images-KVAZK5GA.js"));
+var diagramFor = onDemand(() => import("./chunks/diagram-NA2YOHHU.js"));
 var LINE_MARKS = /* @__PURE__ */ new Set(["strike", "under", "cross"]);
 var shiftPath = (d, dx, dy) => d.replace(/(-?[\d.]+) (-?[\d.]+)/g, (_, x, y) => `${f(+x + dx)} ${f(+y + dy)}`);
 var SVGNS = "http://www.w3.org/2000/svg";
@@ -486,18 +486,18 @@ var midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTi
 function stampCells(unit = "week", date = /* @__PURE__ */ new Date(), { locale = "en-GB", weekStart = firstDayOf(locale), years = 5, from } = {}) {
   if (unit === "month") {
     const name2 = fmt(locale, { month: "short" });
-    return Array.from({ length: 12 }, (_, m) => ({ label: name2.format(new Date(date.getFullYear(), m, 1)), state: sign(m - date.getMonth()) }));
+    return Array.from({ length: 12 }, (_, m) => ({ label: name2.format(new Date(date.getFullYear(), m, 1)), state: sign(m - date.getMonth()), date: new Date(date.getFullYear(), m, 1) }));
   }
   if (unit === "year") {
     const first = from == null ? date.getFullYear() - Math.floor((years - 1) / 2) : from;
-    return Array.from({ length: years }, (_, k) => ({ label: String(first + k), state: sign(first + k - date.getFullYear()) }));
+    return Array.from({ length: years }, (_, k) => ({ label: String(first + k), state: sign(first + k - date.getFullYear()), date: new Date(first + k, 0, 1) }));
   }
   if (unit === "day") {
     const days = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-    return Array.from({ length: days }, (_, k) => ({ label: String(k + 1), state: sign(k + 1 - date.getDate()) }));
+    return Array.from({ length: days }, (_, k) => ({ label: String(k + 1), state: sign(k + 1 - date.getDate()), date: new Date(date.getFullYear(), date.getMonth(), k + 1) }));
   }
   const name = fmt(locale, { weekday: "short" });
-  return weekDates(date, weekStart).map((d) => ({ label: name.format(d), state: sign(midnight(d) - midnight(date)) }));
+  return weekDates(date, weekStart).map((d) => ({ label: name.format(d), state: sign(midnight(d) - midnight(date)), date: d }));
 }
 function stampLabel(unit, date = /* @__PURE__ */ new Date(), locale = "en-GB", { mark = "circle", variant } = {}) {
   const marked = mark !== "none", bar = variant === "bar";
@@ -507,23 +507,25 @@ function stampLabel(unit, date = /* @__PURE__ */ new Date(), locale = "en-GB", {
 }
 function stampLayout(unit = "week", date = /* @__PURE__ */ new Date(), { variant, locale = "en-GB", weekStart = firstDayOf(locale), years, from, rows = 1, title } = {}) {
   const opts = { locale, weekStart, years, from };
+  const labels = Array.isArray(rows) ? rows.map(String) : null, count = labels ? labels.length : rows;
   if (variant === "bar" || unit === "day") return { sections: [{ part: "bar", rows: unit === "day" ? chunk(stampCells("day", date, opts), 16) : [stampCells(unit, date, opts)] }] };
   const narrow = fmt(locale, { weekday: "narrow" });
-  const weekdays = weekDates(date, weekStart).map((d) => ({ label: narrow.format(d), state: sign(midnight(d) - midnight(date)) }));
+  const weekdays = weekDates(date, weekStart).map((d) => ({ label: narrow.format(d), state: sign(midnight(d) - midnight(date)), date: d }));
+  const side = (label) => ({ label, state: "", side: true });
   const months = stampCells("month", date, opts);
   if (unit === "month" && variant === "wide") {
-    const days = stampCells("day", date, opts), side = (label) => ({ label, state: "", side: true });
+    const days = stampCells("day", date, opts);
     return { sections: [
       { part: "head", rows: [[side(fmt(locale, { month: "short" }).format(date)), ...days.map((_, k) => ({ label: narrow.format(new Date(date.getFullYear(), date.getMonth(), k + 1)), state: "" }))]] },
       { part: "days", rows: [[side(String(date.getFullYear())), ...days]] },
       // rows to tick off day by day, so the days gone by are crossed out only on the dates
-      { part: "write", rows: Array.from({ length: rows }, () => [side(""), ...days.map(() => ({ label: "", state: "" }))]) }
+      { part: "write", rows: Array.from({ length: count }, (_, r) => [side(labels ? labels[r] : ""), ...days.map((d) => ({ label: "", state: "", date: d.date, row: r + 1 }))]) }
     ] };
   }
   if (unit === "month") {
-    const first = new Date(date.getFullYear(), date.getMonth(), 1), lead = (first.getDay() - weekStart + 7) % 7;
+    const first = new Date(date.getFullYear(), date.getMonth(), 1), lead2 = (first.getDay() - weekStart + 7) % 7;
     const days = stampCells("day", date, opts), blank = { label: "", state: "" };
-    const cells = [...Array(lead).fill(blank), ...days];
+    const cells = [...Array(lead2).fill(blank), ...days];
     while (cells.length % 7) cells.push(blank);
     return { sections: [
       { part: "months", rows: chunk(months, 6) },
@@ -534,9 +536,28 @@ function stampLayout(unit = "week", date = /* @__PURE__ */ new Date(), { variant
   if (unit === "year") {
     return { sections: [{ part: "title", rows: [[{ label: String(date.getFullYear()), state: "" }]] }, { part: "year", rows: chunk(months, 4) }] };
   }
-  const sections = [{ part: "head", rows: [weekdays] }, { part: "write", rows: Array.from({ length: rows }, () => weekdays.map((d) => ({ label: "", state: d.state }))) }];
+  const lead = labels ? [side("")] : [];
+  const sections = [{ part: "head", rows: [[...lead, ...weekdays]] }, { part: "write", rows: Array.from({ length: count }, (_, r) => [...labels ? [side(labels[r])] : [], ...weekdays.map((d) => ({ label: "", state: d.state, date: d.date, row: r + 1 }))]) }];
   if (title != null) sections.unshift({ part: "title", rows: [[{ label: title, state: "" }]] });
   return { sections };
+}
+var pad = (n) => String(n).padStart(2, "0");
+function cellKey(part, cell, unit) {
+  if (!cell.date) return null;
+  const d = cell.date, ym = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+  if (part === "months" || part === "year" || part === "bar" && unit === "month") return `m:${ym}`;
+  if (part === "bar" && unit === "year") return `y:${d.getFullYear()}`;
+  return `d:${ym}-${pad(d.getDate())}`;
+}
+function fillKey({ date, day, month }, stampDate) {
+  if (date) {
+    const [y, m, d] = String(date).split("-");
+    return d ? `d:${y}-${pad(m)}-${pad(d)}` : m ? `m:${y}-${pad(m)}` : `y:${y}`;
+  }
+  const ym = `${stampDate.getFullYear()}-${pad(stampDate.getMonth() + 1)}`;
+  if (day != null) return `d:${ym}-${pad(day)}`;
+  if (month != null) return `m:${stampDate.getFullYear()}-${pad(month)}`;
+  return null;
 }
 var chunk = (list, n) => Array.from({ length: Math.ceil(list.length / n) }, (_, i) => list.slice(i * n, i * n + n));
 
@@ -545,28 +566,40 @@ var set = (el, sel, text) => {
   const n = el.querySelector(sel);
   if (n) n.textContent = text;
 };
-function dayHead(el, date = /* @__PURE__ */ new Date(), { locale = "en-GB" } = {}) {
+var parseDate = (v) => {
+  const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(v || "");
+  return m ? new Date(+m[1], +m[2] - 1, +(m[3] || 1)) : /* @__PURE__ */ new Date();
+};
+var dateOf = (el) => parseDate(el.dataset.date);
+var localeOf = (el) => el.dataset.locale || el.closest("[lang]") && el.closest("[lang]").lang || "en-GB";
+var weekText = (label, n) => typeof label === "function" ? label(n) : String(label).replace("{n}", n);
+function dayHead(el, date = dateOf(el), { locale = localeOf(el), weekLabel = el.dataset.weekLabel || "Week {n}" } = {}) {
   const p = dayParts(date, locale);
   set(el, ".pt-dayhead__num", p.day);
   set(el, ".pt-dayhead__month", p.month);
   set(el, ".pt-dayhead__weekday", p.weekday);
   set(el, ".pt-dayhead__kanji", p.kanji);
-  set(el, ".pt-dayhead__weekno", "Week " + p.week);
+  set(el, ".pt-dayhead__weekno", weekText(weekLabel, p.week));
 }
-function week(el, date = /* @__PURE__ */ new Date(), { locale = "en-GB", weekStart = firstDayOf(locale) } = {}) {
+function week(el, date = dateOf(el), { locale = localeOf(el), weekStart = el.dataset.weekStart != null ? +el.dataset.weekStart : firstDayOf(locale), mark = el.dataset.mark || "circle" } = {}) {
   const dates = weekDates(date, weekStart);
   el.querySelectorAll(".pt-week__day").forEach((d, k) => {
     const dt = dates[k];
     if (!dt) return;
     d.dataset.day = dt.getDay();
+    const today = sameDay(dt, date);
+    d.toggleAttribute("aria-current", today);
+    if (today) d.setAttribute("aria-current", "date");
     const ds = d.querySelector(".pt-week__date");
     if (!ds) return;
     ds.textContent = dt.getDate();
-    const today = sameDay(dt, date);
-    ds.classList.toggle("pt-anno", today);
-    if (today) {
-      ds.dataset.anno = "circle";
-      ds.style.cssText = "--pt-anno:var(--pt-ink-beni);--pt-ox:6px;--pt-oy:3px";
+    ds.classList.remove("pt-anno", "pt-mark");
+    delete ds.dataset.anno;
+    delete ds.dataset.ptPainted;
+    if (today && mark === "highlight") ds.classList.add("pt-mark");
+    else if (today && mark !== "none") {
+      ds.classList.add("pt-anno");
+      ds.dataset.anno = mark;
     }
   });
 }
@@ -575,10 +608,6 @@ var span = (cls, text) => {
   s.className = cls;
   if (text != null) s.textContent = text;
   return s;
-};
-var parseDate = (v) => {
-  const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(v || "");
-  return m ? new Date(+m[1], +m[2] - 1, +(m[3] || 1)) : /* @__PURE__ */ new Date();
 };
 function stampMark(part, state, mark = "circle", past = "none") {
   return {
@@ -589,17 +618,23 @@ function stampMark(part, state, mark = "circle", past = "none") {
 }
 function dateStamp(el, date = parseDate(el.dataset.date), opts = {}) {
   const d = el.dataset, unit = d.unit || "week", mark = d.mark || "circle", past = d.past || "none";
-  const locale = opts.locale || d.locale || el.closest("[lang]") && el.closest("[lang]").lang || "en-GB";
+  const locale = opts.locale || localeOf(el);
+  const rows = !d.rows ? 1 : /^\s*\d+\s*$/.test(d.rows) ? +d.rows : d.rows.split(",").map((s) => s.trim()).filter(Boolean);
   const { sections } = stampLayout(unit, date, {
     variant: d.variant,
     locale,
     weekStart: d.weekStart != null ? +d.weekStart : void 0,
     years: d.years ? +d.years : void 0,
     from: d.from ? +d.from : void 0,
-    rows: d.rows ? +d.rows : 1,
+    rows,
     title: d.title,
     ...opts
   });
+  const fills = Array.from(el.querySelectorAll(":scope > :is([data-day], [data-date], [data-month]), .pt-datestamp__fill > *"), (n) => ({
+    n,
+    key: fillKey({ date: n.dataset.date, day: n.dataset.day, month: n.dataset.month }, date),
+    row: n.dataset.row ? +n.dataset.row : 0
+  }));
   const layer = (marks) => {
     const out = div(marks ? "pt-datestamp__marks" : "pt-datestamp__print");
     if (marks) out.setAttribute("aria-hidden", "true");
@@ -619,10 +654,15 @@ function dateStamp(el, date = parseDate(el.dataset.date), opts = {}) {
             hl.className = "pt-mark";
             hl.append(label);
             cell.append(hl);
-            continue;
+          } else {
+            if (m.label) Object.assign(label.dataset, { anno: m.label, tool: d.markTool || "pencil" }), label.classList.add("pt-anno");
+            cell.append(label);
           }
-          if (m.label) Object.assign(label.dataset, { anno: m.label, tool: d.markTool || "pencil" }), label.classList.add("pt-anno");
-          cell.append(label);
+          const key = marks && cellKey(s.part, c, unit), here = key ? fills.filter((f2) => f2.key === key && f2.row === (c.row || 0)) : [];
+          if (here.length) {
+            const box = cell.appendChild(span("pt-datestamp__fill"));
+            box.append(...here.map((f2) => f2.n));
+          }
         }
       }
     }
@@ -942,7 +982,7 @@ var PALETTE = {
 };
 
 // src/js/index.js
-var VERSION = "0.4.1";
+var VERSION = "0.5.0";
 var DEFAULTS2 = {
   root: null,
   // element to enhance; defaults to document.body
@@ -977,7 +1017,7 @@ var DEFAULTS2 = {
   observe: true,
   // enhance elements added to the page later
   today: true,
-  // fill .pt-dayhead[data-today] and .pt-week[data-today] with today
+  // fill .pt-dayhead and .pt-week marked data-today (or data-date) with their date
   pen: null,
   pencil: null,
   ribbon: null,
@@ -1032,8 +1072,8 @@ function init(options = {}) {
     const has = (sel) => (scope.matches(sel) ? [scope] : []).concat(Array.from(scope.querySelectorAll(sel)));
     has(".pt-wobble, .pt-label--emboss").forEach((el) => wobble(el, o.wobbleMax));
     if (o.today) {
-      has(".pt-dayhead[data-today]").forEach((el) => dayHead(el));
-      has(".pt-week[data-today]").forEach((el) => week(el));
+      has(".pt-dayhead:is([data-today], [data-date])").forEach((el) => dayHead(el));
+      has(".pt-week:is([data-today], [data-date])").forEach((el) => week(el));
     }
     for (const [sel, fn] of DECORATORS) has(sel).forEach((el, i) => fn(el, o, i));
     has(".pt-sheet").forEach(watchSheet);

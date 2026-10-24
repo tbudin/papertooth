@@ -7,7 +7,7 @@ import { init } from '../js/index.js';
 import { rng, f } from '../js/core.js';
 import { wobblyBox, wobblyRing, spiral, TICK, DOT } from '../js/shapes.js';
 import { firstDayOf, weekDates, sameDay, dayParts, stampLayout, stampLabel } from '../js/dates.js';
-import { stampMark } from '../js/planner.js';
+import { stampMark, weekText } from '../js/planner.js';
 
 /** Start papertooth when the component mounts and stop it when it unmounts. Returns the kit once running. */
 export function usePapertooth(options) {
@@ -114,25 +114,26 @@ export const Check = named('Check', ({ type = 'checkbox', tool, seed, className,
    the date (and today) from the server if it renders in another time zone. */
 
 /** A day heading: the date large, month and weekday, the weekday's kanji as a stamp, and the ISO week. */
-export const DayHead = named('DayHead', ({ date = new Date(), locale = 'en-GB', weekLabel = n => `Week ${n}`, className, ...rest }, ref) => {
+export const DayHead = named('DayHead', ({ date = new Date(), locale = 'en-GB', weekLabel = 'Week {n}', className, ...rest }, ref) => {
   const p = dayParts(date, locale);
   return h('div', { ...rest, ref, className: cls('pt-dayhead', className) },
     h('span', { className: 'pt-dayhead__num' }, p.day),
     h('span', { className: 'pt-dayhead__meta' },
       h('span', { className: 'pt-dayhead__month' }, p.month), h('span', { className: 'pt-dayhead__weekday' }, p.weekday)),
     h('span', { className: 'pt-stamp pt-stamp--round pt-dayhead__kanji', lang: 'ja', 'aria-hidden': 'true' }, p.kanji),
-    h('span', { className: 'pt-dayhead__weekno' }, weekLabel(p.week)));
+    h('span', { className: 'pt-dayhead__weekno' }, weekText(weekLabel, p.week)));
 });
 
-/** Seven days from weekStart around `date`, today circled. children(day) fills a day: { date, index, today }. */
-export const Week = named('Week', ({ date = new Date(), today = date, locale = 'en-GB', weekStart, className, children, ...rest }, ref) => {
+/** Seven days from weekStart around `date`, today marked (mark: circle, box, highlight, none). children(day) fills a day: { date, index, today }. */
+export const Week = named('Week', ({ date = new Date(), today = date, locale = 'en-GB', weekStart, mark = 'circle', className, children, ...rest }, ref) => {
   const start = weekStart == null ? firstDayOf(locale) : weekStart;
   return h('div', { className: 'pt-week-wrap' }, h('div', { ...rest, ref, className: cls('pt-week', className) },
     weekDates(date, start).map((d, index) => {
       const p = dayParts(d, locale), isToday = sameDay(d, today);
-      const num = isToday
-        ? h(Anno, { className: 'pt-week__date', style: { '--pt-anno': 'var(--pt-ink-beni)', '--pt-ox': '6px', '--pt-oy': '3px' } }, p.day)
-        : h('span', { className: 'pt-week__date' }, p.day);
+      // today's mark takes its colour and offsets from the stylesheet, as in the script
+      const num = !isToday || mark === 'none' ? h('span', { className: 'pt-week__date' }, p.day)
+        : mark === 'highlight' ? h(Mark, { className: 'pt-week__date' }, p.day)
+        : h(Anno, { anno: mark, className: 'pt-week__date' }, p.day);
       return h('div', { key: index, className: 'pt-week__day', 'data-day': d.getDay(), 'aria-current': isToday ? 'date' : undefined },
         h('div', { className: 'pt-week__head' }, h('span', null, p.short, ' ', h('span', { className: 'pt-jp', lang: 'ja' }, p.kanji)), num),
         typeof children === 'function' ? children({ date: d, index, today: isToday }) : null);
@@ -150,8 +151,9 @@ export const Habit = named('Habit', ({ seed, className, style, ...input }, ref) 
 /**
  * A habit tracker: one row per habit, one column per day (rows and columns swap on narrow screens).
  * habits: [{ name, ink?, done: boolean[] }]; onToggle(habitIndex, day, checked) is called when a cell changes.
+ * cell({ habit, day, done }) can return anything to draw in a cell instead of its checkbox (a stamp, a letter, a mark).
  */
-export const Habits = named('Habits', ({ days, head, habits, onToggle, title = 'Habit', className, style, ...rest }, ref) => {
+export const Habits = named('Habits', ({ days, head, habits, onToggle, cell, title = 'Habit', className, style, ...rest }, ref) => {
   const n = days || Math.max(0, ...habits.map(x => x.done.length));
   const labels = head || Array.from({ length: n }, (_, d) => d + 1);
   // each cell is placed twice over, as rows-as-habits (wide) and rows-as-days (narrow)
@@ -161,18 +163,23 @@ export const Habits = named('Habits', ({ days, head, habits, onToggle, title = '
     cells.map((cell, d) => cell(at(r, d + 2, d + 2, c), d)));
   return h('div', { className: 'pt-habits-wrap' }, h('div', { ...rest, ref, className: cls('pt-habits', className), 'data-pt-ready': '', style: { '--pt-days': n, '--pt-habit-count': habits.length, ...style } },
     row(1, 1, 'head', title, labels.slice(0, n).map(label => (s, d) => h('span', { key: d, style: s }, label))),
-    habits.map((x, i) => row(i + 2, i + 2, i, x.name, Array.from({ length: n }, () => (s, d) => h(Habit, {
-      key: d, style: s, seed: (i + 1) * 101 + d, checked: !!x.done[d], 'aria-label': `${x.name}, ${labels[d]}`,
-      onChange: onToggle ? e => onToggle(i, d, e.target.checked) : undefined, readOnly: !onToggle
-    })), x.ink))));
+    habits.map((x, i) => row(i + 2, i + 2, i, x.name, Array.from({ length: n }, () => (s, d) => {
+      const own = cell ? cell({ habit: i, day: d, done: !!x.done[d] }) : null;
+      return own != null && own !== false ? h('span', { key: d, style: s, className: 'pt-habits__own' }, own) : h(Habit, {
+        key: d, style: s, seed: (i + 1) * 101 + d, checked: !!x.done[d], 'aria-label': `${x.name}, ${labels[d]}`,
+        onChange: onToggle ? e => onToggle(i, d, e.target.checked) : undefined, readOnly: !onToggle
+      });
+    }), x.ink))));
 });
 
 /**
  * A date stamp: a week strip to fill in, a month calendar (or a whole month in one row, variant="wide"), a year of months, or one row (variant="bar"; unit="day"
  * is always a bar). The current one is circled, boxed or highlighted (mark); past ones crossed or struck (past).
+ * `rows` is a number of rows to fill in, or their labels; `cell({ part, row, date, state })` returns what to draw in a cell
+ * (a stamp, a letter, a mark), placed with the pencil marks on top of the printed stamp.
  */
 export const DateStamp = named('DateStamp', ({ unit = 'week', variant, date = new Date(), mark = 'circle', past = 'none', locale = 'en-GB', weekStart,
-  years, from, rows = 1, title, markTool = 'pencil', pastTool = 'graphite', ink, className, style, ...rest }, ref) => {
+  years, from, rows = 1, title, cell, markTool = 'pencil', pastTool = 'graphite', ink, className, style, ...rest }, ref) => {
   const { sections } = stampLayout(unit, date, { variant, locale, weekStart, years, from, rows, title });
   // printed twice from the same cells: in stamp ink, then the pencil marks alone on top
   const layer = marks => h('div', { className: marks ? 'pt-datestamp__marks' : 'pt-datestamp__print', 'aria-hidden': marks ? 'true' : undefined },
@@ -183,9 +190,11 @@ export const DateStamp = named('DateStamp', ({ unit = 'week', variant, date = ne
           ? h(Anno, { anno: m.label, tool: markTool, className: 'pt-datestamp__label' }, c.label)
           : h('span', { className: 'pt-datestamp__label' }, c.label);
         const inner = m.label === 'highlight' ? h(Mark, null, label) : label;
+        const content = marks && cell && c.date ? cell({ part: s.part, row: c.row || 0, date: c.date, state: c.state }) : null;
+        const fill = content == null || content === false ? null : h('span', { className: 'pt-datestamp__fill' }, content);
         return m.cell
-          ? h(Anno, { key: i, anno: m.cell, tool: pastTool, className: 'pt-datestamp__cell', 'data-state': c.state }, inner)
-          : h('span', { key: i, className: 'pt-datestamp__cell', 'data-state': c.state, 'data-side': c.side ? '' : undefined }, inner);
+          ? h(Anno, { key: i, anno: m.cell, tool: pastTool, className: 'pt-datestamp__cell', 'data-state': c.state }, inner, fill)
+          : h('span', { key: i, className: 'pt-datestamp__cell', 'data-state': c.state, 'data-side': c.side ? '' : undefined }, inner, fill);
       }))))));
   return h('div', {
     ...rest, ref, role: 'img', 'aria-label': stampLabel(unit, date, locale, { mark, variant }), lang: /^ja\b/.test(locale) ? 'ja' : undefined,

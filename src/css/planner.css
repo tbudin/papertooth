@@ -14,6 +14,8 @@
 .pt-week__day:last-child { border-right: 0; }
 .pt-week__head { display: flex; justify-content: space-between; align-items: baseline; height: 24px; font-family: var(--pt-font-type); font-size: 12px; line-height: 24px; color: var(--pt-ribbon); }
 .pt-week__date { font-family: var(--pt-font-type-head); font-size: 17px; }
+/* today's date, marked in red pencil (specific enough to win over marks.css in any load order; a style attribute still wins) */
+.pt-week .pt-week__date.pt-anno { --pt-anno: var(--pt-ink-beni); --pt-ox: 6px; --pt-oy: 3px; }
 .pt-week__head .pt-jp { font-size: 12px; }
 /* Saturday in blue and Sunday in red, as on Japanese calendars. data-day (0 = Sunday … 6 = Saturday) places them
    wherever the week starts; without it, the week is taken to start on Monday. */
@@ -33,6 +35,9 @@
 .pt-habits__head > * { font-family: var(--pt-font-type); font-size: 11px; text-align: center; opacity: .6; color: var(--pt-ribbon); }
 .pt-habits__head .pt-habits__name { font-size: 12px; text-align: left; text-transform: uppercase; letter-spacing: .08em; }
 .pt-habit { display: grid; place-items: center; cursor: pointer; position: relative; height: 24px; }
+/* a cell with content of its own (cell() in React): written in pen unless it brings its own ink */
+.pt-habits__own { display: grid; place-items: center; height: 24px; color: var(--pt-pen); font: 400 20px/1 var(--pt-font-hand); }
+.pt-habits__own .pt-stamp { --pt-pic-size: 18px; }
 .pt-habit svg { overflow: visible; }
 .pt-habit .pt-ring { fill: none; stroke: color-mix(in srgb, var(--pt-ribbon) 32%, transparent); stroke-width: 1; }
 .pt-habit .pt-fill { fill: none; stroke: var(--pt-hb); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset .4s var(--pt-ease); }
@@ -98,6 +103,16 @@
 [data-part="title"] .pt-datestamp__cell { height: 24px; place-items: center start; padding: 0 6px; font-size: 12px; text-transform: none; }
 .pt-datestamp[data-unit="year"] [data-part="title"] .pt-datestamp__cell { place-items: center; font-size: 13px; letter-spacing: .3em; }
 .pt-datestamp[data-variant="wide"] .pt-datestamp__cell[data-side] { flex: 0 0 46px; font-size: 10px; letter-spacing: .03em; }
+/* a week strip with row labels gets a first column for them, and grows by its width */
+.pt-datestamp[data-unit="week"]:has(.pt-datestamp__cell[data-side]) { width: calc(7 * var(--pt-ds-col) + 3px + var(--pt-ds-side, 52px)); }
+.pt-datestamp[data-unit="week"] .pt-datestamp__cell[data-side] { flex: 0 0 var(--pt-ds-side, 52px); font-size: 10px; letter-spacing: .03em; }
+/* content placed in a cell (data-day, data-row, or cell() in React): written in pen unless it brings its own ink,
+   centred on the cell, on top of the printed stamp */
+.pt-datestamp__fill {
+  position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
+  color: var(--pt-pen); font: 400 1.5em/1 var(--pt-font-hand); letter-spacing: 0; text-transform: none;
+}
+.pt-datestamp__fill .pt-stamp { --pt-pic-size: min(80%, 18px); }
 .pt-datestamp[data-variant="wide"] [data-part="days"] .pt-datestamp__cell { height: 22px; place-items: center; padding: 0; }
 .pt-datestamp[data-variant="wide"] [data-part="write"] .pt-datestamp__cell { height: 24px; }
 [data-part="bar"] .pt-datestamp__cell { flex: none; min-width: 28px; height: 26px; padding: 0 5px; font-size: 12px; }

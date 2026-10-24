@@ -129,10 +129,10 @@ export declare function setHighlighter(colour: string, target?: HTMLElement): st
 /** 0 = Sunday … 6 = Saturday, as Date#getDay. */
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
-/** Fill a .pt-dayhead with a date (today by default). */
-export declare function dayHead(el: Element, date?: Date, options?: { locale?: string }): void;
-/** Fill a .pt-week with the week containing a date, that date circled. weekStart defaults to the locale's first day. */
-export declare function week(el: Element, date?: Date, options?: { locale?: string; weekStart?: Weekday }): void;
+/** Fill a .pt-dayhead with a date: its data-date, or today. Language from data-locale or the page; weekLabel from data-week-label. */
+export declare function dayHead(el: Element, date?: Date, options?: { locale?: string; weekLabel?: string | ((week: number) => string) }): void;
+/** Fill a .pt-week with the week containing a date (data-date, or today), that date marked (data-mark). weekStart defaults to the locale's first day. */
+export declare function week(el: Element, date?: Date, options?: { locale?: string; weekStart?: Weekday; mark?: 'circle' | 'box' | 'highlight' | 'none' }): void;
 
 /* Calendar helpers with no DOM. */
 /** ISO 8601 week number. */
@@ -146,7 +146,8 @@ export declare function sameDay(a: Date, b: Date): boolean;
 export declare function dayParts(date?: Date, locale?: string): { day: number; month: string; weekday: string; short: string; kanji: string; week: number };
 
 export type StampUnit = 'week' | 'month' | 'year' | 'day';
-export interface StampCell { label: string; state: 'past' | 'current' | 'future' }
+/** A cell of a date stamp; `date` is the day it stands for (the 1st for a month, 1 January for a year). */
+export interface StampCell { label: string; state: 'past' | 'current' | 'future'; date: Date }
 /** The cells of a date stamp: seven weekdays, twelve months, a run of years (default 5 around the date) or the days of the month. */
 export declare function stampCells(unit?: StampUnit, date?: Date, options?: { locale?: string; weekStart?: Weekday; years?: number; from?: number }): StampCell[];
 /** What a date stamp says, read whole (for screen readers). */
@@ -154,6 +155,8 @@ export declare function stampCells(unit?: StampUnit, date?: Date, options?: { lo
 export declare function stampLabel(unit?: StampUnit, date?: Date, locale?: string, options?: { mark?: 'circle' | 'box' | 'highlight' | 'none'; variant?: 'bar' | 'wide' }): string;
 /** Fill a .pt-datestamp from its data attributes (data-unit, data-date, data-mark, data-past, data-locale…). The script does this for you. */
 export declare function dateStamp(el: Element, date?: Date, options?: { locale?: string; weekStart?: Weekday; years?: number; from?: number }): void;
-export interface StampLayout { sections: { part: 'bar' | 'head' | 'write' | 'months' | 'days' | 'title' | 'year'; rows: { label: string; state: StampCell['state'] | ''; side?: boolean }[][] }[] }
+export type StampPart = 'bar' | 'head' | 'write' | 'months' | 'days' | 'title' | 'year';
+/** Cells in rows to fill in carry `row` (1, 2…) and the `date` of their column; `side` cells hold the row labels. */
+export interface StampLayout { sections: { part: StampPart; rows: { label: string; state: StampCell['state'] | ''; date?: Date; row?: number; side?: boolean }[][] }[] }
 /** Everything a date stamp prints, as sections of rows of cells, with no DOM: for drawing one in another renderer. */
-export declare function stampLayout(unit?: StampUnit, date?: Date, options?: { variant?: 'bar' | 'wide'; locale?: string; weekStart?: Weekday; years?: number; from?: number; rows?: number; title?: string }): StampLayout;
+export declare function stampLayout(unit?: StampUnit, date?: Date, options?: { variant?: 'bar' | 'wide'; locale?: string; weekStart?: Weekday; years?: number; from?: number; rows?: number | string[]; title?: string }): StampLayout;

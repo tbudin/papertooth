@@ -2,6 +2,22 @@
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## 0.5.0 - 2026-10-24
+
+### Added
+- Your own content in date stamp cells: a stamp picture, a letter, a mark, anything. Put an element inside the stamp with `data-day`, `data-date` or `data-month` (and `data-row` for a row to fill in); in React, return it from `cell({ part, row, date, state })`. It sits with the pencil marks, on top of the printed stamp, and stays when the stamp is filled again.
+- Row labels: `data-rows="Run, Read, Water"` (or `rows={['Run', 'Read', 'Water']}`) writes them in a first column, on the wide month and the week strip.
+- Every cell from `stampCells()` and `stampLayout()` carries the `date` it stands for, and cells in rows to fill in carry their `row`.
+- A day heading and a week can show any day with `data-date="2026-10-21"` (until now only today, with `data-today`), and are written in `data-locale` or the page's `lang`.
+- `data-week-label="Semaine {n}"` words a day heading's week number in any language (`weekLabel` in React also takes this string).
+- `data-mark` on a week (`mark` on `<Week>`): today circled, boxed, highlighted or left plain.
+- `cell({ habit, day, done })` on `<Habits>` draws a cell yourself, in place of its checkbox: a stamp, a letter, anything.
+- The README shows how to use your own picture as a stamp (`--pt-pic`).
+
+### Fixed
+- A day heading always wrote "Week" in English, and the script filled day headings and weeks in British English whatever the page's language.
+- A week's circle on today replaced the date's own `style` attribute, and filling the week again for another date left the old mark's settings behind. The circle's colour and offsets now come from the stylesheet.
+
 ## 0.4.1 - 2026-10-23
 
 ### Changed

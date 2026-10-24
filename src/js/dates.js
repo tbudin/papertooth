@@ -53,24 +53,25 @@ const sign = n => (n < 0 ? 'past' : n > 0 ? 'future' : 'current');
 const midnight = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 
 /**
- * The cells of a date stamp, each { label, state } with state 'past', 'current' or 'future' relative to `date`:
+ * The cells of a date stamp, each { label, state, date } with state 'past', 'current' or 'future' relative to `date`,
+ * and `date` the day it stands for (the 1st for a month, 1 January for a year):
  * unit 'week' (seven weekdays), 'month' (the twelve months), 'year' (a run of years) or 'day' (the days of the month).
  */
 export function stampCells(unit = 'week', date = new Date(), { locale = 'en-GB', weekStart = firstDayOf(locale), years = 5, from } = {}) {
   if (unit === 'month') {
     const name = fmt(locale, { month: 'short' });
-    return Array.from({ length: 12 }, (_, m) => ({ label: name.format(new Date(date.getFullYear(), m, 1)), state: sign(m - date.getMonth()) }));
+    return Array.from({ length: 12 }, (_, m) => ({ label: name.format(new Date(date.getFullYear(), m, 1)), state: sign(m - date.getMonth()), date: new Date(date.getFullYear(), m, 1) }));
   }
   if (unit === 'year') {
     const first = from == null ? date.getFullYear() - Math.floor((years - 1) / 2) : from;
-    return Array.from({ length: years }, (_, k) => ({ label: String(first + k), state: sign(first + k - date.getFullYear()) }));
+    return Array.from({ length: years }, (_, k) => ({ label: String(first + k), state: sign(first + k - date.getFullYear()), date: new Date(first + k, 0, 1) }));
   }
   if (unit === 'day') {
     const days = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-    return Array.from({ length: days }, (_, k) => ({ label: String(k + 1), state: sign(k + 1 - date.getDate()) }));
+    return Array.from({ length: days }, (_, k) => ({ label: String(k + 1), state: sign(k + 1 - date.getDate()), date: new Date(date.getFullYear(), date.getMonth(), k + 1) }));
   }
   const name = fmt(locale, { weekday: 'short' });
-  return weekDates(date, weekStart).map(d => ({ label: name.format(d), state: sign(midnight(d) - midnight(date)) }));
+  return weekDates(date, weekStart).map(d => ({ label: name.format(d), state: sign(midnight(d) - midnight(date)), date: d }));
 }
 
 /**
@@ -94,20 +95,24 @@ export function stampLabel(unit, date = new Date(), locale = 'en-GB', { mark = '
  *   unit 'month', variant 'wide': the whole month in one long row, each day under its weekday, with rows to fill in;
  *     its first column (cells with `side`) names the month and the year;
  *   unit 'year': the year over its twelve months.
+ * `rows` is how many rows to fill in, or their labels (['Run', 'Read']), written in a first column. The cells of those
+ * rows carry `row` (1, 2…) and the `date` of their column, so content can be placed in any of them.
  */
 export function stampLayout(unit = 'week', date = new Date(), { variant, locale = 'en-GB', weekStart = firstDayOf(locale), years, from, rows = 1, title } = {}) {
   const opts = { locale, weekStart, years, from };
+  const labels = Array.isArray(rows) ? rows.map(String) : null, count = labels ? labels.length : rows;
   if (variant === 'bar' || unit === 'day') return { sections: [{ part: 'bar', rows: unit === 'day' ? chunk(stampCells('day', date, opts), 16) : [stampCells(unit, date, opts)] }] };
   const narrow = fmt(locale, { weekday: 'narrow' });
-  const weekdays = weekDates(date, weekStart).map(d => ({ label: narrow.format(d), state: sign(midnight(d) - midnight(date)) }));
+  const weekdays = weekDates(date, weekStart).map(d => ({ label: narrow.format(d), state: sign(midnight(d) - midnight(date)), date: d }));
+  const side = label => ({ label, state: '', side: true });
   const months = stampCells('month', date, opts);
   if (unit === 'month' && variant === 'wide') {
-    const days = stampCells('day', date, opts), side = label => ({ label, state: '', side: true });
+    const days = stampCells('day', date, opts);
     return { sections: [
       { part: 'head', rows: [[side(fmt(locale, { month: 'short' }).format(date)), ...days.map((_, k) => ({ label: narrow.format(new Date(date.getFullYear(), date.getMonth(), k + 1)), state: '' }))]] },
       { part: 'days', rows: [[side(String(date.getFullYear())), ...days]] },
       // rows to tick off day by day, so the days gone by are crossed out only on the dates
-      { part: 'write', rows: Array.from({ length: rows }, () => [side(''), ...days.map(() => ({ label: '', state: '' }))]) }
+      { part: 'write', rows: Array.from({ length: count }, (_, r) => [side(labels ? labels[r] : ''), ...days.map(d => ({ label: '', state: '', date: d.date, row: r + 1 }))]) }
     ] };
   }
   if (unit === 'month') {
@@ -124,8 +129,28 @@ export function stampLayout(unit = 'week', date = new Date(), { variant, locale 
   if (unit === 'year') {
     return { sections: [{ part: 'title', rows: [[{ label: String(date.getFullYear()), state: '' }]] }, { part: 'year', rows: chunk(months, 4) }] };
   }
-  const sections = [{ part: 'head', rows: [weekdays] }, { part: 'write', rows: Array.from({ length: rows }, () => weekdays.map(d => ({ label: '', state: d.state }))) }];
+  // with labels, the week gets a first column for them too
+  const lead = labels ? [side('')] : [];
+  const sections = [{ part: 'head', rows: [[...lead, ...weekdays]] }, { part: 'write', rows: Array.from({ length: count }, (_, r) =>
+    [...(labels ? [side(labels[r])] : []), ...weekdays.map(d => ({ label: '', state: d.state, date: d.date, row: r + 1 }))]) }];
   if (title != null) sections.unshift({ part: 'title', rows: [[{ label: title, state: '' }]] });
   return { sections };
+}
+const pad = n => String(n).padStart(2, '0');
+/** What a stamp cell stands for, as a key that content can name: d:2026-10-03 for a day, m:2026-10 for a month, y:2026 for a year. */
+export function cellKey(part, cell, unit) {
+  if (!cell.date) return null;
+  const d = cell.date, ym = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+  if (part === 'months' || part === 'year' || (part === 'bar' && unit === 'month')) return `m:${ym}`;
+  if (part === 'bar' && unit === 'year') return `y:${d.getFullYear()}`;
+  return `d:${ym}-${pad(d.getDate())}`;
+}
+/** The cell some content names: { date: '2026-10-03' | '2026-10' | '2026' } or { day: 3 } or { month: 3 }, in the stamp's month and year. */
+export function fillKey({ date, day, month }, stampDate) {
+  if (date) { const [y, m, d] = String(date).split('-'); return d ? `d:${y}-${pad(m)}-${pad(d)}` : m ? `m:${y}-${pad(m)}` : `y:${y}`; }
+  const ym = `${stampDate.getFullYear()}-${pad(stampDate.getMonth() + 1)}`;
+  if (day != null) return `d:${ym}-${pad(day)}`;
+  if (month != null) return `m:${stampDate.getFullYear()}-${pad(month)}`;
+  return null;
 }
 const chunk = (list, n) => Array.from({ length: Math.ceil(list.length / n) }, (_, i) => list.slice(i * n, i * n + n));

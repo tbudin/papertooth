@@ -1,4 +1,4 @@
-/*! papertooth v0.4.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.5.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 import {
   kindOf,
   measurer,
@@ -9,9 +9,9 @@ import {
   renderFlow,
   renderPie,
   renderXY
-} from "./chunk-DYRTYTTM.js";
-import "./chunk-Y5X4XYAH.js";
-import "./chunk-TVJQOPJV.js";
+} from "./chunk-664YB3EV.js";
+import "./chunk-446YTACK.js";
+import "./chunk-4USTAVRY.js";
 export {
   kindOf,
   measurer,

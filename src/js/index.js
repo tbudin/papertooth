@@ -9,7 +9,7 @@ import { snapSheet } from './baseline.js';
 import { setPen, setPencil, setRibbon, setHighlighter } from './ink.js';
 import { dayHead, week, isoWeek } from './planner.js';
 
-export const VERSION = '0.4.1';
+export const VERSION = '0.5.0';
 
 export const DEFAULTS = {
   root: null,              // element to enhance; defaults to document.body
@@ -29,7 +29,7 @@ export const DEFAULTS = {
   outline: 'sketch',       // default outline for .pt-btn--outline
   wobbleMax: 400,          // letters split per .pt-wobble element
   observe: true,           // enhance elements added to the page later
-  today: true,             // fill .pt-dayhead[data-today] and .pt-week[data-today] with today
+  today: true,             // fill .pt-dayhead and .pt-week marked data-today (or data-date) with their date
   pen: null, pencil: null, ribbon: null, highlighter: null
 };
 
@@ -85,8 +85,8 @@ export function init(options = {}) {
     // letters first, so later measurements see the final text
     has('.pt-wobble, .pt-label--emboss').forEach(el => wobble(el, o.wobbleMax));   // embossed letters are punched one by one
     if (o.today) {
-      has('.pt-dayhead[data-today]').forEach(el => dayHead(el));
-      has('.pt-week[data-today]').forEach(el => week(el));
+      has('.pt-dayhead:is([data-today], [data-date])').forEach(el => dayHead(el));
+      has('.pt-week:is([data-today], [data-date])').forEach(el => week(el));
     }
     for (const [sel, fn] of DECORATORS) has(sel).forEach((el, i) => fn(el, o, i));
     has('.pt-sheet').forEach(watchSheet);

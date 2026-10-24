@@ -1,4 +1,4 @@
-/*! papertooth v0.4.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.5.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 "use client";
 
 // src/react/index.js
@@ -91,18 +91,18 @@ var midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTi
 function stampCells(unit = "week", date = /* @__PURE__ */ new Date(), { locale = "en-GB", weekStart = firstDayOf(locale), years = 5, from } = {}) {
   if (unit === "month") {
     const name2 = fmt(locale, { month: "short" });
-    return Array.from({ length: 12 }, (_, m) => ({ label: name2.format(new Date(date.getFullYear(), m, 1)), state: sign(m - date.getMonth()) }));
+    return Array.from({ length: 12 }, (_, m) => ({ label: name2.format(new Date(date.getFullYear(), m, 1)), state: sign(m - date.getMonth()), date: new Date(date.getFullYear(), m, 1) }));
   }
   if (unit === "year") {
     const first = from == null ? date.getFullYear() - Math.floor((years - 1) / 2) : from;
-    return Array.from({ length: years }, (_, k) => ({ label: String(first + k), state: sign(first + k - date.getFullYear()) }));
+    return Array.from({ length: years }, (_, k) => ({ label: String(first + k), state: sign(first + k - date.getFullYear()), date: new Date(first + k, 0, 1) }));
   }
   if (unit === "day") {
     const days = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-    return Array.from({ length: days }, (_, k) => ({ label: String(k + 1), state: sign(k + 1 - date.getDate()) }));
+    return Array.from({ length: days }, (_, k) => ({ label: String(k + 1), state: sign(k + 1 - date.getDate()), date: new Date(date.getFullYear(), date.getMonth(), k + 1) }));
   }
   const name = fmt(locale, { weekday: "short" });
-  return weekDates(date, weekStart).map((d) => ({ label: name.format(d), state: sign(midnight(d) - midnight(date)) }));
+  return weekDates(date, weekStart).map((d) => ({ label: name.format(d), state: sign(midnight(d) - midnight(date)), date: d }));
 }
 function stampLabel(unit, date = /* @__PURE__ */ new Date(), locale = "en-GB", { mark = "circle", variant } = {}) {
   const marked = mark !== "none", bar = variant === "bar";
@@ -112,23 +112,25 @@ function stampLabel(unit, date = /* @__PURE__ */ new Date(), locale = "en-GB", {
 }
 function stampLayout(unit = "week", date = /* @__PURE__ */ new Date(), { variant, locale = "en-GB", weekStart = firstDayOf(locale), years, from, rows = 1, title } = {}) {
   const opts = { locale, weekStart, years, from };
+  const labels = Array.isArray(rows) ? rows.map(String) : null, count = labels ? labels.length : rows;
   if (variant === "bar" || unit === "day") return { sections: [{ part: "bar", rows: unit === "day" ? chunk(stampCells("day", date, opts), 16) : [stampCells(unit, date, opts)] }] };
   const narrow = fmt(locale, { weekday: "narrow" });
-  const weekdays = weekDates(date, weekStart).map((d) => ({ label: narrow.format(d), state: sign(midnight(d) - midnight(date)) }));
+  const weekdays = weekDates(date, weekStart).map((d) => ({ label: narrow.format(d), state: sign(midnight(d) - midnight(date)), date: d }));
+  const side = (label) => ({ label, state: "", side: true });
   const months = stampCells("month", date, opts);
   if (unit === "month" && variant === "wide") {
-    const days = stampCells("day", date, opts), side = (label) => ({ label, state: "", side: true });
+    const days = stampCells("day", date, opts);
     return { sections: [
       { part: "head", rows: [[side(fmt(locale, { month: "short" }).format(date)), ...days.map((_, k) => ({ label: narrow.format(new Date(date.getFullYear(), date.getMonth(), k + 1)), state: "" }))]] },
       { part: "days", rows: [[side(String(date.getFullYear())), ...days]] },
       // rows to tick off day by day, so the days gone by are crossed out only on the dates
-      { part: "write", rows: Array.from({ length: rows }, () => [side(""), ...days.map(() => ({ label: "", state: "" }))]) }
+      { part: "write", rows: Array.from({ length: count }, (_, r) => [side(labels ? labels[r] : ""), ...days.map((d) => ({ label: "", state: "", date: d.date, row: r + 1 }))]) }
     ] };
   }
   if (unit === "month") {
-    const first = new Date(date.getFullYear(), date.getMonth(), 1), lead = (first.getDay() - weekStart + 7) % 7;
+    const first = new Date(date.getFullYear(), date.getMonth(), 1), lead2 = (first.getDay() - weekStart + 7) % 7;
     const days = stampCells("day", date, opts), blank = { label: "", state: "" };
-    const cells = [...Array(lead).fill(blank), ...days];
+    const cells = [...Array(lead2).fill(blank), ...days];
     while (cells.length % 7) cells.push(blank);
     return { sections: [
       { part: "months", rows: chunk(months, 6) },
@@ -139,13 +141,15 @@ function stampLayout(unit = "week", date = /* @__PURE__ */ new Date(), { variant
   if (unit === "year") {
     return { sections: [{ part: "title", rows: [[{ label: String(date.getFullYear()), state: "" }]] }, { part: "year", rows: chunk(months, 4) }] };
   }
-  const sections = [{ part: "head", rows: [weekdays] }, { part: "write", rows: Array.from({ length: rows }, () => weekdays.map((d) => ({ label: "", state: d.state }))) }];
+  const lead = labels ? [side("")] : [];
+  const sections = [{ part: "head", rows: [[...lead, ...weekdays]] }, { part: "write", rows: Array.from({ length: count }, (_, r) => [...labels ? [side(labels[r])] : [], ...weekdays.map((d) => ({ label: "", state: d.state, date: d.date, row: r + 1 }))]) }];
   if (title != null) sections.unshift({ part: "title", rows: [[{ label: title, state: "" }]] });
   return { sections };
 }
 var chunk = (list, n) => Array.from({ length: Math.ceil(list.length / n) }, (_, i) => list.slice(i * n, i * n + n));
 
 // src/js/planner.js
+var weekText = (label, n) => typeof label === "function" ? label(n) : String(label).replace("{n}", n);
 function stampMark(part, state, mark = "circle", past = "none") {
   return {
     label: state === "current" && part !== "write" && part !== "title" && mark !== "none" ? mark : null,
@@ -246,7 +250,7 @@ var Check = named("Check", ({ type = "checkbox", tool, seed, className, style, c
     radio ? children : h("span", { className: "pt-check__text" }, h("span", { className: "pt-check__ink" }, children))
   );
 });
-var DayHead = named("DayHead", ({ date = /* @__PURE__ */ new Date(), locale = "en-GB", weekLabel = (n) => `Week ${n}`, className, ...rest }, ref) => {
+var DayHead = named("DayHead", ({ date = /* @__PURE__ */ new Date(), locale = "en-GB", weekLabel = "Week {n}", className, ...rest }, ref) => {
   const p = dayParts(date, locale);
   return h(
     "div",
@@ -259,17 +263,17 @@ var DayHead = named("DayHead", ({ date = /* @__PURE__ */ new Date(), locale = "e
       h("span", { className: "pt-dayhead__weekday" }, p.weekday)
     ),
     h("span", { className: "pt-stamp pt-stamp--round pt-dayhead__kanji", lang: "ja", "aria-hidden": "true" }, p.kanji),
-    h("span", { className: "pt-dayhead__weekno" }, weekLabel(p.week))
+    h("span", { className: "pt-dayhead__weekno" }, weekText(weekLabel, p.week))
   );
 });
-var Week = named("Week", ({ date = /* @__PURE__ */ new Date(), today = date, locale = "en-GB", weekStart, className, children, ...rest }, ref) => {
+var Week = named("Week", ({ date = /* @__PURE__ */ new Date(), today = date, locale = "en-GB", weekStart, mark = "circle", className, children, ...rest }, ref) => {
   const start = weekStart == null ? firstDayOf(locale) : weekStart;
   return h("div", { className: "pt-week-wrap" }, h(
     "div",
     { ...rest, ref, className: cls("pt-week", className) },
     weekDates(date, start).map((d, index) => {
       const p = dayParts(d, locale), isToday = sameDay(d, today);
-      const num = isToday ? h(Anno, { className: "pt-week__date", style: { "--pt-anno": "var(--pt-ink-beni)", "--pt-ox": "6px", "--pt-oy": "3px" } }, p.day) : h("span", { className: "pt-week__date" }, p.day);
+      const num = !isToday || mark === "none" ? h("span", { className: "pt-week__date" }, p.day) : mark === "highlight" ? h(Mark, { className: "pt-week__date" }, p.day) : h(Anno, { anno: mark, className: "pt-week__date" }, p.day);
       return h(
         "div",
         { key: index, className: "pt-week__day", "data-day": d.getDay(), "aria-current": isToday ? "date" : void 0 },
@@ -290,7 +294,7 @@ var Habit = named("Habit", ({ seed, className, style, ...input }, ref) => h(
     h("path", { className: "pt-fill", pathLength: 1, d: spiral(rng(useSeed(seed))) })
   )
 ));
-var Habits = named("Habits", ({ days, head, habits, onToggle, title = "Habit", className, style, ...rest }, ref) => {
+var Habits = named("Habits", ({ days, head, habits, onToggle, cell, title = "Habit", className, style, ...rest }, ref) => {
   const n = days || Math.max(0, ...habits.map((x) => x.done.length));
   const labels = head || Array.from({ length: n }, (_, d) => d + 1);
   const at = (ra, ca, rb, cb) => ({ "--pt-ra": ra, "--pt-ca": ca, "--pt-rb": rb, "--pt-cb": cb });
@@ -298,21 +302,24 @@ var Habits = named("Habits", ({ days, head, habits, onToggle, title = "Habit", c
     "div",
     { key, className: cls("pt-habits__row", r === 1 && "pt-habits__head"), style: ink2 ? { "--pt-hb": /^[a-z]+(-[a-z0-9]+)+$/.test(ink2) ? `var(--pt-${ink2})` : ink2 } : void 0 },
     h("span", { className: "pt-habits__name", style: at(r, 1, 1, c) }, name),
-    cells.map((cell, d) => cell(at(r, d + 2, d + 2, c), d))
+    cells.map((cell2, d) => cell2(at(r, d + 2, d + 2, c), d))
   );
   return h("div", { className: "pt-habits-wrap" }, h(
     "div",
     { ...rest, ref, className: cls("pt-habits", className), "data-pt-ready": "", style: { "--pt-days": n, "--pt-habit-count": habits.length, ...style } },
     row(1, 1, "head", title, labels.slice(0, n).map((label) => (s, d) => h("span", { key: d, style: s }, label))),
-    habits.map((x, i) => row(i + 2, i + 2, i, x.name, Array.from({ length: n }, () => (s, d) => h(Habit, {
-      key: d,
-      style: s,
-      seed: (i + 1) * 101 + d,
-      checked: !!x.done[d],
-      "aria-label": `${x.name}, ${labels[d]}`,
-      onChange: onToggle ? (e) => onToggle(i, d, e.target.checked) : void 0,
-      readOnly: !onToggle
-    })), x.ink))
+    habits.map((x, i) => row(i + 2, i + 2, i, x.name, Array.from({ length: n }, () => (s, d) => {
+      const own = cell ? cell({ habit: i, day: d, done: !!x.done[d] }) : null;
+      return own != null && own !== false ? h("span", { key: d, style: s, className: "pt-habits__own" }, own) : h(Habit, {
+        key: d,
+        style: s,
+        seed: (i + 1) * 101 + d,
+        checked: !!x.done[d],
+        "aria-label": `${x.name}, ${labels[d]}`,
+        onChange: onToggle ? (e) => onToggle(i, d, e.target.checked) : void 0,
+        readOnly: !onToggle
+      });
+    }), x.ink))
   ));
 });
 var DateStamp = named("DateStamp", ({
@@ -327,6 +334,7 @@ var DateStamp = named("DateStamp", ({
   from,
   rows = 1,
   title,
+  cell,
   markTool = "pencil",
   pastTool = "graphite",
   ink: ink2,
@@ -345,7 +353,9 @@ var DateStamp = named("DateStamp", ({
         const m = marks ? stampMark(s.part, c.state, mark, past) : {};
         const label = m.label && m.label !== "highlight" ? h(Anno, { anno: m.label, tool: markTool, className: "pt-datestamp__label" }, c.label) : h("span", { className: "pt-datestamp__label" }, c.label);
         const inner = m.label === "highlight" ? h(Mark, null, label) : label;
-        return m.cell ? h(Anno, { key: i, anno: m.cell, tool: pastTool, className: "pt-datestamp__cell", "data-state": c.state }, inner) : h("span", { key: i, className: "pt-datestamp__cell", "data-state": c.state, "data-side": c.side ? "" : void 0 }, inner);
+        const content = marks && cell && c.date ? cell({ part: s.part, row: c.row || 0, date: c.date, state: c.state }) : null;
+        const fill = content == null || content === false ? null : h("span", { className: "pt-datestamp__fill" }, content);
+        return m.cell ? h(Anno, { key: i, anno: m.cell, tool: pastTool, className: "pt-datestamp__cell", "data-state": c.state }, inner, fill) : h("span", { key: i, className: "pt-datestamp__cell", "data-state": c.state, "data-side": c.side ? "" : void 0 }, inner, fill);
       })))
     ))
   );

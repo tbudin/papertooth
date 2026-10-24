@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import * as PT from 'papertooth';
-import { Btn, Wobble, Check } from 'papertooth/react';
+import { Btn, Wobble, Check, DateStamp } from 'papertooth/react';
 import { Notes, Started, HydrateApp } from './components.jsx';
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -119,7 +119,13 @@ const scenarios = {
       <div id="year" class="pt-datestamp" data-unit="year" data-date="2026-10-21" data-past="x"></div>
       <div id="bar" class="pt-datestamp" data-unit="week" data-variant="bar" data-date="2026-10-21" data-past="x"></div>
       <div id="days" class="pt-datestamp" data-unit="day" data-date="2026-02-10" data-mark="box"></div>
-      <div id="wide" class="pt-datestamp" data-unit="month" data-variant="wide" data-date="2026-10-21" data-past="x" data-rows="2"></div></main>`;
+      <div id="wide" class="pt-datestamp" data-unit="month" data-variant="wide" data-date="2026-10-21" data-past="x" data-rows="2"></div>
+      <div id="habits" class="pt-datestamp" data-unit="month" data-variant="wide" data-rows="Run, Read" data-date="2026-10-21">
+        <span data-day="3" data-row="1" class="pt-stamp" data-pic="tick" data-ink="green" id="tick3"></span>
+        <span data-day="5" data-row="2" id="five">5k</span>
+        <span data-date="2026-10-10" id="star">★</span>
+      </div>
+      <div id="weekLabels" class="pt-datestamp" data-unit="week" data-rows="Run, Read" data-date="2026-10-21"><b data-day="20" data-row="2" id="wk">✓</b></div></main>`;
     PT.init({ seed: 3, motion: 'none', lazy: false });
     await until(() => q('#week .pt-datestamp__marks .pt-anno__ink path'));
     // the printed layer has the labels; the marks layer on top has the same cells with the pencil marks
@@ -142,6 +148,14 @@ const scenarios = {
       wideHead: labels('wide', 'head'), wideDays: labels('wide', 'days'), wideDayMarks: marks('wide', 'days'),
       wideWrite: part('wide', 'write').length, wideSides: document.querySelectorAll('#wide .pt-datestamp__print [data-side]').length,
       wideFits: q('#wide').getBoundingClientRect().width <= q('#wide').parentElement.clientWidth,
+      habitLabels: labels('habits', 'write').split(' ').filter(l => l !== '·').join(' '),
+      // where each piece of content landed: its row in its part, and its column (the label column is 0)
+      placed: ['tick3', 'five', 'star', 'wk'].map(id => { const cell = q('#' + id).closest('.pt-datestamp__cell'), row = cell.parentElement;
+        return `${id}:${row.parentElement.dataset.part}${[...row.parentElement.children].indexOf(row) + 1}@${[...row.children].indexOf(cell)}`; }).join(' '),
+      inMarks: !!q('#tick3').closest('.pt-datestamp__marks'),
+      weekWider: q('#weekLabels').offsetWidth > q('#week').offsetWidth,
+      refilled: (() => { q('#habits').dataset.date = '2026-10-22'; PT.dateStamp(q('#habits')); const c = q('#tick3') && q('#tick3').closest('.pt-datestamp__cell');
+        return !!c && [...c.parentElement.children].indexOf(c) === 3; })(),
       days: part('days', 'bar').length, dayMarked: part('days', 'bar', 'marks').findIndex(c => c.querySelector('.pt-anno')?.dataset.anno === 'box') + 1
     };
   },
@@ -195,6 +209,37 @@ const scenarios = {
     return { padding: getComputedStyle(q('#page')).paddingLeft };
   },
   // hydrate the server-rendered planner, then click a habit
+  // a day heading and a week, filled from their attributes: a date, the page's language, a label, a mark
+  async plannerAttrs() {
+    const days = Array.from({ length: 7 }, () => '<div class="pt-week__day"><div class="pt-week__head"><span class="pt-week__date" style="color: rgb(1, 2, 3)"></span></div></div>').join('');
+    q('#root').innerHTML = `<main class="pt-sheet" lang="fr">
+      <div class="pt-dayhead" id="dh" data-date="2026-10-21" data-week-label="Semaine {n}"><span class="pt-dayhead__num"></span><span class="pt-dayhead__month"></span><span class="pt-dayhead__weekday"></span><span class="pt-dayhead__weekno"></span></div>
+      <div class="pt-week" id="wk" data-date="2026-10-21" data-mark="box">${days}</div></main>`;
+    PT.init({ seed: 3, motion: 'none', lazy: false });
+    await until(() => q('#wk [aria-current="date"] .pt-anno__ink path'));
+    const today = () => q('#wk [aria-current="date"] .pt-week__date');
+    const first = { date: today().textContent, anno: today().dataset.anno, kept: today().style.color, marked: document.querySelectorAll('#wk .pt-week__date.pt-anno').length };
+    PT.week(q('#wk'), new Date(2026, 9, 23));
+    return {
+      head: ['num', 'month', 'weekday', 'weekno'].map(k => q('#dh .pt-dayhead__' + k).textContent).join(' | '),
+      dates: [...document.querySelectorAll('#wk .pt-week__date')].map(d => d.textContent.trim()).join(' '),
+      first, moved: today().textContent.trim(), stillMarked: document.querySelectorAll('#wk .pt-week__date.pt-anno').length,
+      current: document.querySelectorAll('#wk [aria-current]').length
+    };
+  },
+  async datestampCell() {
+    mount(<Started options={{ lazy: false, motion: 'none' }}><main className="pt-sheet">
+      <DateStamp unit="week" date={new Date(2026, 9, 21)} rows={['Run', 'Read']}
+        cell={({ row, date }) => row === 1 && date.getDate() === 21 ? <span id="rx">✓</span> : null} />
+    </main></Started>);
+    await until(() => q('#rx'));
+    const cell = q('#rx').closest('.pt-datestamp__cell'), row = cell.parentElement;
+    return {
+      part: row.parentElement.dataset.part, column: [...row.children].indexOf(cell),
+      labels: [...document.querySelectorAll('.pt-datestamp__print [data-part="write"] [data-side]')].map(c => c.textContent).join(' '),
+      inMarks: !!cell.closest('.pt-datestamp__marks'), fills: document.querySelectorAll('.pt-datestamp__fill').length
+    };
+  },
   async hydrate() {
     let toggled = null;
     hydrateRoot(q('#root'), <HydrateApp onToggle={(i, d, c) => { toggled = [i, d, c]; }} />);
@@ -208,6 +253,7 @@ const scenarios = {
       todayCircled: !!q('#w-gb [aria-current="date"] .pt-anno__ink path'), todayContent: text(q('#w-gb [aria-current="date"] p')),
       sundayHead: getComputedStyle(q('#w-us .pt-week__day[data-day="0"] .pt-week__head')).color,
       toggled, cellPlace: q('#h .pt-habit').getAttribute('style'),
+      weekBox: q('#w-box [aria-current="date"] .pt-week__date')?.dataset.anno, ownCell: text(q('#hc .pt-habits__own')), ownCellBoxes: document.querySelectorAll('#hc .pt-habit').length,
       dateStamp: [...document.querySelectorAll('#ds .pt-datestamp__marks .pt-datestamp__cell')].map(c => c.dataset.anno || c.querySelector('.pt-anno')?.dataset.anno || '-').join(' '), dateStampInk: q('#ds').dataset.ink
     };
   }

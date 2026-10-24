@@ -1,4 +1,4 @@
-/*! papertooth v0.4.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.5.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 /* src/css/tokens.css */
 :root {
   --pt-grid: 24px;
@@ -1899,6 +1899,11 @@ summary.pt-link::-webkit-details-marker {
   font-family: var(--pt-font-type-head);
   font-size: 17px;
 }
+.pt-week .pt-week__date.pt-anno {
+  --pt-anno: var(--pt-ink-beni);
+  --pt-ox: 6px;
+  --pt-oy: 3px;
+}
 .pt-week__head .pt-jp {
   font-size: 12px;
 }
@@ -1973,6 +1978,16 @@ summary.pt-link::-webkit-details-marker {
   cursor: pointer;
   position: relative;
   height: 24px;
+}
+.pt-habits__own {
+  display: grid;
+  place-items: center;
+  height: 24px;
+  color: var(--pt-pen);
+  font: 400 20px/1 var(--pt-font-hand);
+}
+.pt-habits__own .pt-stamp {
+  --pt-pic-size: 18px;
 }
 .pt-habit svg {
   overflow: visible;
@@ -2174,6 +2189,28 @@ summary.pt-link::-webkit-details-marker {
   flex: 0 0 46px;
   font-size: 10px;
   letter-spacing: .03em;
+}
+.pt-datestamp[data-unit=week]:has(.pt-datestamp__cell[data-side]) {
+  width: calc(7 * var(--pt-ds-col) + 3px + var(--pt-ds-side, 52px));
+}
+.pt-datestamp[data-unit=week] .pt-datestamp__cell[data-side] {
+  flex: 0 0 var(--pt-ds-side, 52px);
+  font-size: 10px;
+  letter-spacing: .03em;
+}
+.pt-datestamp__fill {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  color: var(--pt-pen);
+  font: 400 1.5em/1 var(--pt-font-hand);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.pt-datestamp__fill .pt-stamp {
+  --pt-pic-size: min(80%, 18px);
 }
 .pt-datestamp[data-variant=wide] [data-part=days] .pt-datestamp__cell {
   height: 22px;
