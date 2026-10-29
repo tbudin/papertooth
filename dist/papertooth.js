@@ -1,4 +1,4 @@
-/*! papertooth v0.5.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.5.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 import {
   ANNO,
   DOT,
@@ -24,7 +24,7 @@ import {
   waveD,
   wobblyBox,
   wobblyRing
-} from "./chunks/chunk-QYNW53EL.js";
+} from "./chunks/chunk-YYEX2G5K.js";
 import {
   DEFAULTS,
   cssVar,
@@ -41,7 +41,7 @@ import {
   svgDoc,
   toHex,
   typewriterFilter
-} from "./chunks/chunk-G2ASMPT7.js";
+} from "./chunks/chunk-INL3BKIA.js";
 
 // src/js/painter.js
 var repaint = () => {
@@ -57,8 +57,8 @@ var onDemand = (load) => {
     return null;
   };
 };
-var imagesFor = onDemand(() => import("./chunks/images-SEQUITVK.js"));
-var diagramFor = onDemand(() => import("./chunks/diagram-TRBSRCI2.js"));
+var imagesFor = onDemand(() => import("./chunks/images-O4SKF2UF.js"));
+var diagramFor = onDemand(() => import("./chunks/diagram-DF7JOULB.js"));
 var LINE_MARKS = /* @__PURE__ */ new Set(["strike", "under", "cross"]);
 var shiftPath = (d, dx, dy) => d.replace(/(-?[\d.]+) (-?[\d.]+)/g, (_, x, y) => `${f(+x + dx)} ${f(+y + dy)}`);
 var SVGNS = "http://www.w3.org/2000/svg";
@@ -988,7 +988,7 @@ var PALETTE = {
 };
 
 // src/js/index.js
-var VERSION = "0.5.0";
+var VERSION = "0.5.1";
 var DEFAULTS2 = {
   root: null,
   // element to enhance; defaults to document.body

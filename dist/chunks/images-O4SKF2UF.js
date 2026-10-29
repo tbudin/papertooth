@@ -1,9 +1,9 @@
-/*! papertooth v0.5.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.5.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 import {
   cssVar,
   lithoFilter,
   toRgb
-} from "./chunk-G2ASMPT7.js";
+} from "./chunk-INL3BKIA.js";
 
 // src/js/images.js
 var lithoCache = /* @__PURE__ */ new Map();

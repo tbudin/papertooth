@@ -2,6 +2,11 @@
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## 0.5.1 - 2026-10-29
+
+### Fixed
+- Three-digit hex colours threw instead of resolving. `toRgb` read the colour with `Array#slice`, which a string does not have, so `#abc` failed wherever a colour is given as a short hex: `setPen`, `setPencil`, `setRibbon` and `setHighlighter`, the matching `init()` options (and the same keys in `data-pt-auto`), the ink filters, and the lithograph's ink. Six-digit hex, `rgb()` and the `pt-*` token names were never affected.
+
 ## 0.5.0 - 2026-10-24
 
 ### Added

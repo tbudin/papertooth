@@ -1,17 +1,17 @@
-/*! papertooth v0.5.0 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.5.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 import {
   FILLS,
   band,
   hatchD,
   swipesD
-} from "./chunk-QYNW53EL.js";
+} from "./chunk-YYEX2G5K.js";
 import {
   curve,
   f,
   jit,
   rng,
   stroke
-} from "./chunk-G2ASMPT7.js";
+} from "./chunk-INL3BKIA.js";
 
 // src/js/diagram.js
 var esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
