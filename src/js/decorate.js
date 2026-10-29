@@ -19,7 +19,7 @@ export const DECORATORS = [
     if (!el.querySelector(':scope > .pt-btn__smear')) {
       const sm = document.createElement('span');
       sm.className = 'pt-btn__smear'; sm.setAttribute('aria-hidden', 'true');
-      sm.textContent = el.querySelector('.pt-btn__label').textContent;
+      sm.textContent = el.querySelector(':scope > .pt-btn__label').textContent;
       el.appendChild(sm);
     }
   }],

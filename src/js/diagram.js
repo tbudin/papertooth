@@ -34,7 +34,7 @@ const EDGES = [
 ];
 
 // node ids: letters, digits, _ and -, including non-Latin letters
-const ID_RE = new RegExp('^([\\w\\u00C0-\\uFFFF-]+?)(?=[\\[\\(\\{>]|\\s|$|-|=|&)');
+const ID_RE = new RegExp('^([\\w\\u00C0-\\uFFFF-]+?)(?=[\\[\\(\\{>]|\\s|$|--|-\\.|=|&)');
 
 export function parseFlow(src) {
   const lines = src.split(/\n|;/).map(l => l.trim()).filter(l => l && !l.startsWith('%%'));

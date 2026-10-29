@@ -1,4 +1,4 @@
-/*! papertooth v0.5.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.5.2 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 import {
   ANNO,
   DOT,
@@ -24,7 +24,7 @@ import {
   waveD,
   wobblyBox,
   wobblyRing
-} from "./chunks/chunk-YYEX2G5K.js";
+} from "./chunks/chunk-ZKPJNINI.js";
 import {
   DEFAULTS,
   cssVar,
@@ -41,7 +41,7 @@ import {
   svgDoc,
   toHex,
   typewriterFilter
-} from "./chunks/chunk-INL3BKIA.js";
+} from "./chunks/chunk-4RAT2SVN.js";
 
 // src/js/painter.js
 var repaint = () => {
@@ -57,8 +57,8 @@ var onDemand = (load) => {
     return null;
   };
 };
-var imagesFor = onDemand(() => import("./chunks/images-O4SKF2UF.js"));
-var diagramFor = onDemand(() => import("./chunks/diagram-DF7JOULB.js"));
+var imagesFor = onDemand(() => import("./chunks/images-I4BVFYK7.js"));
+var diagramFor = onDemand(() => import("./chunks/diagram-6N4MZU3T.js"));
 var LINE_MARKS = /* @__PURE__ */ new Set(["strike", "under", "cross"]);
 var shiftPath = (d, dx, dy) => d.replace(/(-?[\d.]+) (-?[\d.]+)/g, (_, x, y) => `${f(+x + dx)} ${f(+y + dy)}`);
 var SVGNS = "http://www.w3.org/2000/svg";
@@ -273,10 +273,10 @@ var PAINTERS = [
       const r = rng(seedOf(el));
       const d = m.lines ? m.lines.map(([x, y, w, h]) => m.style === "under" ? shiftPath(ANNO.under(w + 4, 11, r), x - 2, y + h - 4) : shiftPath(ANNO[m.style](w + 2 * m.ox, h + 2 * m.oy, r), x - m.ox, y - m.oy)).join(" ") : ANNO[m.style](m.w, m.h, r);
       const ps = m.style === "hatch" ? [[0, 0, 1, 1]] : passes(m.t);
-      while (m.svg.childNodes.length > ps.length) m.svg.lastChild.remove();
-      while (m.svg.childNodes.length < ps.length) m.svg.appendChild(svgEl("path", { pathLength: "1" }));
+      while (m.svg.children.length > ps.length) m.svg.lastElementChild.remove();
+      while (m.svg.children.length < ps.length) m.svg.appendChild(svgEl("path", { pathLength: "1" }));
       ps.forEach(([dx, dy, k, o], i) => {
-        const p = m.svg.childNodes[i];
+        const p = m.svg.children[i];
         p.setAttribute("d", d);
         p.setAttribute("style", `--pt-k:${k};--pt-o:${o}`);
         if (dx || dy) p.setAttribute("transform", `translate(${f(dx)} ${f(dy)})`);
@@ -387,7 +387,9 @@ function createScheduler(opts) {
       if (p.always) p.always(el, m);
     }
   }
+  let stopped = false;
   const request = (el) => {
+    if (stopped) return;
     queue.add(el);
     if (!frame) frame = requestAnimationFrame(flush);
   };
@@ -401,6 +403,7 @@ function createScheduler(opts) {
     flush();
   };
   const stop = () => {
+    stopped = true;
     cancelAnimationFrame(frame);
     frame = 0;
     queue.clear();
@@ -677,6 +680,7 @@ function dateStamp(el, date = parseDate(el.dataset.date), opts = {}) {
   el.setAttribute("role", "img");
   el.setAttribute("aria-label", stampLabel(unit, date, locale, { mark, variant: d.variant }));
   if (/^ja\b/.test(locale)) el.lang = "ja";
+  else if (el.lang === "ja") el.removeAttribute("lang");
   el.replaceChildren(layer(false), layer(true));
   el.dataset.ptReady = "";
 }
@@ -704,7 +708,7 @@ var DECORATORS = [
       const sm = document.createElement("span");
       sm.className = "pt-btn__smear";
       sm.setAttribute("aria-hidden", "true");
-      sm.textContent = el.querySelector(".pt-btn__label").textContent;
+      sm.textContent = el.querySelector(":scope > .pt-btn__label").textContent;
       el.appendChild(sm);
     }
   }],
@@ -988,7 +992,7 @@ var PALETTE = {
 };
 
 // src/js/index.js
-var VERSION = "0.5.1";
+var VERSION = "0.5.2";
 var DEFAULTS2 = {
   root: null,
   // element to enhance; defaults to document.body

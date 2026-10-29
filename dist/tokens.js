@@ -1,4 +1,4 @@
-/*! papertooth v0.5.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.5.2 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 
 // src/js/palette.js
 var PALETTE = {

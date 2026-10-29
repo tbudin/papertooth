@@ -1,17 +1,17 @@
-/*! papertooth v0.5.1 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.5.2 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
 import {
   FILLS,
   band,
   hatchD,
   swipesD
-} from "./chunk-YYEX2G5K.js";
+} from "./chunk-ZKPJNINI.js";
 import {
   curve,
   f,
   jit,
   rng,
   stroke
-} from "./chunk-INL3BKIA.js";
+} from "./chunk-4RAT2SVN.js";
 
 // src/js/diagram.js
 var esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -50,7 +50,7 @@ var EDGES = [
   [/^--+>/, "solid", true],
   [/^---+/, "solid", false]
 ];
-var ID_RE = new RegExp("^([\\w\\u00C0-\\uFFFF-]+?)(?=[\\[\\(\\{>]|\\s|$|-|=|&)");
+var ID_RE = new RegExp("^([\\w\\u00C0-\\uFFFF-]+?)(?=[\\[\\(\\{>]|\\s|$|--|-\\.|=|&)");
 function parseFlow(src) {
   const lines = src.split(/\n|;/).map((l) => l.trim()).filter((l) => l && !l.startsWith("%%"));
   const head = lines.shift() || "";

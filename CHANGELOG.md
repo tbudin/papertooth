@@ -2,6 +2,14 @@
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## 0.5.2 - 2026-10-29
+
+### Fixed
+- A node id with a hyphen broke a flowchart. `my-node --> other` was read as a node called `my`, and the edge after it was dropped without a word, leaving a stray node and no line. Ids keep their hyphens, and the Mermaid subset now has its own tests.
+- A date stamp filled again in another language kept the `lang="ja"` it was given the first time, so a screen reader went on announcing the new text as Japanese.
+- An annotation whose ink `<svg>` was written by hand with whitespace inside it threw while drawing, because the whitespace counted as one of its paths.
+- A diagram or an image effect that finished loading after `destroy()` could still schedule a paint into a kit that was gone.
+
 ## 0.5.1 - 2026-10-29
 
 ### Fixed

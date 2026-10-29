@@ -216,10 +216,10 @@ export const PAINTERS = [
         : ANNO[m.style](m.w, m.h, r);
       // one path per pass of the instrument; colour and weight stay in CSS so the draw-on animation still works
       const ps = m.style === 'hatch' ? [[0, 0, 1, 1]] : passes(m.t);
-      while (m.svg.childNodes.length > ps.length) m.svg.lastChild.remove();
-      while (m.svg.childNodes.length < ps.length) m.svg.appendChild(svgEl('path', { pathLength: '1' }));
+      while (m.svg.children.length > ps.length) m.svg.lastElementChild.remove();
+      while (m.svg.children.length < ps.length) m.svg.appendChild(svgEl('path', { pathLength: '1' }));
       ps.forEach(([dx, dy, k, o], i) => {
-        const p = m.svg.childNodes[i];
+        const p = m.svg.children[i];
         p.setAttribute('d', d);
         p.setAttribute('style', `--pt-k:${k};--pt-o:${o}`);
         if (dx || dy) p.setAttribute('transform', `translate(${f(dx)} ${f(dy)})`); else p.removeAttribute('transform');
@@ -324,11 +324,12 @@ export function createScheduler(opts) {
       if (p.always) p.always(el, m);
     }
   }
-  const request = el => { queue.add(el); if (!frame) frame = requestAnimationFrame(flush); };
+  let stopped = false;
+  const request = el => { if (stopped) return; queue.add(el); if (!frame) frame = requestAnimationFrame(flush); };
   repaint = (el, fresh) => { if (fresh) last.delete(el); request(el); };
   const forget = el => last.delete(el);
   const now = () => { if (frame) cancelAnimationFrame(frame); flush(); };
-  const stop = () => { cancelAnimationFrame(frame); frame = 0; queue.clear(); };
+  const stop = () => { stopped = true; cancelAnimationFrame(frame); frame = 0; queue.clear(); };
   return { request, forget, now, stop };
 }
 
