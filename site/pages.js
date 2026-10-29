@@ -1,0 +1,921 @@
+/* Papertooth's own site: one page per component.
+
+   Imported twice — by package-site in Node to write the HTML a crawler is
+   handed, and by the browser to redraw a preview when a control moves — so
+   nothing at module level may touch the document. The library itself imports
+   cleanly in both, which is why the swatch lists below can be built from
+   PT.PALETTE at render time rather than copied into this file.
+*/
+
+import * as PT from './papertooth.js';
+import { codeBox, esc, refTable } from './ui.js';
+
+/* Browser-only, reached through a function so that importing this module in
+   Node does nothing. init() starts the drawing; in Node there is nothing to
+   draw and no document to draw it on. */
+const root = () => document.documentElement;
+let started = null;
+const start = () => (started ||= PT.init());
+/* Reached through a proxy rather than a function so that every call site
+   reads as it did when this page held a kit directly — and so that the API
+   page can still write kit.refresh() inside a <code> without this module
+   trying to rewrite prose. Nothing runs until a property is read, which in
+   Node never happens. */
+const kit = new Proxy({}, {
+  get(_, k) {
+    const v = start()[k];
+    return typeof v === 'function' ? v.bind(start()) : v;
+  },
+});
+
+/* Pages link to each other by id. In the generator the depth is known per
+   page and arrives as ctx.link; every page function is wrapped below so the
+   last one to render sets this, which is also right in the browser, where
+   only one page exists at a time. */
+let LINK = (id) => `../${id}/`;
+const to = (id) => LINK(id);
+
+/* Pictures and stamp files are served at the site root, and every page but
+   the first sits in a folder of its own, so a bare "img/lake.jpg" would
+   resolve one level too deep. The depth arrives with ctx, like the links. */
+let REL = '../';
+const at = (path) => `${REL}${path}`;
+
+const IMG = { lake: 'img/lake.jpg', coffee: 'img/coffee.jpg' };
+const IMG_ALT = { lake: 'A mountain lake at dusk, with pines on both shores', coffee: 'A cup of coffee and a notebook on a wooden desk, seen from above' };
+
+/* ---------- palettes ---------- */
+const INKS = PT.PALETTE.inks.map(([t, n, k, m]) => [t, `${n}${k ? ' ' + k : ''} ${m}`.trim()]);
+const COLOUR_PENCILS = PT.PALETTE.colourPencils.map(([t, n]) => [t, n]);
+const GRAPHITES = PT.PALETTE.graphite.map(([t, n, k, m]) => [t, m ? `${n}, ${m}` : n]);
+const BALLPOINTS = PT.PALETTE.ballpoints.map(([t, n]) => [t, n]);
+const PENS = INKS.concat(BALLPOINTS.map(([t, n]) => [t, n + ' ballpoint']));
+const PENCILS = GRAPHITES.map(([t, n]) => [t, 'Graphite ' + n]).concat(COLOUR_PENCILS.map(([t, n]) => [t, n + ' pencil']));
+const SUMI = INKS;
+const TOOLS = [['pen', 'fountain pen'], ['ballpoint', 'ballpoint'], ['brush', 'brush pen'], ['marker', 'felt marker'], ['graphite', 'graphite pencil'], ['pencil', 'coloured pencil']];
+const toolCtl = (def, extra = []) => ({ k: 'tool', label: 'Drawn with', type: 'select', options: [['', def]].concat(TOOLS, extra), v: '', note: INK_NOTE });
+const INK_NOTE = 'Each instrument has its own ink, set in <a href="../colours/">Inks and colours</a>.';
+const RIBBONS = PT.PALETTE.ribbons.map(([t, n]) => [t, n + ' ribbon']);
+const HLS = ['yellow', 'pink', 'green', 'orange', 'blue'];
+/* what each instrument writes with right now, set on the Inks and colours page */
+const COLOURS_IN_USE = { pen: 'ink-ai', brush: 'ink-sumi', ballpoint: 'bp-blue', graphite: 'pencil-hb', pencil: 'pencil-red', ribbon: 'ribbon-black', hl: 'hl-yellow' };
+function applyColours(changed) {
+  const S = COLOURS_IN_USE, r = root().style;
+  if (!changed || changed === 'pen') kit.setPen(S.pen);
+  if (!changed || changed === 'pencil') kit.setPencil(S.pencil);
+  if (!changed || changed === 'ribbon') kit.setRibbon(S.ribbon);
+  r.setProperty('--pt-ballpoint', `var(--pt-${S.ballpoint})`);
+  r.setProperty('--pt-brush', `var(--pt-${S.brush})`); r.setProperty('--pt-marker', `var(--pt-${S.brush})`);
+  r.setProperty('--pt-graphite-c', `var(--pt-${S.graphite})`);
+  r.setProperty('--pt-hl', `var(--pt-${S.hl})`);
+  kit.refresh();
+}
+const coloursCode = () => { const S = COLOURS_IN_USE; return `:root {
+  --pt-pen: var(--pt-${S.pen});          /* fountain pen */
+  --pt-brush: var(--pt-${S.brush});      /* brush pen */
+  --pt-marker: var(--pt-${S.brush});     /* felt marker */
+  --pt-ballpoint: var(--pt-${S.ballpoint});
+  --pt-graphite-c: var(--pt-${S.graphite});
+  --pt-pencil: var(--pt-${S.pencil});    /* coloured pencil */
+  --pt-ribbon: var(--pt-${S.ribbon});    /* typed text */
+  --pt-hl: var(--pt-${S.hl});            /* highlighter */
+}
+
+// pens, pencils and ribbons also recolour shapes already drawn, so set them from script too
+kit.setPen('${S.pen}'); kit.setPencil('${S.pencil}'); kit.setRibbon('${S.ribbon}');`; };
+const INK_SAMPLE = `<h2 class="pt-wobble">Notes from the week</h2>
+<p>A paragraph in the current ribbon, with a <a class="pt-link" href="#">link in pen</a> and a <mark class="pt-mark">highlighted phrase</mark>.</p>
+<p class="pt-pen-text">A line written in fountain pen.</p>
+<p class="pt-note">A note in <span class="pt-anno" data-anno="circle">coloured pencil</span>, <span class="pt-anno" data-anno="under" data-tool="graphite">graphite</span>, <span class="pt-anno" data-anno="box" data-tool="ballpoint">ballpoint</span> and <span class="pt-anno" data-anno="under" data-tool="brush">brush pen</span>.</p>
+<div class="pt-row"><button class="pt-btn" type="button">Save</button><button class="pt-btn pt-btn--outline" type="button">Cancel</button></div>`;
+
+const STAMP_INKS = ['red', 'vermilion', 'blue', 'green', 'pink', 'brown'];
+const INK_OPTIONS = PENS.concat(PENCILS, [['stamp-vermilion', 'Vermilion'], ['stamp-blue', 'Stamp blue']]);
+const PLATES = [['#3a82c4', 'Litho blue'], ['#d8466c', 'Litho rose'], ['#f2c640', 'Litho yellow'], ['#23558f', 'Prussian blue'], ['#c8343f', 'Carmine'], ['#eebd2c', 'Chrome yellow'], ['#2a7c8c', 'Teal'], ['#e0558a', 'Rose'], ['#d97a2b', 'Orange'], ['#3c7a4c', 'Bamboo green'], ['#232429', 'Sumi black']];
+
+/* ---------- stamp artwork ----------
+   Picture stamps come from the library (<span class="pt-stamp" data-pic="frog">). The text stamps stay here as inline
+   SVG, because they need the page's fonts, which a CSS image cannot use. */
+const PIC_STAMPS = [['tick', 'Tick'], ['star', 'Star'], ['heart', 'Heart'], ['arrow', 'Arrow'], ['cat', 'Cat 猫'], ['frog', 'Frog 蛙'], ['bear', 'Bear 熊'], ['tiger', 'Tiger 虎'], ['rabbit', 'Rabbit 兎'], ['tanuki', 'Tanuki 狸'], ['owl', 'Owl 梟'], ['paw', 'Cat paw 肉球'], ['onigiri', 'Onigiri'], ['sakura', 'Sakura'], ['cloud', 'Smiling cloud'], ['sun', 'Smiling sun'], ['daruma', 'Daruma'], ['fuji', 'Mount Fuji']];
+const ICONS = {
+  thanks: ['ありがとう', '<svg width="76" height="54" viewBox="0 0 76 54" role="img" aria-label="Arigatou: thank you"><path d="M10 6 H66 C 70 6, 72 8, 72 12 V34 C 72 38, 70 40, 66 40 H30 L20 49 L22 40 H10 C 6 40, 4 38, 4 34 V12 C 4 8, 6 6, 10 6 Z" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linejoin="round"/><text class="pt-jp-round" x="38" y="28.5" text-anchor="middle" font-size="12.5" fill="currentColor">ありがとう</text></svg>'],
+  tea: ['お茶 tea', '<svg width="58" height="60" viewBox="0 0 56 58" role="img" aria-label="A cup of tea"><path d="M12 24 H44 L41 46 C 40.5 50, 37.5 52, 34 52 H22 C 18.5 52, 15.5 50, 15 46 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><text class="pt-jp" x="28" y="44" text-anchor="middle" font-size="14" fill="currentColor">茶</text><path d="M21 19 C 18 15, 24 13, 21 8 M28 19 C 25 15, 31 13, 28 8 M35 19 C 32 15, 38 13, 35 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'],
+  kakunin: ['確認 checked', '<svg width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Kakunin: checked"><circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="3"/><text class="pt-jp" x="32" y="30" text-anchor="middle" font-size="21" fill="currentColor">確</text><text class="pt-jp" x="32" y="53" text-anchor="middle" font-size="21" fill="currentColor">認</text></svg>'],
+  juyo: ['重要 important', '<svg width="86" height="46" viewBox="0 0 86 46" role="img" aria-label="Juuyou: important"><rect x="2" y="2" width="82" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="3"/><rect x="6.5" y="6.5" width="73" height="33" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><text class="pt-jp" x="43" y="32" text-anchor="middle" font-size="24" letter-spacing="4" fill="currentColor">重要</text></svg>'],
+  hi: ['秘 confidential', '<svg width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Hi: confidential"><circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="32" cy="32" r="24" fill="none" stroke="currentColor" stroke-width="1.3"/><text class="pt-jp" x="32" y="43" text-anchor="middle" font-size="29" fill="currentColor">秘</text></svg>'],
+  name: ['Name seal', '<svg width="40" height="70" viewBox="0 0 40 70" role="img" aria-label="Name seal: Thomas"><ellipse cx="20" cy="35" rx="17" ry="32" fill="none" stroke="currentColor" stroke-width="2.6"/><text class="pt-jp" x="20" y="24" text-anchor="middle" font-size="15" fill="currentColor">ト</text><text class="pt-jp" x="20" y="41" text-anchor="middle" font-size="15" fill="currentColor">マ</text><text class="pt-jp" x="20" y="58" text-anchor="middle" font-size="15" fill="currentColor">ス</text></svg>'],
+  date: ['Date stamp', '<svg width="76" height="76" viewBox="0 0 76 76" role="img" aria-label="Date stamp: approved, 20 October 2026, Thomas"><circle cx="38" cy="38" r="34" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M5.5 30 H70.5 M5.5 46 H70.5" stroke="currentColor" stroke-width="1.6"/><text class="pt-jp" x="38" y="25" text-anchor="middle" font-size="13" fill="currentColor">承認</text><text x="38" y="42.5" text-anchor="middle" font-family="Courier Prime, monospace" font-weight="700" font-size="12" fill="currentColor">\'26.10.20</text><text class="pt-jp" x="38" y="62" text-anchor="middle" font-size="13" fill="currentColor">トマス</text></svg>'],
+  yoku: ['よくできました', '<svg width="70" height="70" viewBox="0 0 64 64" role="img" aria-label="Yoku dekimashita: well done"><path d="M32 5 A6.3 6.3 0 0 1 43.7 7.7 A6.3 6.3 0 0 1 53.1 15.2 A6.3 6.3 0 0 1 58.3 26 A6.3 6.3 0 0 1 58.3 38 A6.3 6.3 0 0 1 53.1 48.8 A6.3 6.3 0 0 1 43.7 56.3 A6.3 6.3 0 0 1 32 59 A6.3 6.3 0 0 1 20.3 56.3 A6.3 6.3 0 0 1 10.9 48.8 A6.3 6.3 0 0 1 5.7 38 A6.3 6.3 0 0 1 5.7 26 A6.3 6.3 0 0 1 10.9 15.2 A6.3 6.3 0 0 1 20.3 7.7 A6.3 6.3 0 0 1 32 5 Z" fill="none" stroke="currentColor" stroke-width="2.6"/><circle cx="32" cy="32" r="21" fill="none" stroke="currentColor" stroke-width="1.2"/><text class="pt-jp-round" x="32" y="30" text-anchor="middle" font-size="12" fill="currentColor">よく</text><text class="pt-jp-round" x="32" y="43" text-anchor="middle" font-size="8.6" fill="currentColor">できました</text></svg>']
+};
+
+/** A name seal: Japanese names stacked down an oval, Latin names across a round seal. */
+function nameSeal(text, w) {
+  const t = (text || 'トマス').trim();
+  const chars = [...t].slice(0, 5);
+  if (/[぀-ヿ㐀-鿿]/.test(t)) {
+    const n = chars.length, fs = n > 3 ? 13 : 15, h = 16 + n * (fs + 2);
+    return `<svg width="${w || 40}" height="${Math.round((w || 40) / 40 * (h + 6))}" viewBox="0 0 40 ${h + 6}" role="img" aria-label="Name seal: ${esc(t)}"><ellipse cx="20" cy="${(h + 6) / 2}" rx="17" ry="${(h + 6) / 2 - 3}" fill="none" stroke="currentColor" stroke-width="2.6"/>${chars.map((c, i) => `<text class="pt-jp" x="20" y="${11 + (i + 1) * (fs + 2) - 2}" text-anchor="middle" font-size="${fs}" fill="currentColor">${esc(c)}</text>`).join('')}</svg>`;
+  }
+  const word = t.toUpperCase().slice(0, 10), fs = Math.min(14, 44 / (Math.max(3, word.length) * .62));
+  return `<svg width="${w || 68}" height="${w || 68}" viewBox="0 0 68 68" role="img" aria-label="Name seal: ${esc(t)}"><circle cx="34" cy="34" r="31" fill="none" stroke="currentColor" stroke-width="2.8"/><circle cx="34" cy="34" r="26.5" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="34" y="${34 + fs * .36}" text-anchor="middle" font-family="Courier Prime, monospace" font-weight="700" font-size="${fs.toFixed(1)}" letter-spacing="1" fill="currentColor">${esc(word)}</text></svg>`;
+}
+
+/* ---------- small builders ---------- */
+const style = vars => { const s = Object.entries(vars).filter(([, v]) => v !== '' && v != null).map(([k, v]) => `${k}: ${v}`).join('; '); return s ? ` style="${s}"` : ''; };
+const attr = (k, v, skip) => v != null && v !== '' && v !== skip ? ` ${k}="${esc(v)}"` : '';
+const rot = d => +d ? `${d}deg` : '';
+const opts = list => list.map(v => Array.isArray(v) ? v : [v, v]);
+
+/* ---------- pages ---------- */
+
+/* ---------- playground: starting pages and pieces to insert ---------- */
+const PG_TEMPLATES = {
+  notes: { name: 'meeting notes', html: `<h1>Launch notes</h1>
+<p>Agreed to ship the <mark class="pt-mark">first version on Friday</mark>, with the
+<span class="pt-anno" data-anno="circle">pricing page</span> reviewed by Yui.</p>
+<div class="pt-rule" role="separator" data-rule="wobble"></div>
+<ul class="pt-todo">
+  <li><label class="pt-check"><input type="checkbox" checked> Write the announcement</label></li>
+  <li><label class="pt-check"><input type="checkbox"> Check the proofs</label></li>
+  <li><label class="pt-check"><input type="checkbox"> Book the call</label></li>
+</ul>
+<div class="pt-progress" style="--pt-value: .4" data-label="40%" role="progressbar" aria-label="Launch" aria-valuenow="40"></div>
+<span class="pt-stamp pt-stamp--round" data-ink="vermilion">済</span>` },
+  letter: { name: 'a letter', html: `<p class="pt-pen-text" style="font-size: 26px">Dear Hana,</p>
+<p>Thank you for the notebooks. The paper is <span class="pt-anno" data-anno="under" data-tool="pen">wonderful</span>,
+the kind a fountain pen glides over. I have already filled
+<mark class="pt-mark" data-hl="low" data-color="pink">half of the first one</mark>.</p>
+<p>Come by next week and I will show you.</p>
+<p class="pt-pen-text" style="font-size: 26px">Kenji</p>
+<span class="pt-stamp" data-ink="red">ありがとう</span>` },
+  landing: { name: 'a landing section', html: `<h1>A thinking partner for the <mark class="pt-mark">decisions that shape your business.</mark></h1>
+<p>Advice for founders on positioning, marketing and growth.</p>
+<div class="pt-row">
+  <a class="pt-btn" href="#">Book a call</a>
+  <a class="pt-btn pt-btn--outline" data-outline="circled" href="#">Read the essays</a>
+</div>
+<p>Or read <a class="pt-link" data-ul="swash" href="#">how I work</a>.</p>` },
+  board: { name: 'a pinboard', html: `<div class="pt-row" style="gap: 32px">
+  <div class="pt-sticky" data-sticky="lifted"><div class="pt-sticky__paper"><p>Call the printer</p></div></div>
+  <div class="pt-card"><span class="pt-tape" style="top: -14px; left: 50%; margin-left: -52px"></span><p><b>Print order</b></p><p>200 cards</p></div>
+  <span class="pt-label">Invoices 2026</span>
+  <span class="pt-flag" data-color="yellow">Sign here</span>
+</div>` },
+  blank: { name: 'a blank page', html: `<h1>Start here</h1>
+<p>Write anything.</p>` }
+};
+const PG_SNIPS = [
+  ['highlight', '<mark class="pt-mark">highlighted</mark>'],
+  ['link', '<a class="pt-link" data-ul="wobble" href="#">a link</a>'],
+  ['button', '<a class="pt-btn" href="#">Hire me</a>'],
+  ['outlined button', '<button class="pt-btn pt-btn--outline" data-outline="brackets">Read more</button>'],
+  ['circle a word', '<span class="pt-anno" data-anno="circle">word</span>'],
+  ['separator', '\n<div class="pt-rule" role="separator" data-rule="brush"></div>\n'],
+  ['stamp', '<span class="pt-stamp pt-stamp--round" data-ink="vermilion">済</span>'],
+  ['sticky note', '\n<div class="pt-sticky"><div class="pt-sticky__paper"><p>Remember this</p></div></div>\n'],
+  ['tape', '<span class="pt-tape" data-tape="seigaiha"></span>'],
+  ['to-do', '\n<ul class="pt-todo">\n  <li><label class="pt-check"><input type="checkbox"> Something to do</label></li>\n</ul>\n'],
+  ['progress', '\n<div class="pt-progress" data-shape="circles" style="--pt-value: .6" role="progressbar" aria-label="Progress" aria-valuenow="60"></div>\n'],
+  ['text field', '\n<label class="pt-field"><span class="pt-field__label">Your name</span><input class="pt-input" placeholder="Write here"></label>\n'],
+  ['flowchart', '\n<pre class="pt-diagram">flowchart LR\n  A[Idea] --> B{Worth it?}\n  B -->|yes| C(Build it)\n</pre>\n']
+];
+
+
+
+
+/* The paper the whole site is written on. The prerendered HTML carries
+   these; setGlobals moves the page off them. */
+const G = { mode: 'type', paper: 'white', ruling: 'dot', tex: 'full' };
+const sheetAttrs = () => `data-paper="${G.paper}" data-ruling="${G.ruling}"`;
+
+function GROUP_LINKS() {
+  const firsts = { 'Paper and writing': ['paper', 'Paper, ruling, typed and handwritten text'], 'Marks': ['highlighter', 'Highlighters, underlines, separators, marks, stamps'], 'Paper goods': ['sticky', 'Sticky notes, tape, cards, clips, labels'], 'Images': ['litho', 'Lithograph, printer, frames'], 'Planner': ['planner', 'Day, week, habits, bullet journal'], 'Forms': ['checkbox', 'Checkboxes, radios, text fields'], 'Diagrams': ['flowchart', 'Flowcharts, pie and bar charts from Mermaid'] };
+  return Object.entries(firsts).map(([g, [id, d]]) => `<a href="${to(id)}"><b>${g}</b><span>${d}</span></a>`).join('');
+}
+
+function swatch(kind, tool, token, label) { return `<button class="pt-swatch" type="button" data-kind="${kind}" data-tool="${tool}" data-token="${token}" style="--pt-swatch: var(--pt-${token})"><span class="pt-swatch__ink"></span><span class="pt-swatch__name">${label}</span></button>`; }
+
+const STATE = {};
+const DRAWABLE = '.pt-anno, .pt-btn, .pt-rule, .pt-link, .pt-mark, .pt-stamp, .pt-tape, .pt-sticky, .pt-flag, .pt-torn, .pt-ticket, .pt-photo, .pt-postage, .pt-label, .pt-progress, .pt-printout, .pt-diagram, .pt-draw-path';
+
+function frame(p, markup) {
+  if (p.frame === 'desk') return markup.replace('class="pt-sheet', 'class="pt-sheet paper-own');
+  const pad = p.frame === 'pad' ? ' style="padding-top: 48px"' : '';
+  return `<div class="pt-sheet" ${sheetAttrs()}${pad}>${markup}</div>`;
+}
+function replay() {
+  const stage = document.getElementById('preview');
+  const items = stage.querySelectorAll(DRAWABLE);
+  items.forEach((it, i) => it.style.setProperty('--pt-delay', Math.min(i * .12, 1.2).toFixed(2) + 's'));
+  drawOnce(stage);
+}
+// play the drawing once in a live preview, then keep it still so editing does not replay it
+function drawOnce(box) {
+  root().dataset.ptMotion = '';
+  box.setAttribute('data-pt-draw', ''); delete box.dataset.ptDrawn; void box.offsetWidth; box.dataset.ptDrawn = '';
+  clearTimeout(box._still); box._still = setTimeout(() => { delete box.dataset.ptDrawn; box.setAttribute('data-pt-draw', 'off'); }, 2800);
+}
+
+
+/* ---------- typewriter lab ---------- */
+function LAB_HTML() {
+  return `<svg width="0" height="0" style="position:absolute" aria-hidden="true" id="lab-defs"></svg><div class="play"><div class="stage"><div class="pt-sheet" ${sheetAttrs()}>
+    <span class="tag">With the texture</span><p class="lab-sample pt-nosnap" id="lab-sample"></p>
+    <span class="tag">Same font, no texture</span><p class="lab-plain pt-nosnap" id="lab-plain"></p>
+  </div></div>
+  <div class="ctls"><h3>Parameters</h3>
+    <label class="ctl" for="lab-font"><span>Font</span><select id="lab-font">
+      ${[["'Courier Prime', monospace", 'Courier Prime'], ["'IBM Plex Mono', monospace", 'IBM Plex Mono'], ["'JetBrains Mono', monospace", 'JetBrains Mono'], ["'Space Mono', monospace", 'Space Mono'], ["'Courier New', monospace", 'Courier New (system)'], ["'Work Sans', sans-serif", 'Work Sans'], ["'DM Sans', sans-serif", 'DM Sans'], ['Archivo, sans-serif', 'Archivo'], ['Helvetica, Arial, sans-serif', 'Helvetica / Arial'], ['system-ui, sans-serif', 'System UI']].map(([v, l]) => `<option value="${esc(v)}">${l}</option>`).join('')}
+    </select></label>
+    ${[['spread', 'Ink spread', 0, 1, .05, .6], ['rough', 'Rough edges', 0, 3, .1, 1.2], ['uneven', 'Uneven ribbon', 0, 1, .05, .7], ['speckle', 'Worn speckles', 0, 1, .05, .5], ['double', 'Double strike', 0, 1, .05, .35], ['wobble', 'Letter wobble', 0, 1, .05, .5]].map(([k, l, mi, ma, st, v]) => `<label class="ctl" for="lab-${k}"><span>${l}<output id="lab-${k}-o">${v}</output></span><input type="range" id="lab-${k}" data-key="${k}" min="${mi}" max="${ma}" step="${st}" value="${v}"></label>`).join('')}
+    <label class="ctl wide" for="lab-text"><span>Sample text</span><input type="text" id="lab-text" value="Every month, I carve some time to help founders with their marketing."></label>
+  </div></div>
+  <p class="code-label">Code</p>${codeBox('', 'lab-code')}`;
+}
+function mountLab() {
+  const lab = { spread: .6, rough: 1.2, uneven: .7, speckle: .5, double: .35, wobble: .5 };
+  const sample = document.getElementById('lab-sample'), plain = document.getElementById('lab-plain');
+  const font = document.getElementById('lab-font'), text = document.getElementById('lab-text'), code = document.getElementById('lab-code');
+  const shadow = d => d > 0 ? `${(d * .7).toFixed(2)}px ${(d * .25).toFixed(2)}px 0 color-mix(in srgb, currentColor ${Math.round(d * 55)}%, transparent)` : 'none';
+  function render() {
+    document.getElementById('lab-defs').innerHTML = PT.typewriterFilter('tw-lab', lab);
+    sample.style.fontFamily = plain.style.fontFamily = font.value;
+    const t = text.value || ' ';
+    plain.textContent = t; sample.textContent = '';
+    let seed = 1234; const r = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    t.split(/(\s+)/).forEach(part => {
+      if (!part) return;
+      if (/^\s+$/.test(part)) { sample.appendChild(document.createTextNode(part)); return; }
+      const w = document.createElement('span'); w.style.whiteSpace = 'nowrap';
+      for (const ch of part) {
+        const s = document.createElement('span'); s.className = 'c'; s.textContent = ch;
+        s.style.transform = `translateY(${((r() - .5) * 1.8 * lab.wobble).toFixed(2)}px) rotate(${((r() - .5) * 3.2 * lab.wobble).toFixed(2)}deg)`;
+        s.style.opacity = (1 - r() * .24 * lab.wobble).toFixed(2);
+        w.appendChild(s);
+      }
+      sample.appendChild(w);
+    });
+    sample.style.textShadow = shadow(lab.double);
+    sample.style.filter = 'none'; void sample.offsetWidth; sample.style.filter = '';
+    code.textContent = `// with the script
+kit.setTypewriter({ spread: ${lab.spread}, rough: ${lab.rough}, uneven: ${lab.uneven}, speckle: ${lab.speckle} });
+
+/* then on any text */
+.my-heading {
+  font-family: ${font.value};
+  filter: url(#pt-typewriter);
+  text-shadow: ${shadow(lab.double)};
+  --pt-wobble: ${(lab.wobble * 2).toFixed(1)};   /* with class="pt-wobble" */
+}`;
+  }
+  document.querySelectorAll('[id^="lab-"][type="range"]').forEach(inp => inp.addEventListener('input', () => { lab[inp.dataset.key] = +inp.value; document.getElementById(`lab-${inp.dataset.key}-o`).textContent = inp.value; render(); }));
+  font.addEventListener('change', render); text.addEventListener('input', render);
+  render();
+}
+
+
+
+/* The pages, declared exactly as they were when this was one file. page()
+   pushes; the wrapping below turns the list into what package-site reads. */
+const RAW = [];
+const page = (p) => RAW.push(p);
+
+page({ id: 'intro', description: "What Papertooth is, what it gives a page, and how the CSS and the optional script divide the work between them.", group: 'Getting started', title: 'Introduction', lead: 'Hand-drawn stationery for the web. Paper-makers call the fine grain on a sheet its tooth: it is what grips the pencil and what you feel under your fingers. Papertooth brings that feel to a web page, inspired by Japanese stationery.',
+  before: () => `
+    <div class="play" style="grid-template-columns:1fr"><div class="stage"><main class="pt-sheet hero-sheet pt-links-mix" ${sheetAttrs()}>
+      <h1 class="pt-wobble">Writing that looks like it was done by hand, on paper you can almost feel.</h1>
+      <p>Text sits on the dots. Links get a <a class="pt-link" href="${to('link')}">pen underline</a>, a phrase can be <mark class="pt-mark">picked out with a highlighter</mark>, and a word can be <span class="pt-anno" data-anno="circle">circled</span> in red pencil.</p>
+      <div class="pt-row"><a class="pt-btn" href="${to('install')}">Get started</a><a class="pt-btn pt-btn--outline" href="${to('highlighter')}">Browse the kit</a></div>
+      <div class="row center"><div class="pt-sticky" data-sticky="lifted"><div class="pt-sticky__paper"><p>Every element has a playground</p></div></div><span class="pt-stamp pt-stamp--round" data-ink="vermilion">済</span><span class="pt-stamp pt-stamp--box" data-ink="green">Approved</span><span class="pt-tape" data-tape="seigaiha"></span></div>
+    </main></div></div>
+    <h2>What is inside</h2>
+    <div class="grid-links">${GROUP_LINKS()}</div>
+    <h2>How it works</h2>
+    <p>The CSS works on its own: paper, tape, notes, stamps, forms and every variant are classes and data attributes. A small optional script adds what CSS cannot do: ink textures as SVG filters, shapes drawn at each element's real size, text snapped to the grid, image effects and diagrams. It draws only what is near the screen and goes fully idle afterwards.</p>
+    <p>Nothing is rotated unless you ask for it. Give any note, stamp, tape, card or photo a <code>--pt-rot</code> to set it at an angle.</p>
+    <p>Anything drawn can be drawn with any instrument: fountain pen, ballpoint, brush pen, felt marker, graphite or coloured pencil. Put <code>data-tool</code> on it.</p>` });
+
+page({ id: 'playground', description: "Write HTML with Papertooth classes and watch it land on paper as you type, starting from a sample page or a piece you drop in.", group: 'Getting started', title: 'Playground', keywords: 'editor sandbox try', lead: 'Write any HTML with Papertooth classes and see it on paper as you type. Start from a page, or drop in pieces from the list.',
+  before: () => `<div class="play-tabs" role="tablist" aria-label="Show"><button type="button" role="tab" data-view="settings" aria-selected="true">Code</button><button type="button" role="tab" data-view="preview" aria-selected="false">Preview</button></div>
+  <div class="pg" data-view="settings">
+    <div class="pg-code">
+      <div class="pg-bar"><label for="pg-tpl">Start from <select id="pg-tpl">${Object.keys(PG_TEMPLATES).map(k => `<option value="${k}">${PG_TEMPLATES[k].name}</option>`).join('')}</select></label><button type="button" id="pg-copy">Copy</button></div>
+      <div class="pg-insert"><b>Insert at the cursor</b>${PG_SNIPS.map(([l], i) => `<button type="button" data-i="${i}">${l}</button>`).join('')}</div>
+      <label class="sr" for="pg-src">HTML</label><textarea id="pg-src" spellcheck="false"></textarea>
+    </div>
+    <div class="stage" id="stage"><div class="stage-tools"><button type="button" id="pg-replay">Draw again</button></div><div class="pt-sheet" id="pg-out" data-pt-draw="off" ${sheetAttrs()}></div></div>
+  </div>`,
+  onShow: (s, main) => {
+    const src = document.getElementById('pg-src'), out = document.getElementById('pg-out'), tpl = document.getElementById('pg-tpl');
+    let t = 0;
+    const run = () => { out.innerHTML = src.value; kit.scan(out); kit.refresh(out); };
+    const load = k => { src.value = PG_TEMPLATES[k].html; run(); };
+    src.addEventListener('input', () => { clearTimeout(t); t = setTimeout(run, 250); });
+    src.addEventListener('keydown', e => { if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); src.setRangeText('  ', src.selectionStart, src.selectionEnd, 'end'); } });
+    tpl.addEventListener('change', () => load(tpl.value));
+    document.querySelector('.pg-insert').addEventListener('click', e => {
+      const b = e.target.closest('button[data-i]'); if (!b) return;
+      src.focus(); src.setRangeText(PG_SNIPS[+b.dataset.i][1], src.selectionStart, src.selectionEnd, 'end'); run();
+    });
+    document.getElementById('pg-copy').addEventListener('click', e => copy({ textContent: src.value }, e.target));
+    document.getElementById('pg-replay').addEventListener('click', () => {
+      out.querySelectorAll(DRAWABLE).forEach((it, i) => it.style.setProperty('--pt-delay', Math.min(i * .12, 1.2).toFixed(2) + 's'));
+      drawOnce(out);
+    });
+    load(tpl.value);
+  } });
+
+page({ id: 'install', description: "Install Papertooth from npm or load the stylesheet and script from a CDN, with the one line of markup a page needs.", group: 'Getting started', title: 'Installation', lead: 'Install the package, or load two files from a CDN.',
+  before: () => `
+    <p class="code-label">npm</p>${codeBox('npm install papertooth')}
+    ${codeBox(`import 'papertooth/css';
+import { init } from 'papertooth';
+
+const kit = init({ pen: 'ink-ai', motion: 'scroll' });`)}
+    <p class="code-label">CDN, no build step</p>
+    ${codeBox(`<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/papertooth@0.5/dist/papertooth.min.css">
+<script src="https://cdn.jsdelivr.net/npm/papertooth@0.5/dist/papertooth.min.js" defer data-pt-auto><\/script>`)}
+    <p><code>data-pt-auto</code> starts the script on load. Pass options as JSON: <code>data-pt-auto='{"seed": 7}'</code>. The running instance is <code>window.Papertooth.kit</code>.</p>
+    <h2>Fonts</h2>
+    <p>Fonts are not bundled. The defaults are Courier Prime, Special Elite and Caveat, plus Shippori Mincho B1 and Zen Maru Gothic for Japanese stamps. Swap any of them in <a href="${to('theming')}">Theming</a>.</p>
+    ${codeBox('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Courier+Prime:wght@400;700&family=Special+Elite&display=swap">')}
+    <h2>A first page</h2>
+    ${codeBox(`<body class="pt-desk">
+  <main class="pt-sheet" data-paper="dot">
+    <h1 class="pt-wobble">A typed heading</h1>
+    <p>Some text with a <mark class="pt-mark">highlight</mark> and a <a class="pt-link" href="#">link</a>.</p>
+    <a class="pt-btn" href="#">Hire me</a>
+  </main>
+</body>`)}
+    <h2>Without the script</h2>
+    <p>Everything still renders, with a fixed version of each drawn shape. For the textures, paste <code>dist/papertooth-filters.svg</code> into the page and add <code>class="pt-filters"</code> to <code>&lt;html&gt;</code>. Lithograph, printer and diagrams need the script.</p>` });
+
+page({ id: 'colours', description: "Every ink, pencil, ribbon, highlighter, stamp pad and paper, named and swatched, with the CSS to set the ones you pick.", group: 'Getting started', title: 'Inks and colours', keywords: 'palette colour scheme inks japanese wisteria fuji pen pencil ballpoint ribbon highlighter stamp paper theme', lead: 'Every ink, pencil, ribbon, highlighter, stamp pad and paper in Papertooth, in one place. The fountain pen inks are named after traditional Japanese colours (伝統色, dentō-shoku). Click any of them to use it across the site, then copy the settings.',
+  before: () => {
+    const S = COLOURS_IN_USE;
+    const groups = [
+      ['Fountain pen, brush pen and marker', 'inks', 'fountain', 'pen', 'The same bottled inks fill all three. Choose which one a click sets:'],
+      ['Ballpoint', 'ballpoints', 'ballpoint', 'ballpoint', ''],
+      ['Graphite pencil', 'graphite', 'pencil', 'graphite', 'Hatching, shading and anything drawn in graphite.'],
+      ['Coloured pencil', 'colourPencils', 'pencil', 'pencil', 'Notes and marks on text.'],
+      ['Typewriter ribbon', 'ribbons', 'fountain', 'ribbon', 'Typed text.'],
+      ['Highlighter', 'highlighters', 'highlighter', 'hl', ''],
+      ['Stamp pad', 'stamps', 'stamp', '', 'Set on each stamp with data-ink.'],
+      ['Paper', 'papers', 'paper', 'paper', 'Set on each sheet with data-paper.']
+    ];
+    const sw = (g, tool, use, [t, n, k, m, hex]) => {
+      const chip = g === 'papers' ? `<span class="col-paper" style="background:${hex}"></span>`
+        : g === 'highlighters' ? `<span class="col-hl"><mark class="pt-mark" style="--pt-hl: var(--pt-${t})">highlight</mark></span>`
+        : g === 'stamps' ? `<span class="col-stamp"><span class="pt-stamp pt-stamp--round" style="color: var(--pt-${t})">印</span></span>`
+        : `<span class="pt-swatch__ink"></span>`;
+      const tag = use ? 'button' : 'div';
+      const on = use && (use === 'paper' ? G.paper === t : S[use] === t);
+      return `<${tag} class="pt-swatch col"${use ? ` type="button" aria-pressed="${on}"` : ''}${g === 'inks' ? ' data-group-inks' : ''} data-use="${use}" data-tool="${tool === 'pencil' ? 'pencil' : tool === 'ballpoint' ? 'ballpoint' : 'fountain'}" data-token="${t}" style="--pt-swatch: ${g === 'papers' ? hex : `var(--pt-${t})`}">${chip}<span class="col-name">${esc(n)}${k ? ` <span class="pt-jp">${k}</span>` : ''}</span>${m ? `<span class="col-m">${esc(m)}</span>` : ''}<code>${g === 'papers' ? `data-paper="${t}"` : g === 'stamps' ? `data-ink="${t.replace('stamp-', '')}"` : `--pt-${t}`}</code><span class="col-m">${hex}</span></${tag}>`;
+    };
+    return `<div class="play" style="grid-template-columns:1fr"><div class="stage"><div class="pt-sheet" id="col-sample" ${sheetAttrs()}>${INK_SAMPLE}</div></div></div>
+      <nav class="col-jump" aria-label="Jump to">${groups.map(([title], i) => `<a href="${to('colours')}" data-jump="col-${i}">${title}</a>`).join('')}</nav>`
+      + groups.map(([title, g, tool, use, note], i) => `<h2 id="col-${i}">${title} <small class="col-count">${PT.PALETTE[g].length}</small></h2>${note ? `<p class="col-note">${note}</p>` : ''}${g === 'inks' ? `<p class="col-note"><span class="seg" id="ink-for"><button type="button" data-for="pen" aria-pressed="true">fountain pen</button><button type="button" data-for="brush" aria-pressed="false">brush pen and marker</button></span></p>` : ''}<div class="pt-sheet col-sheet" ${sheetAttrs()}><div class="cols">${PT.PALETTE[g].map(x => sw(g, tool, use, x)).join('')}</div></div>`).join('')
+      + `<h2>In your stylesheet</h2>${codeBox(coloursCode(), 'col-code')}<p>The same list is exported as <code>PALETTE</code> from the script, if you need the names and values in JavaScript.</p>`;
+  },
+  onShow: (s, main) => {
+    main.querySelectorAll('.col-jump a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); document.getElementById(a.dataset.jump).scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+    const inkFor = document.getElementById('ink-for');
+    if (inkFor) inkFor.addEventListener('click', e => {
+      const b = e.target.closest('button[data-for]'); if (!b) return;
+      inkFor.querySelectorAll('button').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
+      main.querySelectorAll('button.col[data-group-inks]').forEach(o => { o.dataset.use = b.dataset.for; o.setAttribute('aria-pressed', String(COLOURS_IN_USE[b.dataset.for] === o.dataset.token)); });
+    });
+    main.querySelectorAll('button.col').forEach(b => b.addEventListener('click', () => {
+      const use = b.dataset.use, t = b.dataset.token;
+      if (use === 'paper') { const sel = document.getElementById('g-paper'); sel.value = t; sel.dispatchEvent(new Event('change')); }
+      else { COLOURS_IN_USE[use] = t; applyColours(use); }
+      main.querySelectorAll(`button.col[data-use="${use}"]`).forEach(o => o.setAttribute('aria-pressed', String(o === b)));
+      const code = document.getElementById('col-code'); if (code) code.textContent = coloursCode();
+    }));
+  } });
+
+page({ id: 'theming', description: "The custom properties that set the grid, the paper and the fonts, with a live preview and the stylesheet to copy.", group: 'Getting started', title: 'Theming', lead: 'Every effect is a CSS custom property. Set the grid, the paper and the fonts here and the whole site follows; copy the result into your own stylesheet. Inks and colours have their own page.',
+  controls: [
+    { k: 'grid', label: 'Grid', type: 'range', min: 16, max: 32, step: 2, unit: 'px', v: 24 },
+    { k: 'dot', label: 'Dot size', type: 'range', min: .4, max: 1.4, step: .05, unit: 'px', v: .8 },
+    { k: 'dotAlpha', label: 'Dot strength', type: 'range', min: .08, max: .5, step: .02, v: .26 },
+    { k: 'grain', label: 'Paper grain', type: 'range', min: 0, max: 1, step: .05, v: .1 },
+    { k: 'wobble', label: 'Letter wobble', type: 'range', min: 0, max: 2, step: .1, v: 1 },
+    { k: 'typeFont', label: 'Typewriter font', type: 'select', options: [['"Courier Prime", monospace', 'Courier Prime'], ['"IBM Plex Mono", monospace', 'IBM Plex Mono'], ['"JetBrains Mono", monospace', 'JetBrains Mono'], ['"Space Mono", monospace', 'Space Mono']], v: '"Courier Prime", monospace' },
+    { k: 'handFont', label: 'Handwriting font', type: 'select', options: [['"Caveat", cursive', 'Caveat'], ['"Kalam", cursive', 'Kalam'], ['"Nanum Pen Script", cursive', 'Nanum Pen Script']], v: '"Caveat", cursive' }
+  ],
+  onShow: (s, main) => {
+    const r = html.style;
+    r.setProperty('--pt-grid', s.grid + 'px'); r.setProperty('--pt-dot-size', s.dot + 'px');
+    r.setProperty('--pt-dot', `rgba(88, 86, 80, ${s.dotAlpha})`); r.setProperty('--pt-grain', s.grain);
+    r.setProperty('--pt-wobble', s.wobble);
+    r.setProperty('--pt-font-type', s.typeFont); r.setProperty('--pt-font-hand', s.handFont);
+    kit.refresh();
+  },
+  render: s => INK_SAMPLE,
+  code: s => `:root {
+  --pt-grid: ${s.grid}px;
+  --pt-dot-size: ${s.dot}px;
+  --pt-dot: rgba(88, 86, 80, ${s.dotAlpha});
+  --pt-grain: ${s.grain};
+  --pt-wobble: ${s.wobble};
+  --pt-font-type: ${s.typeFont};
+  --pt-font-hand: ${s.handFont};
+}`,
+  after: () => `<p>Pens, pencils, ribbons and highlighters: see <a href="${to('colours')}">Inks and colours</a>.</p>
+    ${refTable([['--pt-grid', '24px', 'Dot pitch and line height. Text snaps to it.'], ['--pt-sheet-width', '720px', 'Widest the sheet gets, rounded down to whole cells.'], ['--pt-paper, --pt-desk', '#fefefe, #cdcbc5', 'Paper and desk colours.'], ['--pt-dot, --pt-dot-size', 'warm grey, .8px', 'Printed dots.'], ['--pt-line', 'pale blue', 'Ruling on grid, graph and lined paper.'], ['--pt-grain', '.1', 'Paper grain, 0 to 1.'], ['--pt-pen, --pt-pencil, --pt-ribbon', 'indigo, red pencil, black', 'Current tools.'], ['--pt-hl', 'yellow', 'Highlighter colour.'], ['--pt-wobble', '1', 'Letter wobble, 0 to 2.'], ['--pt-tilt', '1', 'Multiplies every --pt-rot, 0 to 2.'], ['--pt-draw, --pt-ease', '.75s', 'Drawing-on timing.'], ['--pt-font-type, -hand, -type-head, -jp', 'Courier Prime, Caveat…', 'Fonts.'], ['--pt-s-body, -small, -h1, -h2', '20, 16, 36, 26px', 'Type sizes.']])}` });
+
+page({ id: 'paper', description: "Paper colour and grain, and the ruling printed on it, as two separate choices that keep text sitting on the lines.", group: 'Paper and writing', title: 'Paper', lead: 'Two separate choices: the paper itself (its colour and grain) and the ruling printed on it. The grid sets both the dot pitch and the line height, so text always sits on the ruling.',
+  controls: [
+    { k: 'paper', label: 'Paper', type: 'select', options: [['white', 'white'], ['cream', 'cream'], ['washi', 'washi 和紙'], ['kraft', 'kraft'], ['recycled', 'recycled'], ['tracing', 'tracing']], v: 'white' },
+    { k: 'ruling', label: 'Ruling', type: 'select', options: [['dot', 'dots'], ['grid', 'grid 方眼'], ['graph', 'graph'], ['lined', 'lined'], ['blank', 'blank']], v: 'dot' },
+    { k: 'grid', label: 'Grid', type: 'range', min: 16, max: 32, step: 2, unit: 'px', v: 24 },
+    { k: 'grain', label: 'Grain', type: 'range', min: 0, max: 1, step: .05, v: .1 },
+    { k: 'guides', label: 'Show baselines', type: 'toggle', v: false }
+  ],
+  frame: 'desk',
+  render: s => `<main class="pt-sheet${s.guides ? ' pt-guides' : ''}"${attr('data-paper', s.paper, 'white')} data-ruling="${s.ruling}"${style({ '--pt-grid': s.grid !== 24 ? s.grid + 'px' : '', '--pt-grain': s.grain !== .1 ? s.grain : '' })}>
+  <h2>Thursday</h2>
+  <p>Every line of text lands on the ruling, whatever the font or size.</p>
+  <p class="pt-pen-text">Handwriting sits on the same rows.</p>
+</main>`,
+  ref: [['data-paper', 'white', 'white, cream, washi, kraft, recycled, tracing'], ['data-ruling', 'dot', 'dot, grid, graph, lined, blank'], ['--pt-grid', '24px', 'Dot pitch and line height'], ['--pt-grain', '.1', 'Grain strength (each stock has its own)'], ['--pt-dot, --pt-line', 'per paper', 'Ruling colours; each paper sets its own'], ['.pt-guides', '', 'Show the baselines'], ['.pt-desk', '', 'The desk colour, on body or any container. Dark at night, unless .pt-day.']] });
+
+page({ id: 'writing', description: "Typed and handwritten text in ribbon, pen or pencil, with the texture that varies the ink from letter to letter.", group: 'Paper and writing', title: 'Writing', lead: 'Typed or handwritten, in ribbon, pen or pencil. The texture varies the ink a little from letter to letter.',
+  controls: [
+    { k: 'mode', label: 'Writing', type: 'select', options: [['type', 'typed'], ['hand', 'by hand']], v: 'type' },
+    { k: 'tool', label: 'Written with', type: 'select', options: [['', 'typewriter ribbon'], ['pt-pen-text', 'pen'], ['pt-pencil-text', 'graphite pencil'], ['pt-note', 'coloured pencil']], v: '', note: INK_NOTE },
+    { k: 'wobble', label: 'Letter wobble', type: 'range', min: 0, max: 2, step: .1, v: 1 },
+    { k: 'tex', label: 'Texture', type: 'select', options: ['full', 'light', 'off'], v: 'full' }
+  ],
+  render: s => {
+    const cls = [s.mode === 'hand' ? 'pt-mode-hand' : '', s.tex !== 'full' ? `pt-texture-${s.tex}` : ''].filter(Boolean).join(' ');
+    return `<section${cls ? ` class="${cls}"` : ''}${style({ '--pt-wobble': s.wobble !== 1 ? s.wobble : '' })}>
+  <h1 class="pt-wobble">The feel of paper</h1>
+  <p${s.tool ? ` class="${s.tool}"` : ''}>Every month I set aside time to help founders with their marketing. The ink is never quite even.</p>
+</section>`;
+  },
+  ref: [['.pt-wobble', '', 'Each letter lands slightly differently, like a typewriter key'], ['.pt-mode-hand', '', 'Handwriting instead of typing, on any ancestor'], ['.pt-pen-text, .pt-pencil-text, .pt-note', '', 'Written with the fountain pen, a graphite pencil or the coloured pencil'], ['.pt-texture-light, .pt-texture-off', '', 'Less or no ink texture'], ['--pt-wobble', '1', '0 to 2']] });
+
+page({ id: 'typelab', description: "Tune the typewriter filter on any font you like, then copy the settings it produces into your own stylesheet.", group: 'Paper and writing', title: 'Typewriter on any font', lead: 'The typewriter texture is one SVG filter, so it works on any font. Tune it, then copy the settings.', before: () => LAB_HTML(), onShow: mountLab });
+
+page({ id: 'highlighter', description: "Felt-tip highlighter styles, from a clean swipe to a dry marker, and what happens when one crosses fresh ink.", group: 'Marks', title: 'Highlighter', lead: 'A felt-tip swipe. Most styles start light where the nib lands and fill in towards the end; a flick and a dry marker start heavy and run out. On fresh ink the highlighter drags a little of the ink with it.',
+  controls: [
+    { k: 'hl', label: 'Style', type: 'select', options: [['swipe', 'swipe'], ['flick', 'flick'], ['double', 'double pass'], ['low', 'low band'], ['dry', 'dry marker'], ['scribble', 'scribble fill']], v: 'swipe' },
+    { k: 'size', label: 'Tip', type: 'select', options: [['fine', 'fine'], ['', 'regular chisel'], ['broad', 'broad']], v: '' },
+    { k: 'color', label: 'Colour', type: 'select', options: HLS, v: 'yellow' },
+    { k: 'label', label: 'Label', type: 'text', v: 'Hire a fractional CMO' },
+    { k: 'hover', label: 'On hover', type: 'select', options: [['', 'underlined'], ['pass', 'a second pass'], ['circle', 'circled'], ['none', 'nothing']], v: '' },
+    { k: 'tool', label: 'Hover drawn with', type: 'select', options: [['', 'fountain pen']].concat(TOOLS.slice(1)), v: '', when: s => s.hover !== 'pass' && s.hover !== 'none' },
+    { k: 'state', label: 'State', type: 'select', options: [['', 'ready'], ['on', 'on (aria-pressed)'], ['disabled', 'disabled']], v: '' },
+    { k: 'smudge', label: 'Fresh ink smudge', type: 'toggle', v: true }
+  ],
+  render: s => {
+    const a = `${attr('data-hl', s.hl, 'swipe')}${attr('data-size', s.size)}${attr('data-color', s.color, 'yellow')}`;
+    const hv = `${attr('data-hover', s.hover)}${s.hover !== 'pass' && s.hover !== 'none' ? attr('data-tool', s.tool) : ''}`;
+    return `<div class="pt-row${s.smudge ? '' : ' pt-dry'}">
+  <a class="pt-btn"${a}${hv}${s.state === 'on' ? ' aria-pressed="true"' : s.state === 'disabled' ? ' aria-disabled="true"' : ''} href="#">${esc(s.label)}</a>
+</div>
+<p${s.smudge ? '' : ' class="pt-dry"'}>In running text, a phrase can be <mark class="pt-mark"${a}>picked out with a highlighter</mark>.</p>`;
+  },
+  ref: [['data-hl', 'swipe', 'swipe, flick, double, low, dry, scribble'], ['data-size', 'regular', 'fine, broad'], ['data-color', 'yellow', 'yellow, pink, green, orange, blue'], ['data-hover', 'underline', 'underline (in pen), pass (a second highlighter pass), circle, none'], ['aria-pressed, aria-current, aria-expanded, aria-selected', '', 'The button is on: its hover mark stays drawn (an open <details> too)'], [':disabled, aria-disabled', '', 'Faded, with no hover'], ['.pt-dry', '', 'No fresh-ink smudge, on any ancestor'], ['--pt-hl', '', 'Any colour'], ['kit.setFilters({ smudge })', '{ drag: 4.2, blur: 3.4, strength: .78 }', 'How far and how strongly the ink drags']] });
+
+page({ id: 'outline', description: "Buttons drawn as outlines, loops, corners or brackets, including the Japanese corner marks, with the highlighter on hover.", group: 'Marks', title: 'Outlined button', lead: 'A drawn outline at rest, the highlighter on hover. Boxes, a loop, corners, or brackets of several kinds, including the Japanese 「」 and 【】.',
+  controls: [
+    { k: 'ol', label: 'Outline', type: 'select', options: [['sketch', 'sketch box'], ['double', 'double pass'], ['broken', 'broken line'], ['circled', 'circled'], ['corners', 'corners'], ['brackets', 'square brackets [ ]'], ['parens', 'round brackets ( )'], ['braces', 'curly braces { }'], ['angles', 'angle brackets < >'], ['kagi', 'kagi 「 」'], ['lenticular', 'lenticular 【 】']], v: 'sketch' },
+    toolCtl('ink'),
+    { k: 'color', label: 'Hover colour', type: 'select', options: HLS, v: 'yellow' },
+    { k: 'hover', label: 'On hover', type: 'select', options: [['', 'highlighted'], ['underline', 'underlined'], ['circle', 'circled'], ['none', 'nothing']], v: '' },
+    { k: 'state', label: 'State', type: 'select', options: [['', 'ready'], ['on', 'on (aria-pressed)'], ['disabled', 'disabled']], v: '' },
+    { k: 'label', label: 'Label', type: 'text', v: 'Read the essays' }
+  ],
+  render: s => `<button class="pt-btn pt-btn--outline"${attr('data-outline', s.ol, 'sketch')}${attr('data-tool', s.tool)}${attr('data-color', s.color, 'yellow')}${attr('data-hover', s.hover)}${s.state === 'on' ? ' aria-pressed="true"' : s.state === 'disabled' ? ' disabled' : ''} type="button">${esc(s.label)}</button>`,
+  ref: [['data-outline', 'sketch', 'sketch, double, broken, circled, corners, brackets, parens, braces, angles, kagi, lenticular'], ['data-tool', 'ink', 'pen, ballpoint, brush, marker, graphite, pencil'], ['data-color', 'yellow', 'Hover highlighter colour'], ['data-hover', 'pass', 'pass (highlighted), underline, circle, none'], ['aria-pressed, aria-current, aria-expanded, aria-selected', '', 'The button is on: its hover mark stays drawn (an open <details> too)'], [':disabled, aria-disabled', '', 'Faded, with no hover']] });
+
+page({ id: 'link', description: "Pen-stroke underlines that follow every line of a link, and the second stroke or circle that hover adds.", group: 'Marks', title: 'Link underline', lead: 'A pen stroke under each line of a link. Hover adds a second stroke, or circles the link.',
+  controls: [
+    { k: 'ul', label: 'Underline', type: 'select', options: ['wobble', 'slant', 'double', 'swash', ['marker', 'heavy'], 'wave', ['hl', 'highlight']], v: 'wobble' },
+    toolCtl('fountain pen'),
+    { k: 'hover', label: 'On hover', type: 'select', options: [['', 'a second stroke'], ['circle', 'circled'], ['none', 'nothing']], v: '' },
+    { k: 'state', label: 'State', type: 'select', options: [['', 'ready'], ['current', 'current page (aria-current)'], ['disabled', 'disabled (aria-disabled)']], v: '' },
+    { k: 'long', label: 'Wrap onto two lines', type: 'toggle', v: false }
+  ],
+  render: s => `<p>Read <a class="pt-link"${attr('data-ul', s.ul, 'wobble')}${attr('data-tool', s.tool)}${attr('data-hover', s.hover)}${s.state === 'current' ? ' aria-current="page"' : s.state === 'disabled' ? ' aria-disabled="true"' : ''} href="#">${s.long ? 'the essay on pricing a retainer honestly, and what changed when we stopped discounting' : 'the essay'}</a> before the call.</p>`,
+  ref: [['data-ul', 'wobble', 'wobble, slant, double, swash, marker, wave, hl (highlighted; hover adds a pen underline)'], ['data-tool', 'pen', 'ballpoint, brush, marker, graphite, pencil'], ['data-hover', 'second', 'second (another stroke), circle, none'], ['aria-current', '', 'The current page: its hover mark stays drawn (also aria-pressed, aria-expanded, aria-selected, an open <details>)'], ['aria-disabled', '', 'Faded, with no hover'], ['--pt-visited', 'the pen, a little darker', 'Colour of a visited link'], ['button.pt-link', '', 'A button that reads as a link: none of the button’s own box'], ['.pt-links-mix', '', 'On a container: a natural mix of styles']] });
+
+page({ id: 'separator', description: "A rule drawn across the page at its real width, so that no two separators on a page come out the same.", group: 'Marks', title: 'Separator', lead: 'A line drawn across the page, at its real width, so no two repeat.',
+  controls: [{ k: 'rule', label: 'Style', type: 'select', options: ['wobble', 'double', 'dashes', ['brush', 'pressure stroke'], 'coil', 'scrawl', ['short', 'short stroke'], ['stars', 'typed stars']], v: 'wobble' }, toolCtl('ribbon ink')],
+  render: s => `<p>Above the line.</p>
+<div class="pt-rule"${attr('data-rule', s.rule, 'wobble')}${attr('data-tool', s.tool)} role="separator"></div>
+<p>Below the line.</p>`,
+  ref: [['data-rule', 'wobble', 'wobble, double, dashes, brush, coil, scrawl, short, stars'], ['data-tool', 'ribbon ink', 'pen, ballpoint, brush, marker, graphite, pencil']] });
+
+page({ id: 'marks', description: "Circle, box, underline, strike or cross out a word, and the teacher's hanamaru for work well done.", group: 'Marks', title: 'Marks on text', lead: 'Circle, box, underline, strike or cross out a word. The teacher\'s hanamaru is for work well done.',
+  controls: [
+    { k: 'anno', label: 'Mark', type: 'select', options: ['circle', 'box', ['under', 'underline twice'], 'strike', ['cross', 'cross out'], 'hatch', 'hanamaru'], v: 'circle' },
+    toolCtl('coloured pencil'),
+    { k: 'word', label: 'Word', type: 'text', v: 'important' }
+  ],
+  render: s => `<p>This is <span class="pt-anno" data-anno="${s.anno}"${attr('data-tool', s.tool)}>${esc(s.word)}</span>, so read it twice.</p>`,
+  ref: [['data-anno', '', 'circle, box, under, strike, cross, hatch, hanamaru, x'], ['data-wrap', '', 'Let a longer phrase wrap: strike, under and cross follow each line; circle, box and hanamaru go around the whole phrase'], ['data-tool', 'coloured pencil', 'pen, ballpoint, brush, marker, graphite'], ['--pt-anno', '', 'Any colour']] });
+
+page({ id: 'stamps', description: "Rubber stamps with real ink: heavy at the rim, uneven in the middle, with gaps where the paper did not take it.", group: 'Marks', title: 'Stamps', lead: 'Rubber stamps with real ink: heavier at the rim, uneven in the middle, with small gaps where the paper did not take it.',
+  controls: [
+    { k: 'kind', label: 'Stamp', type: 'select', options: [['box', 'Text in a box'], ['round', 'Round kanji'], ['seal', 'Name seal 印鑑']].concat(PIC_STAMPS, Object.entries(ICONS).filter(([k]) => k !== 'name').map(([k, [l]]) => [k, l])), v: 'box' },
+    { k: 'text', label: 'Text', type: 'text', v: 'Approved', when: s => s.kind === 'box' || s.kind === 'round' },
+    { k: 'seal', label: 'Name on the seal', type: 'text', v: 'トマス', when: s => s.kind === 'seal', note: 'Japanese names run down the seal; Latin names go across.' },
+    { k: 'ink', label: 'Ink', type: 'select', options: STAMP_INKS, v: 'red' },
+    { k: 'rot', label: 'Rotation', type: 'range', min: -20, max: 20, step: 1, unit: '°', v: 0 },
+    { k: 'opacity', label: 'Ink', type: 'range', min: .4, max: 1, step: .02, v: .86 },
+    { k: 'wear', label: 'Wear', type: 'range', min: 0, max: 1, step: .05, v: .55, global: true },
+    { k: 'edge', label: 'Ink at the rim', type: 'range', min: 0, max: 1, step: .05, v: .5, global: true },
+    { k: 'mottle', label: 'Uneven pad', type: 'range', min: 0, max: 1, step: .05, v: .5, global: true }
+  ],
+  onShow: (s, main) => { const k = `${s.wear}|${s.edge}|${s.mottle}`; if (PAGES_BY.stamps.last !== k) { PAGES_BY.stamps.last = k; kit.setFilters({ stamp: { wear: s.wear, edge: s.edge, mottle: s.mottle } }); } },
+  render: s => {
+    const st = style({ '--pt-rot': rot(s.rot), '--pt-stamp-opacity': s.opacity !== .86 ? s.opacity : '' });
+    if (s.kind === 'box') return `<span class="pt-stamp pt-stamp--box"${attr('data-ink', s.ink, 'red')}${st}>${esc(s.text)}</span>`;
+    if (s.kind === 'round') return `<span class="pt-stamp pt-stamp--round"${attr('data-ink', s.ink, 'red')}${st}>${esc([...(s.text || '済')][0])}</span>`;
+    if (s.kind === 'seal') return `<span class="pt-stamp"${attr('data-ink', s.ink, 'red')}${st}>${nameSeal(s.seal)}</span>`;
+    const pic = PIC_STAMPS.find(([k]) => k === s.kind);
+    if (pic) return `<span class="pt-stamp" data-pic="${s.kind}"${attr('data-ink', s.ink, 'red')}${st} role="img" aria-label="${pic[1]}"></span>`;
+    return `<span class="pt-stamp"${attr('data-ink', s.ink, 'red')}${st}>${ICONS[s.kind][1]}</span>`;
+  },
+  code: s => PAGES_BY.stamps.render(s) + `\n\n// texture, for every stamp on the page\nkit.setFilters({ stamp: { wear: ${s.wear}, edge: ${s.edge}, mottle: ${s.mottle} } });`,
+  after: () => `<h2>Download the pictures</h2><p>Each picture stamp is also a file of its own: one ink (it takes the colour around it, or black as an image) with real holes, so it sits on any paper. In a project they are <code>papertooth/stamps/frog.svg</code> and so on, and the stylesheet with all of them is optional (<code>papertooth/css/pictures</code>).</p>
+    <div class="stamp-files">${PIC_STAMPS.map(([k, l]) => `<a href="${at('stamps/' + k + '.svg')}" download="papertooth-${k}.svg"><img src="${at('stamps/' + k + '.svg')}" alt="" width="48" height="48"><span>${esc(l)}</span></a>`).join('')}</div>
+    <h2>Approval boxes</h2><p>The 承認 / 確認 / 作成 boxes found on Japanese office documents.</p>
+    <div class="play" style="grid-template-columns:1fr"><div class="stage"><div class="pt-sheet" ${sheetAttrs()}><div><div class="pt-approval">
+      <div><span class="pt-approval__head">承認</span><span class="pt-approval__cell"></span></div>
+      <div><span class="pt-approval__head">確認</span><span class="pt-approval__cell"><span class="pt-stamp" data-ink="vermilion" style="--pt-rot:-8deg">${ICONS.kakunin[1].replace('width="64" height="64"', 'width="46" height="46"')}</span></span></div>
+      <div><span class="pt-approval__head">作成</span><span class="pt-approval__cell"><span class="pt-stamp" data-ink="vermilion">${nameSeal((STATE.stamps || {}).seal, 30)}</span></span></div>
+    </div></div></div></div></div>`,
+  ref: [['.pt-stamp--box, .pt-stamp--round', '', 'Text stamps. Any inline SVG drawn in currentColor works too'], ['data-pic', '', 'A picture stamp, no script needed: ' + PIC_STAMPS.map(([k]) => k).join(', ') + '. Give it role="img" and an aria-label; size with --pt-pic-size (60px)'], ['data-ink', 'red', 'red, vermilion, blue, green, pink, brown'], ['--pt-rot', '0deg', 'Rotation'], ['--pt-stamp-opacity', '.86', 'How much ink'], ['kit.setFilters({ stamp })', '{ wear: .55, edge: .5, mottle: .5, rough: 1.3 }', 'Texture']] });
+
+page({ id: 'datestamps', description: "Week strips, month calendars and year grids in the style of Japanese date stamps, with today marked.", group: 'Marks', title: 'Date stamps', keywords: 'date stamp week month year day calendar today weekday habit tracker check-in 曜日 日付 カレンダー', lead: 'The calendar stamps of Japanese stationery: a week strip to fill in, a month calendar, a year of months, or a single row. Fine printed lines in one ink, with today circled and the days gone by crossed out in pencil.',
+  controls: [
+    { k: 'unit', label: 'Stamp', type: 'select', options: [['week', 'Week strip'], ['month', 'Month calendar'], ['year', 'Year'], ['day', 'Days of the month']], v: 'week' },
+    { k: 'variant', label: 'Style', type: 'select', options: [['', 'Printed grid'], ['bar', 'One row'], ['wide', 'Wide (month)']], v: '', when: s => s.unit !== 'day' },
+    { k: 'rows', label: 'Rows to fill in', type: 'range', min: 1, max: 6, step: 1, v: 2, when: s => (s.unit === 'week' && !s.variant) || (s.unit === 'month' && s.variant === 'wide') },
+    { k: 'title', label: 'Title line', type: 'toggle', v: true, when: s => s.unit === 'week' && !s.variant },
+    { k: 'mark', label: 'Today', type: 'select', options: [['circle', 'Circled'], ['box', 'Boxed'], ['highlight', 'Highlighted'], ['none', 'Not marked']], v: 'circle' },
+    { k: 'past', label: 'Gone by', type: 'select', options: [['x', 'Crossed out'], ['strike', 'Struck through'], ['none', 'Not marked']], v: 'x' },
+    { k: 'locale', label: 'Language', type: 'select', options: [['en-GB', 'English'], ['ja-JP', '日本語'], ['fr-FR', 'Français'], ['de-DE', 'Deutsch'], ['es-ES', 'Español'], ['en-US', 'English (US)']], v: 'en-GB' },
+    { k: 'date', label: 'Date', type: 'text', v: 'today', note: 'today, or a date such as 2026-10-21' },
+    { k: 'ink', label: 'Ink', type: 'select', options: STAMP_INKS, v: 'red' }
+  ],
+  render: s => {
+    const grid = s.unit === 'week' && !s.variant, wide = s.unit === 'month' && s.variant === 'wide';
+    return `<div class="pt-datestamp" data-unit="${s.unit}"${attr('data-variant', s.unit !== 'day' ? s.variant : '')}${grid || wide ? attr('data-rows', s.rows, 1) : ''}${grid && s.title ? ' data-title=""' : ''}${attr('data-date', s.date, 'today')}${attr('data-mark', s.mark, 'circle')}${attr('data-past', s.past, 'none')}${attr('data-locale', s.locale)}${attr('data-ink', s.ink, 'red')}></div>`;
+  },
+  ref: [['data-unit', 'week', 'week (a strip to fill in), month (a calendar), year (its months), day (1 to 31 in a row)'], ['data-variant', '', 'bar: a single row for week, month or year; wide: a month as one long row of days'], ['data-rows', '1', 'Week strip and wide month: rows to fill in'], ['data-title', '', 'Week strip: a title line on top (empty to write in, or printed text)'], ['data-date', 'today', 'The day to mark, as 2026-10-21'], ['data-mark', 'circle', 'How today is marked: circle, box, highlight, none'], ['data-past', 'none', 'How the past is marked: x, strike, none'], ['data-locale', 'the page’s lang', 'Labels come from Intl in this language'], ['data-week-start', 'the locale’s', '0 = Sunday … 6 = Saturday'], ['data-years, data-from', '5, around today', 'Year bar'], ['data-mark-tool, data-past-tool', 'pencil, graphite', 'The instruments the marks are drawn with'], ['data-ink', 'red', 'red, vermilion, blue, green, pink, brown'], ['<DateStamp>', '', 'The same in papertooth/react']] });
+page({ id: 'sticky', description: "Sticky notes in the usual sizes and four ways of sitting on a page, with the shadow doing the work of an outline.", group: 'Paper goods', title: 'Sticky notes', lead: 'Flat along the glue strip at the top. There is no outline: the edge you see is the shadow underneath. Four ways a note sits on a page, in the usual sizes.',
+  controls: [
+    { k: 'color', label: 'Colour', type: 'select', options: ['yellow', 'pink', 'mint', 'blue', 'orange'], v: 'yellow' },
+    { k: 'ratio', label: 'Size', type: 'select', options: [['', 'square 3 × 3'], ['wide', 'wide 5 × 3'], ['tall', 'tall 3 × 4'], ['small', 'small 2 × 1.5'], ['strip', 'strip']], v: '' },
+    { k: 'variant', label: 'On the page', type: 'select', options: [['', 'flat'], ['lifted', 'bottom lifting'], ['pad', 'whole pad'], ['stack', 'a loose stack']], v: '' },
+    { k: 'rot', label: 'Rotation', type: 'range', min: -10, max: 10, step: .5, unit: '°', v: 0 },
+    { k: 'text', label: 'Note', type: 'text', v: 'Check the print proofs before Friday' }
+  ],
+  render: s => `<div class="pt-sticky"${attr('data-color', s.color, 'yellow')}${attr('data-ratio', s.ratio)}${attr('data-sticky', s.variant)}${style({ '--pt-rot': rot(s.rot) })}>
+  <div class="pt-sticky__paper"><p>${esc(s.text)}</p></div>
+</div>`,
+  ref: [['data-color', 'yellow', 'yellow, pink, mint, blue, orange'], ['data-ratio', 'square', 'wide, tall, small, strip'], ['data-sticky', 'flat', 'lifted, pad, stack'], ['--pt-rot', '0deg', 'Rotation'], ['--pt-note-paper', '', 'Any paper colour']] });
+
+page({ id: 'tape', description: "Masking, kraft, washi and clear tape, opaque or see-through as each one is in real life.", group: 'Paper goods', title: 'Tape', lead: 'Masking, kraft and washi tape are opaque, as they are in real life. Only clear tape lets the page through.',
+  controls: [
+    { k: 'tape', label: 'Tape', type: 'select', options: ['masking', 'kraft', 'stripes', 'dots', 'gingham', 'seigaiha', 'clear'], v: 'masking' },
+    { k: 'rot', label: 'Rotation', type: 'range', min: -45, max: 45, step: 1, unit: '°', v: 0 },
+    { k: 'text', label: 'Write on it', type: 'text', v: '' }
+  ],
+  render: s => s.text
+    ? `<span class="pt-tape pt-tape--text"${attr('data-tape', s.tape, 'masking')}${style({ '--pt-rot': rot(s.rot) })}>${esc(s.text)}</span>`
+    : `<span class="pt-tape"${attr('data-tape', s.tape, 'masking')}${style({ '--pt-rot': rot(s.rot) })}></span>`,
+  ref: [['data-tape', 'masking', 'masking, kraft, stripes, dots, gingham, seigaiha, clear'], ['.pt-tape--text', '', 'Tape you can write on'], ['--pt-rot', '0deg', 'Rotation']] });
+
+page({ id: 'card', description: "A ruled index card held by tape or a paper clip whose inner loop passes behind the card at the edge.", group: 'Paper goods', title: 'Cards and clips', lead: 'A ruled index card, held by tape or a paper clip. The clip sits around the paper: its inner loop disappears behind the card at the edge.',
+  controls: [
+    { k: 'hold', label: 'Held by', type: 'select', options: [['clip', 'paper clip'], ['tape', 'tape at the corners'], ['tapetop', 'tape at the top'], ['', 'nothing']], v: 'clip' },
+    { k: 'rot', label: 'Rotation', type: 'range', min: -8, max: 8, step: .5, unit: '°', v: 0 }
+  ],
+  frame: 'pad',
+  render: s => `<div class="pt-card"${style({ '--pt-rot': rot(s.rot) })}>
+  ${s.hold === 'clip' ? '<span class="pt-clip" aria-hidden="true"></span>\n  ' : s.hold === 'tape' ? '<span class="pt-tape" style="top: -12px; left: -30px; --pt-rot: -34deg"></span>\n  <span class="pt-tape" style="top: -10px; right: -32px; --pt-rot: 31deg"></span>\n  ' : s.hold === 'tapetop' ? '<span class="pt-tape" data-tape="stripes" style="top: -14px; left: 50%; margin-left: -52px"></span>\n  ' : ''}<p><b>Print order</b></p>
+  <p>200 cards, 350gsm</p>
+  <p>Letterpress, one colour</p>
+</div>`,
+  ref: [['.pt-card', '', 'Ruled index card'], ['.pt-clip', '', 'Paper clip, placed on the top edge'], ['.pt-tape inside .pt-card', '', 'Position it with top, left and --pt-rot']] });
+
+page({ id: 'torn', description: "A memo torn from a pad with fibres along the tear, and a perforated order slip with a numbered stub.", group: 'Paper goods', title: 'Torn and perforated', lead: 'A memo torn off a pad, with white fibres along the tear, and an order slip with a numbered stub.',
+  controls: [{ k: 'kind', label: 'Kind', type: 'select', options: [['torn', 'torn memo'], ['ticket', 'order slip']], v: 'torn' }, { k: 'rot', label: 'Rotation', type: 'range', min: -6, max: 6, step: .5, unit: '°', v: 0 }],
+  render: s => s.kind === 'torn' ? `<div class="pt-torn"${style({ '--pt-rot': rot(s.rot) })}>
+  <p class="pt-memo-head"><span>Memo</span><span>No. ____</span></p>
+  <p>Call the letterpress studio</p>
+  <p>Ask for samples in cream</p>
+</div>` : `<div class="pt-ticket"${style({ '--pt-rot': rot(s.rot) })}>
+  <div class="pt-ticket__stub"><small>No.</small><b>0042</b></div>
+  <div class="pt-ticket__body"><p class="pt-memo-head">Order slip</p><p>Business cards, 200</p><p>Collect after 3pm</p></div>
+</div>`,
+  ref: [['.pt-torn', '', 'Torn memo'], ['.pt-ticket', '', 'Perforated slip'], ['--pt-stub', '72px', 'Stub width']] });
+
+page({ id: 'labels', description: "Printed label tape, embossed plastic lettering and film index flags, in the colours each one comes in.", group: 'Paper goods', title: 'Labels and flags', lead: 'Printed label tape, embossed plastic labels and film flags.',
+  controls: [
+    { k: 'kind', label: 'Kind', type: 'select', options: [['print', 'printed label'], ['emboss', 'embossed label'], ['flag', 'film flag']], v: 'print' },
+    { k: 'color', label: 'Colour', type: 'select', options: [['', 'default'], 'yellow', 'black', 'clear', 'blue', 'green', 'mint', 'orange'], v: '' },
+    { k: 'text', label: 'Text', type: 'text', v: 'Invoices 2026' },
+    { k: 'rot', label: 'Rotation', type: 'range', min: -6, max: 6, step: .5, unit: '°', v: 0 }
+  ],
+  render: s => s.kind === 'flag' ? `<span class="pt-flag"${attr('data-color', s.color)}>${esc(s.text)}</span>`
+    : `<span class="pt-label${s.kind === 'emboss' ? ' pt-label--emboss' : ''}"${attr('data-color', s.color)}${style({ '--pt-rot': rot(s.rot) })}>${esc(s.text)}</span>`,
+  ref: [['.pt-label', '', 'Printed label: white, yellow, clear, black'], ['.pt-label--emboss', '', 'Embossed: red, blue, black, green'], ['.pt-flag', '', 'Film flag: pink, yellow, mint, blue, orange'], ['.pt-tabs > .pt-tab', '', 'Index tabs on the edge of a sheet']] });
+
+const PICS = [['lake', 'lake at dusk'], ['coffee', 'desk from above']];
+const litho = (s, extra = {}) => {
+  const v = { '--pt-litho-grain': s.grain !== .6 ? s.grain : '', '--pt-litho-size': s.size !== .7 ? s.size : '', '--pt-litho-contrast': s.contrast !== 1.2 ? s.contrast : '', '--pt-litho-darken': s.darken ? s.darken : '' };
+  if (s.mode === 'tri') Object.assign(v, { '--pt-litho-blue': s.p1 !== '#3a82c4' ? s.p1 : '', '--pt-litho-red': s.p2 !== '#d8466c' ? s.p2 : '', '--pt-litho-yellow': s.p3 !== '#f2c640' ? s.p3 : '', '--pt-litho-offset': s.offset !== 1.5 ? s.offset : '' });
+  else Object.assign(v, { '--pt-litho-ink': s.ink !== 'ink-sumi' ? `var(--pt-${s.ink})` : '' });
+  if (s.mode === 'duo') Object.assign(v, { '--pt-litho-ink2': `var(--pt-${s.ink2})`, '--pt-litho-offset': s.offset !== 1.5 ? s.offset : '' });
+  return `<img class="pt-litho"${s.mode !== 'mono' ? ` data-litho="${s.mode}"` : ''} src="${at(IMG[s.img])}" alt="${IMG_ALT[s.img]}"${style({ ...extra, ...v })}>`;
+};
+page({ id: 'litho', description: "Print any picture as a stone lithograph: one ink, two inks by tone, or three stones slightly out of register.", group: 'Images', title: 'Lithograph', lead: 'Any picture printed as a stone lithograph: grainy tones in one ink, two inks by tone, or three stones by colour like a chromolithograph, each slightly out of register.',
+  controls: [
+    { k: 'img', label: 'Picture', type: 'select', options: PICS, v: 'lake' },
+    { k: 'mode', label: 'Inks', type: 'select', options: [['mono', 'one ink'], ['duo', 'two inks, by tone'], ['tri', 'three colours']], v: 'tri' },
+    { k: 'ink', label: 'Ink', type: 'select', options: INK_OPTIONS, v: 'ink-sumi', when: s => s.mode !== 'tri' },
+    { k: 'ink2', label: 'Second ink', type: 'select', options: INK_OPTIONS, v: 'stamp-vermilion', when: s => s.mode === 'duo' },
+    { k: 'p1', label: 'Blue stone', type: 'select', options: PLATES, v: '#3a82c4', when: s => s.mode === 'tri' },
+    { k: 'p2', label: 'Red stone', type: 'select', options: PLATES, v: '#d8466c', when: s => s.mode === 'tri' },
+    { k: 'p3', label: 'Yellow stone', type: 'select', options: PLATES, v: '#f2c640', when: s => s.mode === 'tri' },
+    { k: 'grain', label: 'Grain', type: 'range', min: 0, max: 1, step: .05, v: .6 },
+    { k: 'size', label: 'Grain size', type: 'range', min: .2, max: 1.4, step: .05, v: .7, note: 'Lower is coarser' },
+    { k: 'contrast', label: 'Contrast', type: 'range', min: .6, max: 2.4, step: .05, v: 1.2 },
+    { k: 'darken', label: 'Darken', type: 'range', min: -.3, max: .3, step: .02, v: 0 },
+    { k: 'offset', label: 'Misregistration', type: 'range', min: 0, max: 5, step: .5, unit: 'px', v: 1.5, when: s => s.mode !== 'mono' }
+  ],
+  render: s => litho(s, { width: '100%', 'max-width': '480px' }),
+  ref: [['data-litho', 'mono', 'mono, duo, tri'], ['--pt-litho-ink', 'sumi', 'Mono and duo: main ink'], ['--pt-litho-ink2', 'none', 'Duo: ink for the mid tones'], ['--pt-litho-blue, -red, -yellow', 'blue, rose, yellow', 'Tri: one stone per colour'], ['--pt-litho-grain', '.6', 'How much grain breaks the tones'], ['--pt-litho-size', '.7', 'Grain frequency'], ['--pt-litho-contrast', '1.2', ''], ['--pt-litho-darken', '0', '-0.3 to 0.3'], ['--pt-litho-offset', '1.5', 'Misregistration, in px']] });
+
+const print = (s, extra = {}) => `<img class="pt-print" data-printer="${s.printer}"${attr('data-palette', s.printer === 'gameboy' ? s.palette : '', 'print')}${attr('data-dither', s.dither)}${attr('data-dots', s.dots, s.printer === 'gameboy' ? 160 : 200)} src="${at(IMG[s.img])}" alt="${IMG_ALT[s.img]}"${style({ ...extra, '--pt-print-contrast': s.contrast !== 1.15 ? s.contrast : '', '--pt-print-brightness': s.bright || '', '--pt-print-wear': s.wear !== .5 ? s.wear : '' })}>`;
+page({ id: 'printer', description: "Dither any picture the way a Game Boy Printer or a thermal receipt printer would, with the ink straight on the page.", group: 'Images', title: 'Printer', lead: 'The picture printed again at low resolution with real dithering, the way a Game Boy Printer or a thermal receipt printer would. The ink sits straight on the page.',
+  controls: [
+    { k: 'img', label: 'Picture', type: 'select', options: PICS, v: 'lake' },
+    { k: 'printer', label: 'Printer', type: 'select', options: [['gameboy', 'Game Boy Printer'], ['thermal', 'thermal receipt']], v: 'gameboy' },
+    { k: 'palette', label: 'Colours', type: 'select', options: [['print', 'printed ink'], ['screen', 'green screen']], v: 'print', when: s => s.printer === 'gameboy' },
+    { k: 'dither', label: 'Dithering', type: 'select', options: [['', 'printer default'], ['bayer', 'ordered (Bayer)'], ['atkinson', 'Atkinson'], ['floyd', 'Floyd–Steinberg'], ['threshold', 'none']], v: '' },
+    { k: 'dots', label: 'Dots across', type: 'range', min: 64, max: 320, step: 8, v: 160 },
+    { k: 'contrast', label: 'Contrast', type: 'range', min: .6, max: 2, step: .05, v: 1.15 },
+    { k: 'bright', label: 'Brightness', type: 'range', min: -.3, max: .3, step: .02, v: 0 },
+    { k: 'wear', label: 'Print head wear', type: 'range', min: 0, max: 1, step: .05, v: .5, note: 'Uneven heat and a worn streak' }
+  ],
+  render: s => print(s, { width: '100%', 'max-width': '480px' }),
+  ref: [['data-printer', 'thermal', 'gameboy, thermal'], ['data-palette', 'print', 'screen: the Game Boy\'s green'], ['data-dither', 'printer default', 'bayer, atkinson, floyd, threshold'], ['data-dots', '160 / 200', 'Resolution across the picture'], ['--pt-print-contrast, -brightness', '1.15, 0', ''], ['--pt-print-wear', '.5', 'Uneven heat'], ['--pt-print-ink', '#26262a', 'Ink colour']] });
+
+page({ id: 'frames', description: "Mount a picture as an instant print, with photo corners, under tape, or as a postage stamp.", group: 'Images', title: 'Frames', lead: 'Ways to mount a picture: an instant print, photo corners, tape or a postage stamp. Any picture works, with or without an effect.',
+  controls: [
+    { k: 'frame', label: 'Frame', type: 'select', options: [['polaroid', 'instant print'], ['corners', 'photo corners'], ['tape', 'tape'], ['postage', 'postage stamp']], v: 'polaroid' },
+    { k: 'effect', label: 'Effect', type: 'select', options: [['', 'none'], ['litho', 'lithograph, one ink'], ['tri', 'lithograph, three colours'], ['gameboy', 'Game Boy print'], ['thermal', 'thermal print']], v: '' },
+    { k: 'img', label: 'Picture', type: 'select', options: PICS, v: 'lake' },
+    { k: 'cap', label: 'Caption', type: 'text', v: 'Kamakura, last summer', when: s => s.frame === 'polaroid' || s.frame === 'corners' },
+    { k: 'value', label: 'Value', type: 'text', v: '84', when: s => s.frame === 'postage' },
+    { k: 'w', label: 'Width', type: 'range', min: 120, max: 320, step: 8, unit: 'px', v: 232 },
+    { k: 'rot', label: 'Rotation', type: 'range', min: -10, max: 10, step: .5, unit: '°', v: 0 }
+  ],
+  frame: 'pad',
+  render: s => {
+    const base = { img: s.img, grain: .6, size: .7, contrast: 1.2, darken: 0, offset: 1.5, ink: 'ink-sumi', p1: '#3a82c4', p2: '#d8466c', p3: '#f2c640', dots: s.effect === 'gameboy' ? 160 : 200, contrast2: 1.15, bright: 0, wear: .5, palette: 'print', dither: '' };
+    const pic = s.effect === 'litho' ? litho({ ...base, mode: 'mono' }) : s.effect === 'tri' ? litho({ ...base, mode: 'tri' })
+      : s.effect ? print({ ...base, printer: s.effect, contrast: 1.15 }) : `<img src="${at(IMG[s.img])}" alt="${IMG_ALT[s.img]}">`;
+    if (s.frame === 'postage') return `<span class="pt-lift">
+  <span class="pt-postage"${style({ '--pt-rot': rot(s.rot) })}>
+    ${pic.replace('<img ', `<img style="display: block; width: ${Math.round(s.w * .6)}px; aspect-ratio: 4 / 5; object-fit: cover" `)}${s.value ? `\n    <span class="pt-postage__value">${esc(s.value)}</span>` : ''}
+  </span>
+</span>`;
+    return `<figure class="pt-photo"${s.frame !== 'tape' ? ` data-mount="${s.frame}"` : ''}${style({ '--pt-photo-w': s.w + 'px', '--pt-rot': rot(s.rot) })}>
+  ${s.frame === 'tape' ? '<span class="pt-tape" data-tape="dots"></span>\n  ' : ''}${pic}${s.cap && s.frame !== 'tape' ? `\n  <figcaption>${esc(s.cap)}</figcaption>` : ''}
+</figure>`;
+  },
+  ref: [['.pt-photo[data-mount]', '', 'polaroid, corners, or a .pt-tape inside'], ['--pt-photo-w', '240px', 'Width'], ['--pt-photo-ratio', '4 / 3', 'Picture ratio (1 for the instant print)'], ['.pt-postage', '', 'Perforated frame; wrap it in .pt-lift for a shadow'], ['--pt-perf', '12px', 'Perforation pitch'], ['--pt-rot', '0deg', 'Rotation']] });
+
+page({ id: 'planner', description: "A date header and a Monday-first week view, with Saturday blue and Sunday red as on a Japanese calendar.", group: 'Planner', title: 'Day and week', lead: 'A date header and a week view, Monday first. Saturday is blue and Sunday red, as on Japanese calendars. With data-today they show today.',
+  controls: [{ k: 'show', label: 'Show', type: 'select', options: [['both', 'day and week'], ['day', 'day header'], ['week', 'week']], v: 'both' }],
+  render: s => (s.show !== 'week' ? `<div class="pt-dayhead" data-today>
+  <span class="pt-dayhead__num">21</span>
+  <span class="pt-dayhead__meta"><span class="pt-dayhead__month">October 2026</span><span class="pt-dayhead__weekday">Wednesday</span></span>
+  <span class="pt-stamp pt-stamp--round pt-dayhead__kanji">水</span>
+  <span class="pt-dayhead__weekno">Week 43</span>
+</div>` : '') + (s.show === 'both' ? '\n' : '') + (s.show !== 'day' ? `<div class="pt-week-wrap">
+  <div class="pt-week" data-today>
+${['Mon 月|Brief the designer', 'Tue 火|Essay draft', 'Wed 水|Print proofs', 'Thu 木|Client call 10:00', 'Fri 金|Send the proposal', 'Sat 土|Market', 'Sun 日|Rest'].map((d, i) => { const [h, t] = d.split('|'); const [en, jp] = h.split(' '); return `    <div class="pt-week__day"><div class="pt-week__head"><span>${en} <span class="pt-jp">${jp}</span></span><span class="pt-week__date">${19 + i}</span></div><p>${t}</p></div>`; }).join('\n')}
+  </div>
+</div>` : ''),
+  ref: [['.pt-dayhead[data-today]', '', 'Filled with today by the script'], ['.pt-week[data-today]', '', 'Dates for this week; today is circled'], ['kit.planner.dayHead(el, date)', '', 'Any date']] });
+
+page({ id: 'habits', description: "A habit grid whose circles fill with a quick scribble when tapped, each habit in its own ink.", group: 'Planner', title: 'Habit tracker', lead: 'Tap a circle and it fills in with a quick scribble. Each habit has its own ink.',
+  controls: [{ k: 'days', label: 'Days', type: 'range', min: 7, max: 21, step: 1, v: 14 }, { k: 'rows', label: 'Habits', type: 'range', min: 1, max: 4, step: 1, v: 3 }],
+  render: s => {
+    const H = [['Write 500 words', 'ink-ai'], ['Walk 30 minutes', 'ink-wakatake'], ['Read before bed', 'ink-fuji'], ['No screens after 10', 'ink-beni']].slice(0, s.rows);
+    let out = `<div class="pt-habits-wrap">\n  <div class="pt-habits" style="--pt-days: ${s.days}">\n    <div class="pt-habits__row pt-habits__head"><span class="pt-habits__name">Habit</span>${Array.from({ length: s.days }, (_, j) => `<span>${j + 1}</span>`).join('')}</div>\n`;
+    H.forEach(([n, ink], i) => { out += `    <div class="pt-habits__row" style="--pt-hb: var(--pt-${ink})"><span class="pt-habits__name">${n}</span>${Array.from({ length: s.days }, (_, j) => `<label class="pt-habit"><input type="checkbox" aria-label="${n}, day ${j + 1}"${j < 9 && ((i * 7 + j * 5) % 11) < 7 ? ' checked' : ''}></label>`).join('')}</div>\n`; });
+    return out + '  </div>\n</div>';
+  },
+  code: s => `<div class="pt-habits" style="--pt-days: ${s.days}">
+  <div class="pt-habits__row" style="--pt-hb: var(--pt-ink-ai)">
+    <span class="pt-habits__name">Write 500 words</span>
+    <label class="pt-habit"><input type="checkbox" aria-label="Write 500 words, day 1"></label>
+    <!-- one label per day -->
+  </div>
+</div>`,
+  ref: [['--pt-days', '14', 'Columns'], ['--pt-hb', 'pen', 'Ink for a row']] });
+
+page({ id: 'bujo', description: "The rapid-logging signs of a bullet journal, drawn in whichever ink the page is currently using.", group: 'Planner', title: 'Bullet journal', lead: 'The rapid-logging signs, drawn in the current ink.',
+  controls: [{ k: 'sign', label: 'Add a line', type: 'select', options: ['task', 'done', 'migrated', 'scheduled', 'event', 'note', 'priority'], v: 'task' }, { k: 'text', label: 'Text', type: 'text', v: 'Book the photo studio' }],
+  render: s => `<ul class="pt-bujo">
+  <li data-sign="priority">Send the proposal to the client</li>
+  <li data-sign="done">Pick the paper stock</li>
+  <li data-sign="migrated">Plan the launch post</li>
+  <li data-sign="event">Coffee with a founder, 3pm</li>
+  <li data-sign="${s.sign}">${esc(s.text)}</li>
+</ul>`,
+  ref: [['data-sign', '', 'task, done, migrated, scheduled, event, note, priority']] });
+
+page({ id: 'progress', description: "Progress as a bar, boxes, circles or a 正 tally, filling continuously or one unit at a time.", group: 'Planner', title: 'Progress', lead: 'Pick the shape, then what it is filled with. A bar fills continuously; boxes and circles fill one at a time. 正 is how tallies are kept in Japan: five strokes to a character.',
+  controls: [
+    { k: 'shape', label: 'Shape', type: 'select', options: [['bar', 'continuous bar'], ['boxes', 'boxes'], ['circles', 'circles'], ['ring', 'ring'], ['tally', 'tally marks 卌'], ['sei', 'tally 正']], v: 'bar' },
+    { k: 'style', label: 'Filled with', type: 'select', options: [['highlight', 'highlighter'], ['pencil', 'pencil shading'], ['hatch', 'hatching'], ['cross', 'cross-hatching'], ['scribble', 'scribble'], ['stipple', 'stipple']], v: 'highlight', when: s => ['bar', 'boxes', 'circles'].includes(s.shape) },
+    { k: 'v', label: 'Value', type: 'range', min: 0, max: 100, step: 1, unit: '%', v: 62 },
+    toolCtl('ink'),
+    { k: 'color', label: 'Highlighter', type: 'select', options: HLS, v: 'yellow', when: s => s.style === 'highlight' && ['bar', 'boxes', 'circles'].includes(s.shape) },
+    { k: 'segments', label: 'How many', type: 'range', min: 4, max: 20, step: 1, v: 10, when: s => s.shape === 'boxes' || s.shape === 'circles' },
+    { k: 'max', label: 'Tally of', type: 'range', min: 5, max: 40, step: 5, v: 20, when: s => s.shape === 'tally' || s.shape === 'sei' },
+    { k: 'label', label: 'Show the value', type: 'toggle', v: true }
+  ],
+  render: s => { const fillable = ['bar', 'boxes', 'circles'].includes(s.shape), tally = s.shape === 'tally' || s.shape === 'sei';
+    return `<div class="pt-progress"${attr('data-shape', s.shape, 'bar')}${fillable ? attr('data-style', s.style, 'highlight') : ''}${attr('data-tool', s.tool)}${(s.shape === 'boxes' || s.shape === 'circles') && s.segments !== 10 ? ` data-segments="${s.segments}"` : ''}${tally && s.max !== 20 ? ` data-max="${s.max}"` : ''}${s.label ? ` data-label="${tally ? Math.round(s.v / 100 * s.max) + ' of ' + s.max : s.v + '%'}"` : ''} role="progressbar" aria-label="Essay draft" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${s.v}" style="--pt-value: ${(s.v / 100).toFixed(2)}${fillable && s.style === 'highlight' && s.color !== 'yellow' ? `; --pt-hl: var(--pt-hl-${s.color})` : ''}"></div>`; },
+  ref: [['data-shape', 'bar', 'bar, boxes, circles, ring, tally, sei'], ['data-style', 'highlight', 'The fill: highlight, pencil, hatch, cross, scribble, stipple'], ['--pt-value', '.5', '0 to 1 (or aria-valuenow)'], ['data-tool', 'ink', 'Any instrument'], ['data-segments', '10', 'How many boxes or circles'], ['data-max', '20', 'Tally total'], ['data-label', '', 'Text shown beside it, or inside the ring'], ['--pt-hl', 'yellow', 'Highlighter colour']] });
+
+page({ id: 'checkbox', description: "Hand-drawn boxes and circles over the native checkbox and radio, so keyboard and screen reader behaviour is unchanged.", group: 'Forms', title: 'Checkbox and radio', lead: 'Hand-drawn boxes and circles over the native controls, so keyboards and screen readers work as usual.',
+  controls: [{ k: 'kind', label: 'Kind', type: 'select', options: [['check', 'to-do list'], ['radio', 'radio group']], v: 'check' }, toolCtl('fountain pen'),
+    { k: 'strike', label: 'When done', type: 'select', options: [['line', 'struck through'], ['double', 'struck through twice'], ['scribble', 'scribbled out'], ['under', 'underlined'], ['none', 'just ticked']], v: 'line', when: s => s.kind === 'check' },
+    { k: 'ul', label: 'Underline', type: 'select', options: [['wobble', 'wobble'], ['slant', 'slant'], ['swash', 'swash'], ['double', 'double'], ['marker', 'marker'], ['wave', 'wave']], v: 'wobble', when: s => s.kind === 'check' && s.strike === 'under' }],
+  render: s => s.kind === 'check' ? `<ul class="pt-todo"${attr('data-strike', s.strike, 'line')}${s.strike === 'under' ? attr('data-ul', s.ul, 'wobble') : ''}>
+  <li><label class="pt-check"${attr('data-tool', s.tool)}><input type="checkbox" checked> Pick the paper stock</label></li>
+  <li><label class="pt-check"${attr('data-tool', s.tool)}><input type="checkbox"> Send the print order</label></li>
+  <li><label class="pt-check"${attr('data-tool', s.tool)}><input type="checkbox"> Plan the launch post</label></li>
+</ul>` : `<div class="pt-radios" role="radiogroup" aria-label="Ink">
+  <label class="pt-radio"${attr('data-tool', s.tool)}><input type="radio" name="ink" checked> Black ribbon</label>
+  <label class="pt-radio"${attr('data-tool', s.tool)}><input type="radio" name="ink"> Blue pen</label>
+  <label class="pt-radio"${attr('data-tool', s.tool)}><input type="radio" name="ink"> Red pencil</label>
+</div>`,
+  ref: [['.pt-check, .pt-radio', '', 'Wrap a native input in a label'], ['data-tool', 'pen', 'Instrument for the tick and the strike-through'], ['.pt-todo', '', 'List of checkboxes on the grid'], ['data-strike', 'line', 'line, double, scribble, under, none'], ['data-ul', 'wobble', 'Underline style when data-strike="under"']] });
+
+page({ id: 'input', description: "A text field that is a pencil line on the page until you start writing, when it is inked in.", group: 'Forms', title: 'Text field', lead: 'A line on the page to write on: dotted in pencil like a printed form, inked in when you start writing. What you type is written in pen.',
+  controls: [{ k: 'label', label: 'Label', type: 'text', v: 'Your name' }, { k: 'ph', label: 'Placeholder', type: 'text', v: 'Write here' }, { k: 'multi', label: 'Several lines', type: 'toggle', v: false }],
+  render: s => `<label class="pt-field">
+  <span class="pt-field__label">${esc(s.label)}</span>
+  ${s.multi ? `<textarea class="pt-input" rows="3" placeholder="${esc(s.ph)}"></textarea>` : `<input class="pt-input" type="text" placeholder="${esc(s.ph)}">`}
+</label>`,
+  ref: [['.pt-field', '', 'Label and field together'], ['.pt-field__label', '', 'Typed label above the line'], ['.pt-input', '', 'Any text input, or a textarea for several ruled lines'], ['--pt-input-line', 'pencil', 'Colour of the dotted line']] });
+
+const FLOW = `flowchart TD
+  A[Idea] --> B{Worth it?}
+  B -->|yes| C(Sketch it)
+  B -->|no| D([Park it])
+  C --> E[[Build]] --> F((Ship))
+  F -.-> A`;
+page({ id: 'flowchart', description: "Mermaid flowchart syntax drawn by hand, taking its colours and fonts from the CSS variables.", group: 'Diagrams', title: 'Flowchart', lead: 'Write a Mermaid flowchart and it is drawn by hand. Colours and fonts follow the CSS variables, so a change of pen restyles it without drawing it again.',
+  controls: [
+    { k: 'src', label: 'Mermaid', type: 'textarea', v: FLOW, wide: true },
+    { k: 'example', label: 'Examples', type: 'select', options: [['', 'choose…'], ['td', 'top down'], ['lr', 'left to right'], ['loop', 'review loop']], v: '' },
+    { k: 'fill', label: 'Fill', type: 'select', options: [['none', 'none'], ['wash', 'highlighter wash'], ['highlight', 'highlighter fill'], ['pencil', 'pencil shading'], ['hatch', 'hatching'], ['cross', 'cross-hatching'], ['scribble', 'scribble'], ['stipple', 'stipple']], v: 'none' },
+    toolCtl('ink', [['type', 'typewriter']])
+  ],
+  onChange: (s, k) => { if (k === 'example' && s.example) { s.src = { td: FLOW, lr: 'flowchart LR\n  brief[Brief] --> draft[First draft] ==> review{Review}\n  review -- changes --> draft\n  review --> done[(Archive)]', loop: 'graph TD\n  inbox([Inbox]) --> triage{Urgent?}\n  triage -->|yes| today[Today]\n  triage -->|no| later[This week]\n  today --> done((Done))\n  later -.-> triage' }[s.example]; s.example = ''; return true; } },
+  render: s => `<pre class="pt-diagram"${attr('data-fill', s.fill, 'none')}${attr('data-tool', s.tool)}>
+${esc(s.src)}
+</pre>`,
+  ref: [['Shapes', '', 'A[rect] A(round) A([stadium]) A((circle)) A{diamond} A[[subroutine]] A[(cylinder)] A>flag]'], ['Edges', '', '--> --- -.-> ==> with |label| or -- label -->'], ['Direction', 'TD', 'TD, LR, BT, RL'], ['data-fill', 'none', 'wash, hatch, cross, scribble, stipple'], ['data-tool', 'ink', 'pen, ballpoint, brush, marker, graphite, pencil, type'], ['--pt-diagram-stroke', '1.6px', 'Line weight']] });
+
+page({ id: 'pie', description: "Mermaid pie syntax filled in by hand, in the inks the page is already using.", group: 'Diagrams', title: 'Pie chart', lead: 'Mermaid\'s pie syntax, filled in by hand.',
+  controls: [{ k: 'fill', label: 'Fill', type: 'select', options: [['hatch', 'hatching'], ['highlight', 'highlighter'], ['pencil', 'pencil shading'], ['cross', 'cross-hatching'], ['scribble', 'scribble'], ['stipple', 'stipple']], v: 'hatch' }, { k: 'src', label: 'Mermaid', type: 'textarea', v: 'pie title Where the week goes\n  "Client work" : 42\n  "Writing" : 18\n  "Products" : 25\n  "Admin" : 15', wide: true }, toolCtl('ink', [['type', 'typewriter']])],
+  render: s => `<pre class="pt-diagram"${attr('data-fill', s.fill, 'hatch')}${attr('data-tool', s.tool)}>
+${esc(s.src)}
+</pre>`,
+  ref: [['pie', '', 'pie [showData] [title …], then "Label" : value per line']] });
+
+page({ id: 'chart', description: "Mermaid xychart syntax as hatched bars and a pen line drawn through the points.", group: 'Diagrams', title: 'Bar and line chart', lead: 'Mermaid\'s xychart syntax: hatched bars and a pen line through the points.',
+  controls: [{ k: 'fill', label: 'Fill', type: 'select', options: [['hatch', 'hatching'], ['highlight', 'highlighter'], ['pencil', 'pencil shading'], ['cross', 'cross-hatching'], ['scribble', 'scribble'], ['stipple', 'stipple']], v: 'hatch' }, { k: 'src', label: 'Mermaid', type: 'textarea', v: 'xychart-beta\n  title "Essays published"\n  x-axis [Jan, Feb, Mar, Apr, May, Jun]\n  y-axis "Essays" 0 --> 8\n  bar [2, 3, 5, 4, 6, 7]\n  line [1, 2, 4, 4, 5, 6]', wide: true }, toolCtl('ink', [['type', 'typewriter']])],
+  render: s => `<pre class="pt-diagram"${attr('data-fill', s.fill, 'hatch')}${attr('data-tool', s.tool)}>
+${esc(s.src)}
+</pre>`,
+  ref: [['xychart-beta', '', 'title, x-axis [labels], y-axis "label" min --> max, bar [values], line [values]']] });
+
+page({ id: 'api', description: "Every option init() takes and every method on the kit it returns, with what each one is for.", group: 'Reference', title: 'Script API', lead: 'Options for init(), and the methods on the returned kit.', before: () => `${codeBox(`const kit = Papertooth.init({
+  root: document.body,   // where to look
+  seed: null,            // a number makes every drawing repeatable
+  filters: true,         // inject the texture filters
+  filterParams: {        // tune any texture
+    text: { density: .7 }, head: { rough: 1, density: .8 },
+    graphite: { tooth: 2.4, rough: .9 },
+    stamp: { wear: .55, rough: 1.3, edge: .5, mottle: .5 },
+    smudge: { drag: 4.2, blur: 3.4, strength: .78 },
+    smear: { drag: 7, blur: 4.5, strength: .7 },
+    typewriter: { spread: .6, rough: 1.2, uneven: .7, speckle: .5 }
+  },
+  snap: true,            // put text on the grid
+  lazy: true,            // draw shapes only near the screen
+  motion: 'scroll',      // 'scroll', 'load' or 'none'
+  stagger: .12,          // seconds between marks drawing on in one block
+  highlight: 'swipe',    // default highlighter
+  outline: 'sketch',     // default outline
+  observe: true,         // enhance elements added later
+  today: true,           // fill planner pieces marked data-today
+  pen: null, pencil: null, ribbon: null, highlighter: null
+});
+
+kit.setPen('ink-beni');        // a token name or any colour
+kit.setPencil('pencil-2b');
+kit.setRibbon('ribbon-blue');
+kit.setHighlighter('#ffc06a');
+kit.setFilters({ stamp: { wear: .8 } });
+kit.setTypewriter({ spread: .8 });
+kit.refresh();                 // after changing writing mode or layout
+kit.replay();                  // draw everything on again
+kit.destroy();
+
+Papertooth.renderDiagram(source, { font, seed, fill });   // SVG string
+Papertooth.filtersMarkup(params);                         // the filters as SVG markup`)}
+    <h2>Performance</h2>
+    <ul>
+      <li>Shapes are drawn only when they come near the screen, and redrawn only when their size or style changes.</li>
+      <li>Each frame measures everything first and writes everything after, so the page lays out once.</li>
+      <li>Snapping uses <code>translate</code>, which moves text without a new layout.</li>
+      <li>The script ignores its own changes to the page and goes idle after loading.</li>
+      <li>Animations are CSS only and stop for people who prefer reduced motion.</li>
+      <li>Textures are SVG filters on text only. On long pages, use <code>.pt-texture-light</code>, or <code>.pt-lazy</code> on sections so the browser can skip them off screen.</li>
+    </ul>` });
+
+/* The settings in the header. They describe the paper the whole site is
+   written on, so they are global rather than per page: picking kraft on one
+   page and finding white on the next would be a different site each time. */
+export const globals = [
+  { k: 'mode', label: 'Writing', type: 'select', options: [['type', 'typed'], ['hand', 'by hand']], v: 'type' },
+  { k: 'paper', label: 'Paper', type: 'select', options: ['white', 'cream', 'washi', 'kraft', 'recycled', 'tracing'], v: 'white' },
+  { k: 'ruling', label: 'Ruling', type: 'select', options: ['dot', 'grid', 'graph', 'lined', 'blank'], v: 'dot' },
+  { k: 'tex', label: 'Texture', type: 'select', options: ['full', 'light', 'off'], v: 'full' },
+];
+
+/* Called on load and on every change. The prerendered HTML carries the
+   defaults in G, so this only ever has to move the page from one setting to
+   another — it never has to draw the first one. */
+export function setGlobals(g) {
+  /* Called once on load and again on every change, which makes it the one
+     place the library is reliably started. The old page called init() at the
+     top of its script; here nothing else would, and a page whose preview is
+     pure CSS would have looked fine while every drawn shape stayed blank. */
+  start();
+  Object.assign(G, g);
+  const r = root();
+  r.classList.toggle('pt-mode-hand', g.mode === 'hand');
+  r.classList.toggle('pt-texture-light', g.tex === 'light');
+  r.classList.toggle('pt-texture-off', g.tex === 'off');
+  for (const s of document.querySelectorAll('.pt-sheet:not(.paper-own)')) {
+    s.dataset.paper = g.paper;
+    s.dataset.ruling = g.ruling;
+  }
+  start().refresh();
+  if (document.fonts) document.fonts.ready.then(() => start().refresh());
+}
+
+export const announce = (g) => `Paper ${g.paper}, ruling ${g.ruling}, texture ${g.tex}. Redrawn.`;
+
+
+/* A page may keep a scratch value on its own entry between redraws — the
+   stamps page remembers which filter settings it last pushed — and reaches
+   it by id, as it did when the router owned the list. */
+const PAGES_BY = Object.fromEntries(RAW.map((p) => [p.id, p]));
+
+/* Every page function is wrapped so that it picks up the depth it is being
+   rendered at, and so that a page's preview is the element papertooth draws
+   into: the template owns the stage, the library owns what is inside it. */
+const DRAW_TOOLS = '<button class="btn" type="button" id="replay">Draw again</button>';
+
+const wrap = (p) => {
+  const out = { ...p };
+  for (const k of ['lead', 'before', 'after', 'code', 'render']) {
+    const fn = p[k];
+    if (typeof fn !== 'function') continue;
+    out[k] = (s, d, c) => {
+      if (c?.link) LINK = c.link;
+      if (c?.rel != null) REL = c.rel;
+      return fn(s, d, c);
+    };
+  }
+  if (p.render) {
+    const inner = out.render;
+    out.render = (s, d, c) => `<div id="preview" data-pt-draw="off">${frame(p, inner(s, d, c))}</div>`;
+    out.tools = DRAW_TOOLS;
+  }
+  return out;
+};
+
+export const pages = RAW.map(wrap);

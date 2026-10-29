@@ -87,7 +87,10 @@
     "check:sizes": "node scripts/check-sizes.mjs",
     "dev": "node scripts/build.mjs && node scripts/serve.mjs",
     "prepublishOnly": "npm run build",
-    "test": "playwright test"
+    "test": "playwright test",
+    "build:docs": "npm run build && package-site build",
+    "check:docs": "npm run build && package-site check",
+    "docs": "npm run build && package-site serve 4323"
   },
   "peerDependencies": {
     "react": ">=18"
@@ -101,6 +104,7 @@
     "@playwright/test": "1.64.0",
     "esbuild": "0.28.2",
     "oxlint": "^1.90.0",
+    "package-site": "github:tbudin/package-site#v0.1.1",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   }

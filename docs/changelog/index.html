@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Changelog · papertooth</title>
+<meta name="description" content="Every released version of papertooth, newest first, with what changed in each — and an Atom feed to follow new ones.">
+<link rel="canonical" href="https://tbudin.github.io/papertooth/changelog/">
+<meta name="author" content="Thomas Budin">
+<meta name="generator" content="package-site">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta name="theme-color" content="#f4f2ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1f1e1c" media="(prefers-color-scheme: dark)">
+<link rel="prev" href="https://tbudin.github.io/papertooth/api/">
+<link rel="alternate" type="text/markdown" href="https://tbudin.github.io/papertooth/changelog/index.md" title="Changelog as markdown">
+<link rel="alternate" type="text/plain" href="https://tbudin.github.io/papertooth/llms.txt" title="llms.txt">
+<link rel="alternate" type="application/atom+xml" href="https://tbudin.github.io/papertooth/feed.xml" title="papertooth releases">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="papertooth">
+<meta property="og:title" content="Changelog · papertooth">
+<meta property="og:description" content="Every released version of papertooth, newest first, with what changed in each — and an Atom feed to follow new ones.">
+<meta property="og:url" content="https://tbudin.github.io/papertooth/changelog/">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tbudin.github.io/papertooth/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Papertooth: a sheet of dotted paper with a highlighted word, a circled word, a red daruma stamp and a sticky note">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Changelog · papertooth">
+<meta name="twitter:description" content="Every released version of papertooth, newest first, with what changed in each — and an Atom feed to follow new ones.">
+<meta name="twitter:image" content="https://tbudin.github.io/papertooth/og.png">
+<meta name="twitter:image:alt" content="Papertooth: a sheet of dotted paper with a highlighted word, a circled word, a red daruma stamp and a sticky note">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23f8f1df'/%3E%3Cpath d='M4 19 C 12 16, 20 17, 28 14 L 28 23 C 20 25, 12 24, 4 27 Z' fill='%23fff04a'/%3E%3Ctext x='16' y='23' font-family='Georgia, serif' font-size='21' text-anchor='middle' fill='%23213c6b'%3Ep%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&amp;family=Courier+Prime:ital,wght@0,400;0,700;1,400&amp;family=Special+Elite&amp;family=Kalam:wght@400;700&amp;family=Nanum+Pen+Script&amp;family=IBM+Plex+Mono:wght@400;700&amp;family=JetBrains+Mono:wght@400;700&amp;family=Space+Mono:wght@400;700&amp;family=Work+Sans:wght@400;700&amp;family=DM+Sans:wght@400;700&amp;family=Archivo:wght@400;700&amp;family=Archivo+Narrow:wght@500;600&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@800&amp;family=Zen+Maru+Gothic:wght@700&amp;display=swap">
+<link rel="stylesheet" href="../assets/chrome.css">
+<link rel="stylesheet" href="../assets/papertooth.min.css">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+:root {
+  --bg: #f4f2ec;
+  --fg: #24262c;
+  --muted: #6c6a64;
+  --line: #dcd8ce;
+  --panel: #ebe8e0;
+  --code: #efece5;
+  --accent: #213c6b;
+  --mark: #fff04a;
+  --f-ui: "Courier Prime", "Courier New", monospace;
+  --f-head: "Special Elite", "Courier Prime", monospace;
+  --f-mono: "Courier Prime", "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1f1e1c;
+    --fg: #e9e6de;
+    --muted: #a29f97;
+    --line: #3a3834;
+    --panel: #2a2926;
+    --code: #262522;
+    --accent: #a9bde6;
+    --mark: #6d6418;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1f1e1c;
+  --fg: #e9e6de;
+  --muted: #a29f97;
+  --line: #3a3834;
+  --panel: #2a2926;
+  --code: #262522;
+  --accent: #a9bde6;
+  --mark: #6d6418;
+}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "papertooth",
+      "item": "https://tbudin.github.io/papertooth/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Changelog",
+      "item": "https://tbudin.github.io/papertooth/changelog/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Changelog",
+  "description": "Every released version of papertooth, newest first, with what changed in each — and an Atom feed to follow new ones.",
+  "url": "https://tbudin.github.io/papertooth/changelog/",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "papertooth",
+    "url": "https://tbudin.github.io/papertooth/"
+  },
+  "about": {
+    "@type": "SoftwareSourceCode",
+    "name": "papertooth",
+    "codeRepository": "https://github.com/tbudin/papertooth"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Thomas Budin"
+  }
+}
+</script>
+</head>
+<script>/* before paint, or the page flashes the other theme */try{var t=localStorage.getItem('package-site:theme');if(t&&t!=='system')document.documentElement.dataset.theme=t;}catch(e){}</script>
+<body data-page="changelog">
+<a class="skip" href="#page">Skip to the page</a>
+
+<header class="top">
+  <button class="btn menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="side">
+    <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Menu</span>
+  </button>
+  <a class="brand" href="../"><b>papertooth</b><span>v0.5.2</span></a>
+  <span class="here" id="here">Changelog</span>
+<div class="top-ctl" id="settings" role="group" aria-label="Site settings"><label for="g-mode">Writing <select id="g-mode" data-k="mode"><option value="type" selected>typed</option><option value="hand">by hand</option></select></label><label for="g-paper">Paper <select id="g-paper" data-k="paper"><option value="white" selected>white</option><option value="cream">cream</option><option value="washi">washi</option><option value="kraft">kraft</option><option value="recycled">recycled</option><option value="tracing">tracing</option></select></label><label for="g-ruling">Ruling <select id="g-ruling" data-k="ruling"><option value="dot" selected>dot</option><option value="grid">grid</option><option value="graph">graph</option><option value="lined">lined</option><option value="blank">blank</option></select></label><label for="g-tex">Texture <select id="g-tex" data-k="tex"><option value="full" selected>full</option><option value="light">light</option><option value="off">off</option></select></label><button class="switch" type="button" role="switch" id="g-theme" aria-checked="false" aria-label="Dark mode"><span class="switch-track" aria-hidden="true"><span class="switch-knob"></span></span><span class="switch-text">Dark</span></button></div>
+
+</header>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="wrap">
+  <nav class="side" id="side" aria-label="Pages">
+    <div class="side-head"><b>papertooth</b><button class="btn" type="button" id="side-close">Close</button></div>
+    <div class="side-settings" id="side-settings"></div>
+    <label class="find" for="find"><span class="sr">Find a component</span><input type="search" id="find" placeholder="Find a component" autocomplete="off"><kbd>/</kbd></label>
+    <div id="nav-list">
+<div class="nav-group" role="group" aria-labelledby="nav-g0"><p class="nav-group-label" id="nav-g0">Getting started</p><a href="../" data-id="intro" data-words="introduction  getting started ">Introduction</a><a href="../playground/" data-id="playground" data-words="playground  getting started editor sandbox try">Playground</a><a href="../install/" data-id="install" data-words="installation  getting started ">Installation</a><a href="../colours/" data-id="colours" data-words="inks and colours  getting started palette colour scheme inks japanese wisteria fuji pen pencil ballpoint ribbon highlighter stamp paper theme">Inks and colours</a><a href="../theming/" data-id="theming" data-words="theming  getting started ">Theming</a></div><div class="nav-group" role="group" aria-labelledby="nav-g1"><p class="nav-group-label" id="nav-g1">Paper and writing</p><a href="../paper/" data-id="paper" data-words="paper  paper and writing ">Paper</a><a href="../writing/" data-id="writing" data-words="writing  paper and writing ">Writing</a><a href="../typelab/" data-id="typelab" data-words="typewriter on any font  paper and writing ">Typewriter on any font</a></div><div class="nav-group" role="group" aria-labelledby="nav-g2"><p class="nav-group-label" id="nav-g2">Marks</p><a href="../highlighter/" data-id="highlighter" data-words="highlighter  marks ">Highlighter</a><a href="../outline/" data-id="outline" data-words="outlined button  marks ">Outlined button</a><a href="../link/" data-id="link" data-words="link underline  marks ">Link underline</a><a href="../separator/" data-id="separator" data-words="separator  marks ">Separator</a><a href="../marks/" data-id="marks" data-words="marks on text  marks ">Marks on text</a><a href="../stamps/" data-id="stamps" data-words="stamps  marks ">Stamps</a><a href="../datestamps/" data-id="datestamps" data-words="date stamps  marks date stamp week month year day calendar today weekday habit tracker check-in 曜日 日付 カレンダー">Date stamps</a></div><div class="nav-group" role="group" aria-labelledby="nav-g3"><p class="nav-group-label" id="nav-g3">Paper goods</p><a href="../sticky/" data-id="sticky" data-words="sticky notes  paper goods ">Sticky notes</a><a href="../tape/" data-id="tape" data-words="tape  paper goods ">Tape</a><a href="../card/" data-id="card" data-words="cards and clips  paper goods ">Cards and clips</a><a href="../torn/" data-id="torn" data-words="torn and perforated  paper goods ">Torn and perforated</a><a href="../labels/" data-id="labels" data-words="labels and flags  paper goods ">Labels and flags</a></div><div class="nav-group" role="group" aria-labelledby="nav-g4"><p class="nav-group-label" id="nav-g4">Images</p><a href="../litho/" data-id="litho" data-words="lithograph  images ">Lithograph</a><a href="../printer/" data-id="printer" data-words="printer  images ">Printer</a><a href="../frames/" data-id="frames" data-words="frames  images ">Frames</a></div><div class="nav-group" role="group" aria-labelledby="nav-g5"><p class="nav-group-label" id="nav-g5">Planner</p><a href="../planner/" data-id="planner" data-words="day and week  planner ">Day and week</a><a href="../habits/" data-id="habits" data-words="habit tracker  planner ">Habit tracker</a><a href="../bujo/" data-id="bujo" data-words="bullet journal  planner ">Bullet journal</a><a href="../progress/" data-id="progress" data-words="progress  planner ">Progress</a></div><div class="nav-group" role="group" aria-labelledby="nav-g6"><p class="nav-group-label" id="nav-g6">Forms</p><a href="../checkbox/" data-id="checkbox" data-words="checkbox and radio  forms ">Checkbox and radio</a><a href="../input/" data-id="input" data-words="text field  forms ">Text field</a></div><div class="nav-group" role="group" aria-labelledby="nav-g7"><p class="nav-group-label" id="nav-g7">Diagrams</p><a href="../flowchart/" data-id="flowchart" data-words="flowchart  diagrams ">Flowchart</a><a href="../pie/" data-id="pie" data-words="pie chart  diagrams ">Pie chart</a><a href="../chart/" data-id="chart" data-words="bar and line chart  diagrams ">Bar and line chart</a></div><div class="nav-group" role="group" aria-labelledby="nav-g8"><p class="nav-group-label" id="nav-g8">Reference</p><a href="../api/" data-id="api" data-words="script api  reference ">Script API</a></div><div class="nav-group" role="group" aria-labelledby="nav-g9"><p class="nav-group-label" id="nav-g9">Releases</p><a href="../changelog/" data-id="changelog" data-words="changelog changelog releases changelog releases versions history news feed" aria-current="page">Changelog</a></div>
+    </div>
+    <div id="results" class="results" hidden></div>
+    <p class="nothing" id="nothing" hidden>Nothing matches. Try “stamp” or “chart”.</p>
+  </nav>
+  <main id="page" class="page" tabindex="-1">
+<ol class="crumb"><li><a href="../">papertooth</a></li><li>Releases</li><li aria-current="page">Changelog</li></ol>
+<p class="sr" id="say" role="status"></p>
+<article>
+<h1 class="title">Changelog</h1>
+<p class="lead">Newest first. <a href="../feed.xml">Follow by feed</a>.</p><section class="release" id="v0-5-2-2026-10-29"><h2>0.5.2 - 2026-10-29 <time datetime="2026-10-29">29 October 2026</time></h2><h3>Fixed</h3>
+<ul class="release-changes"><li><p>A node id with a hyphen broke a flowchart. <code>my-node --&gt; other</code> was read as a node called <code>my</code>, and the edge after it was dropped without a word, leaving a stray node and no line. Ids keep their hyphens, and the Mermaid subset now has its own tests.</p></li><li><p>A date stamp filled again in another language kept the <code>lang=&quot;ja&quot;</code> it was given the first time, so a screen reader went on announcing the new text as Japanese.</p></li><li><p>An annotation whose ink <code>&lt;svg&gt;</code> was written by hand with whitespace inside it threw while drawing, because the whitespace counted as one of its paths.</p></li><li><p>A diagram or an image effect that finished loading after <code>destroy()</code> could still schedule a paint into a kit that was gone.</p></li></ul></section>
+<section class="release" id="v0-5-1-2026-10-29"><h2>0.5.1 - 2026-10-29 <time datetime="2026-10-29">29 October 2026</time></h2><h3>Fixed</h3>
+<ul class="release-changes"><li><p>Three-digit hex colours threw instead of resolving. <code>toRgb</code> read the colour with <code>Array#slice</code>, which a string does not have, so <code>#abc</code> failed wherever a colour is given as a short hex: <code>setPen</code>, <code>setPencil</code>, <code>setRibbon</code> and <code>setHighlighter</code>, the matching <code>init()</code> options (and the same keys in <code>data-pt-auto</code>), the ink filters, and the lithograph's ink. Six-digit hex, <code>rgb()</code> and the <code>pt-*</code> token names were never affected.</p></li></ul></section>
+<section class="release" id="v0-5-0-2026-10-24"><h2>0.5.0 - 2026-10-24 <time datetime="2026-10-24">24 October 2026</time></h2><h3>Added</h3>
+<ul class="release-changes"><li><p>Your own content in date stamp cells: a stamp picture, a letter, a mark, anything. Put an element inside the stamp with <code>data-day</code>, <code>data-date</code> or <code>data-month</code> (and <code>data-row</code> for a row to fill in); in React, return it from <code>cell({ part, row, date, state })</code>. It sits with the pencil marks, on top of the printed stamp, and stays when the stamp is filled again.</p></li><li><p>Row labels: <code>data-rows=&quot;Run, Read, Water&quot;</code> (or <code>rows={['Run', 'Read', 'Water']}</code>) writes them in a first column, on the wide month and the week strip.</p></li><li><p>Every cell from <code>stampCells()</code> and <code>stampLayout()</code> carries the <code>date</code> it stands for, and cells in rows to fill in carry their <code>row</code>.</p></li><li><p>A day heading and a week can show any day with <code>data-date=&quot;2026-10-21&quot;</code> (until now only today, with <code>data-today</code>), and are written in <code>data-locale</code> or the page's <code>lang</code>.</p></li><li><p><code>data-week-label=&quot;Semaine {n}&quot;</code> words a day heading's week number in any language (<code>weekLabel</code> in React also takes this string).</p></li><li><p><code>data-mark</code> on a week (<code>mark</code> on <code>&lt;Week&gt;</code>): today circled, boxed, highlighted or left plain.</p></li><li><p><code>cell({ habit, day, done })</code> on <code>&lt;Habits&gt;</code> draws a cell yourself, in place of its checkbox: a stamp, a letter, anything.</p></li><li><p>The README shows how to use your own picture as a stamp (<code>--pt-pic</code>).</p></li></ul>
+<h3>Fixed</h3>
+<ul class="release-changes"><li><p>A day heading always wrote &quot;Week&quot; in English, and the script filled day headings and weeks in British English whatever the page's language.</p></li><li><p>A week's circle on today replaced the date's own <code>style</code> attribute, and filling the week again for another date left the old mark's settings behind. The circle's colour and offsets now come from the stylesheet.</p></li></ul></section>
+<section class="release" id="v0-4-1-2026-10-23"><h2>0.4.1 - 2026-10-23 <time datetime="2026-10-23">23 October 2026</time></h2><h3>Changed</h3>
+<ul class="release-changes"><li><p>The brush looks like brush ink: a heavier stroke with a ragged edge, dry streaks where the brush runs out, and uneven ink, on marks, checkboxes, diagrams, and drawn underlines and rules. Before, it was a thick, even line, close to the fountain pen and the marker. Tune it with <code>setFilters({ brush: { dry, rough } })</code>.</p></li><li><p>A date stamp tells screen readers what it marks: a month calendar says the day it marks (Wednesday 21 October 2026), a year of months says the month. Before, a month calendar only said the month. <code>stampLabel()</code> takes <code>{ mark, variant }</code> for this.</p></li></ul>
+<h3>Fixed</h3>
+<ul class="release-changes"><li><p>Buttons swung between two grid positions each time the page was snapped again (when an app changed the page, for example). The press effect animated <code>translate</code>, which snapping reads, so a snap measured the button mid-animation; the press now uses <code>transform</code>.</p></li></ul></section>
+<section class="release" id="v0-4-0-2026-10-23"><h2>0.4.0 - 2026-10-23 <time datetime="2026-10-23">23 October 2026</time></h2><h3>Added</h3>
+<ul class="release-changes"><li><p>Picture stamps in the stylesheet, no script needed: <code>&lt;span class=&quot;pt-stamp&quot; data-pic=&quot;frog&quot;&gt;</code>. Six new animals (frog, bear, tiger, rabbit, tanuki, owl) join tick, star, heart, arrow, cat, paw, daruma, Fuji, sakura, onigiri, cloud and sun.</p></li><li><p>Date stamps, <code>.pt-datestamp</code> and <code>&lt;DateStamp&gt;</code>, in the manner of Japanese stationery stamps: a week strip to fill in (with rows and a title line), a month calendar with the 1st on its weekday and a month selector, a year of months, and single-row bars. Fine printed lines in one ink, labels in any language through Intl; today circled, boxed or highlighted, the days gone by crossed out or struck through in pencil.</p></li><li><p>Per-part stylesheets: <code>papertooth/css/base</code> and then only the parts a page uses (<code>highlight</code>, <code>marks</code>, <code>pictures</code>, <code>planner</code>…), in any order. <code>papertooth/css</code> is still everything.</p></li><li><p>Picture stamps as files of their own: <code>papertooth/stamps/frog.svg</code> and so on (one ink, real holes), also downloadable from the docs site.</p></li><li><p><code>papertooth/diagram</code> for <code>renderDiagram</code> and <code>kindOf</code>.</p></li><li><p>A wide month stamp, <code>data-variant=&quot;wide&quot;</code> (<code>variant=&quot;wide&quot;</code>): the whole month in one row, each day under its weekday, with rows to fill in like a habit tracker.</p></li><li><p>Every state of a button and a link: - pressed down (<code>:active</code>), and on (<code>aria-pressed</code>, <code>aria-selected</code>, <code>aria-expanded</code>, <code>aria-current</code> or an open <code>&lt;details&gt;</code>), which keeps the hover mark drawn; - disabled (<code>disabled</code> or <code>aria-disabled=&quot;true&quot;</code>); - visited links (<code>--pt-visited</code>); - reduced motion, and a plain underline and border in high-contrast mode; - <code>button.pt-link</code> and <code>summary</code> as buttons or links.</p></li><li><p>An <code>x</code> mark on text (<code>data-anno=&quot;x&quot;</code>).</p></li><li><p><code>data-wrap</code> on a mark (<code>wrap</code> on <code>&lt;Anno&gt;</code>) lets a longer phrase wrap: a strike, underline or scribble follows each line, a circle, box or hanamaru goes around the whole phrase.</p></li><li><p>React planner components: <code>&lt;DayHead&gt;</code>, <code>&lt;Week&gt;</code> (with <code>children</code> to fill each day), <code>&lt;Habit&gt;</code> and <code>&lt;Habits&gt;</code>. They render everything themselves, so nothing is written into React's DOM afterwards.</p></li><li><p>Date helpers with no DOM, in any locale and from any first day of the week: <code>weekDates</code>, <code>firstDayOf</code>, <code>dayParts</code>, <code>sameDay</code>, <code>stampCells</code>, <code>stampLabel</code> (and <code>isoWeek</code>, as before). <code>dayHead()</code> and <code>week()</code> take <code>{ locale }</code> and <code>{ locale, weekStart }</code>.</p></li><li><p><code>papertooth/shapes</code> and <code>papertooth/tokens</code>: the shape generators, picture stamps and colours with no DOM, for React Native, canvas or a server.</p></li><li><p><code>papertooth/layer.css</code>: the stylesheet inside <code>@layer papertooth</code>, so utility classes (Tailwind v4) can win over it.</p></li><li><p>Browser tests (Playwright) and CI. Releases are published from a version tag by a GitHub workflow with npm trusted publishing, and copied to GitHub Packages as <code>@tbudin/papertooth</code>.</p></li></ul>
+<h3>Changed</h3>
+<ul class="release-changes"><li><p>As a module, the script fetches the code for diagrams and image effects only when a page has one: about 23 KB gzipped up front instead of 30. The <code>&lt;script&gt;</code> build is still one file with everything.</p></li><li><p><code>renderDiagram</code> moved from <code>papertooth</code> to <code>papertooth/diagram</code> (it stays on <code>window.Papertooth</code> in the <code>&lt;script&gt;</code> build).</p></li><li><p>White paper is a neutral white (<code>#fefefe</code>) with a grey grain at <code>.1</code>, so it reads white on a whole screen; cream and kraft keep the warm grain (<code>--pt-grain-warm-image</code>).</p></li><li><p>To-do lists, bullet journals and anything marked <code>data-pt-ruled</code> snap to the grid as one block, so rows an app sizes and rules itself keep their rhythm.</p></li><li><p>The sheet's text styles, headings included, weigh as little as one class (through <code>:where()</code>), so an app's own class wins over them when it loads later. Within papertooth, the per-part stylesheets can load in any order.</p></li><li><p><code>.pt-sheet--page</code> is an ordinary block instead of a column with a grid line of gap between everything on it. Its blocks of text keep that line between them, but an app's header, tabs and views no longer get it added on top of their own spacing.</p></li><li><p>A <code>&lt;section&gt;</code> on a sheet is no longer a flex column. It puts a grid line between its blocks of text with margins, which an app can override and which merge with the app's own margins instead of adding to them. Before, every section in an app became a flex column, which shrank centred children with a <code>max-width</code> and stacked its gap on the app's margins.</p></li><li><p>Hovering a highlighter button underlines it in pen instead of adding a second highlighter pass, which is now <code>data-hover=&quot;pass&quot;</code>. Outlined buttons still bring out the highlighter.</p></li><li><p>Hover marks on buttons and links are drawn only where a pointer can hover, so a tap on a phone no longer leaves one stuck; a tap draws it while the finger is down.</p></li><li><p>A highlighted link (<code>data-ul=&quot;hl&quot;</code>) is highlighted from the start, and hovering draws a pen underline under it instead of more highlighter.</p></li><li><p>The weekend in <code>.pt-week</code> is coloured by <code>data-day</code> (0 = Sunday … 6 = Saturday), so it is right wherever the week starts. Markup without <code>data-day</code> is still read as Monday first.</p></li></ul>
+<h3>Fixed</h3>
+<ul class="release-changes"><li><p>On <code>.pt-sheet--page</code>, a <code>--pt-sheet-pad</code> smaller than a grid cell rounded the side margins to nothing on phones; they are now at least one cell.</p></li><li><p>A to-do that wraps onto several lines is struck through line by line and takes as many grid lines as it needs, instead of overflowing into the next one. The strike now sits on an inline <code>.pt-check__ink</code> inside <code>.pt-check__text</code> (the script and <code>&lt;Check&gt;</code> add it).</p></li><li><p>A sticky note in a flex row or grid that stretches its items kept its shadows at the bottom of the stretched box, below the paper.</p></li></ul></section>
+<section class="release" id="v0-3-1-2026-10-23"><h2>0.3.1 - 2026-10-23 <time datetime="2026-10-23">23 October 2026</time></h2><h3>Added</h3>
+<ul class="release-changes"><li><p><code>drawInserted</code> option: <code>false</code> shows content added on screen (a route or tab change) as already drawn. <code>kit.settle(element)</code> does the same for one part of the page.</p></li></ul>
+<h3>Changed</h3>
+<ul class="release-changes"><li><p>The script keeps its state in <code>data-pt-*</code> attributes instead of classes (<code>is-drawn</code>, <code>is-painted</code>, <code>is-ready</code>, <code>pt-selecting</code>, <code>pt-motion</code> and others), so a framework changing <code>className</code> no longer undoes it. <code>class=&quot;pt-filters&quot;</code> still works for pages that paste the filters themselves.</p></li><li><p>A picture the printer cannot read gets <code>data-pt-blocked</code> instead of the <code>pt-print--blocked</code> class.</p></li></ul>
+<h3>Fixed</h3>
+<ul class="release-changes"><li><p><code>init()</code> after <code>destroy()</code> (a remount, React StrictMode) left blocks below the fold invisible.</p></li><li><p><code>&lt;Wobble&gt;</code> did not split <code>Hello {name}</code>; screen readers now get the whole text and the letters are hidden from them.</p></li><li><p><code>&lt;Btn&gt;</code> rendered its children twice (duplicate ids, duplicated state); the smear is now text only.</p></li><li><p>React components forward refs on React 18 (<code>&lt;Check&gt;</code> to its input).</p></li></ul></section>
+<section class="release" id="v0-3-0-2026-10-23"><h2>0.3.0 - 2026-10-23 <time datetime="2026-10-23">23 October 2026</time></h2><h3>Added</h3>
+<ul class="release-changes"><li><p><code>papertooth/react</code>: <code>&lt;Btn&gt;</code>, <code>&lt;Mark&gt;</code>, <code>&lt;Anno&gt;</code>, <code>&lt;Wobble&gt;</code> and <code>&lt;Check&gt;</code> render the markup the script would add, so React re-renders keep it; <code>usePapertooth()</code> and <code>&lt;Papertooth /&gt;</code> start and stop the script. Marked <code>&quot;use client&quot;</code> for Next.js.</p></li><li><p>TypeScript types for the script and the React components.</p></li><li><p>A React and Next.js section in the README.</p></li></ul>
+<h3>Changed</h3>
+<ul class="release-changes"><li><p>CDN snippets point at <code>@0.3</code>.</p></li></ul></section>
+<section class="release" id="v0-2-2-2026-10-22"><h2>0.2.2 - 2026-10-22 <time datetime="2026-10-23">23 October 2026</time></h2><h3>Added</h3>
+<ul class="release-changes"><li><p>Night inks: on the dark desk, links, highlights, ticks, rules, stamps and tape written straight on the desk switch to light inks (<code>--pt-night-pen</code>, <code>--pt-night-pencil</code>, <code>--pt-night-graphite</code>, <code>--pt-night-ballpoint</code>, <code>--pt-night-hl-ink</code>); paper keeps its day inks.</p></li><li><p>Text on the desk takes <code>--pt-desk-ink</code>.</p></li><li><p>The script redraws when the system switches between light and dark.</p></li></ul>
+<h3>Fixed</h3>
+<ul class="release-changes"><li><p>Buttons no longer stretch in grid or column layouts, so their highlight fits the label.</p></li><li><p>The draw-on wipe releases its clip when it ends, so nothing drawn past an element's box stays cut off.</p></li><li><p>Checkbox outlines, bullet-journal signs and the progress label follow the text colour.</p></li></ul></section>
+<section class="release" id="v0-2-1-2026-10-22"><h2>0.2.1 - 2026-10-22 <time datetime="2026-10-23">23 October 2026</time></h2><h3>Fixed</h3>
+<ul class="release-changes"><li><p>A progress bar's label was cut off after it drew on.</p></li><li><p>The highlight on a chosen colour swatch ran past its name.</p></li></ul></section>
+<section class="release" id="v0-2-0-2026-10-22"><h2>0.2.0 - 2026-10-22 <time datetime="2026-10-23">23 October 2026</time></h2><p>First public release.</p></section>
+</article>
+<nav class="pager" aria-label="Previous and next page"><a href="../api/"><small>Previous</small>Script API</a></nav>
+<footer class="colophon"><span class="nods">MIT · © Plain Matter Pte Ltd · Made by <b>Thomas Budin</b></span><span class="spacer"></span><nav aria-label="Elsewhere"><a href="https://github.com/tbudin/papertooth">GitHub</a><a href="https://www.npmjs.com/package/papertooth">npm</a><a href="index.md">Markdown</a><a href="https://github.com/tbudin/papertooth/edit/main/site/pages.js">Edit</a><a href="../llms.txt">llms.txt</a></nav></footer>
+  </main>
+</div>
+<script type="module" src="../assets/chrome.js"></script>
+</body>
+</html>

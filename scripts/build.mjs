@@ -1,6 +1,6 @@
 // Build: readable and minified CSS, an ES module, a browser script, and the filters as a static file.
 import { build } from 'esbuild';
-import { writeFileSync, mkdirSync, readFileSync, copyFileSync, rmSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 import { filtersMarkup } from '../src/js/filters.js';
 import { PICTURES, PAPER } from '../src/js/pictures.js';
@@ -62,8 +62,8 @@ await Promise.all([
 writeFileSync('dist/papertooth-filters.svg', filtersMarkup() + '\n');
 
 // and as files of their own (papertooth/stamps/frog.svg, and stamps/ on the docs site): currentColor ink with real
-// holes, so they work on any paper, inline or as an image
-for (const dir of ['dist/stamps', 'docs/stamps']) {
+// holes, so they work on any paper, inline or as an image. The site copies them out of dist, so one place writes them.
+for (const dir of ['dist/stamps']) {
   rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
   for (const [name, p] of Object.entries(PICTURES)) {
@@ -76,9 +76,6 @@ for (const dir of ['dist/stamps', 'docs/stamps']) {
 // one stylesheet per part, for pages that want only some of it (papertooth/css/base first, then any of these)
 const CSS_PARTS = ['base', 'highlight', 'lines', 'marks', 'pictures', 'goods', 'planner', 'forms', 'extras', 'images', 'diagram'];
 await Promise.all(CSS_PARTS.map(part => build({ entryPoints: [`src/css/${part}.css`], bundle: true, minify: true, outfile: `dist/css/${part}.css`, banner, logLevel: 'warning', charset: 'ascii' })));
-
-// the docs page loads the built files from its own folder
-for (const f of ['papertooth.min.css', 'papertooth.min.js']) copyFileSync('dist/' + f, 'docs/' + f);
 
 const kb = n => (n / 1024).toFixed(1) + ' KB';
 for (const f of ['papertooth.min.css', 'papertooth.min.js', 'papertooth.min.mjs', 'diagram.min.mjs', 'papertooth-filters.svg']) {

@@ -169,12 +169,15 @@ test('papertooth/shapes and papertooth/tokens run without a DOM', async () => {
   expect(Object.keys(TOKENS).length).toBeGreaterThan(50);
 });
 
-test('the docs page runs without errors', async ({ page }) => {
+test('the docs site runs without errors', async ({ page }) => {
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errors.push(m.text()); });
-  await page.goto(new URL('../docs/index.html#intro', import.meta.url).href);
-  await expect(page.locator('#version')).toHaveText(`v${version}`);
+  /* Over http, not file://: the site is a set of ES modules now, and a
+     module cannot be imported from a file:// page. The server the other
+     tests use already serves the repository. */
+  await page.goto('http://localhost:4317/docs/');
+  await expect(page.locator('.brand span')).toHaveText(`v${version}`);
   await expect(page.locator('html')).toHaveAttribute('data-pt-filters', '');
   await expect(page.locator('.pt-btn--outline').first()).toHaveAttribute('style', /--pt-ol/);
   expect(errors).toEqual([]);

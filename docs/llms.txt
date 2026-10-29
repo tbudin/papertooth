@@ -1,0 +1,79 @@
+# papertooth
+
+> Hand-drawn Japanese stationery for the web: dotted paper, highlighters, ink, pencil, hanko stamps, washi tape and planner pieces, in CSS with an optional script.
+
+Hand-drawn stationery for the web: dotted and ruled paper, fountain-pen and pencil ink, highlighters, hanko stamps, washi tape, planner pieces and Mermaid diagrams drawn by hand. The CSS works on its own; a small optional script adds the textures, the shapes drawn at each element's real size and the diagrams.
+
+- Version 0.5.2, MIT, © Plain Matter Pte Ltd.
+- Install: `npm i papertooth`
+- Source: https://github.com/tbudin/papertooth
+- Every page below is also available as markdown at its URL plus `index.md`.
+- The whole documentation as one file: https://tbudin.github.io/papertooth/llms-full.txt
+
+## Start
+
+- [papertooth: the feel of paper, for the web](https://tbudin.github.io/papertooth/index.md): What Papertooth is, what it gives a page, and how the CSS and the optional script divide the work between them.
+
+## Getting started
+
+- [Playground](https://tbudin.github.io/papertooth/playground/index.md): Write HTML with Papertooth classes and watch it land on paper as you type, starting from a sample page or a piece you drop in.
+- [Installation](https://tbudin.github.io/papertooth/install/index.md): Install Papertooth from npm or load the stylesheet and script from a CDN, with the one line of markup a page needs.
+- [Inks and colours](https://tbudin.github.io/papertooth/colours/index.md): Every ink, pencil, ribbon, highlighter, stamp pad and paper, named and swatched, with the CSS to set the ones you pick.
+- [Theming](https://tbudin.github.io/papertooth/theming/index.md): The custom properties that set the grid, the paper and the fonts, with a live preview and the stylesheet to copy.
+
+## Paper and writing
+
+- [Paper](https://tbudin.github.io/papertooth/paper/index.md): Paper colour and grain, and the ruling printed on it, as two separate choices that keep text sitting on the lines.
+- [Writing](https://tbudin.github.io/papertooth/writing/index.md): Typed and handwritten text in ribbon, pen or pencil, with the texture that varies the ink from letter to letter.
+- [Typewriter on any font](https://tbudin.github.io/papertooth/typelab/index.md): Tune the typewriter filter on any font you like, then copy the settings it produces into your own stylesheet.
+
+## Marks
+
+- [Highlighter](https://tbudin.github.io/papertooth/highlighter/index.md): Felt-tip highlighter styles, from a clean swipe to a dry marker, and what happens when one crosses fresh ink.
+- [Outlined button](https://tbudin.github.io/papertooth/outline/index.md): Buttons drawn as outlines, loops, corners or brackets, including the Japanese corner marks, with the highlighter on hover.
+- [Link underline](https://tbudin.github.io/papertooth/link/index.md): Pen-stroke underlines that follow every line of a link, and the second stroke or circle that hover adds.
+- [Separator](https://tbudin.github.io/papertooth/separator/index.md): A rule drawn across the page at its real width, so that no two separators on a page come out the same.
+- [Marks on text](https://tbudin.github.io/papertooth/marks/index.md): Circle, box, underline, strike or cross out a word, and the teacher's hanamaru for work well done.
+- [Stamps](https://tbudin.github.io/papertooth/stamps/index.md): Rubber stamps with real ink: heavy at the rim, uneven in the middle, with gaps where the paper did not take it.
+- [Date stamps](https://tbudin.github.io/papertooth/datestamps/index.md): Week strips, month calendars and year grids in the style of Japanese date stamps, with today marked.
+
+## Paper goods
+
+- [Sticky notes](https://tbudin.github.io/papertooth/sticky/index.md): Sticky notes in the usual sizes and four ways of sitting on a page, with the shadow doing the work of an outline.
+- [Tape](https://tbudin.github.io/papertooth/tape/index.md): Masking, kraft, washi and clear tape, opaque or see-through as each one is in real life.
+- [Cards and clips](https://tbudin.github.io/papertooth/card/index.md): A ruled index card held by tape or a paper clip whose inner loop passes behind the card at the edge.
+- [Torn and perforated](https://tbudin.github.io/papertooth/torn/index.md): A memo torn from a pad with fibres along the tear, and a perforated order slip with a numbered stub.
+- [Labels and flags](https://tbudin.github.io/papertooth/labels/index.md): Printed label tape, embossed plastic lettering and film index flags, in the colours each one comes in.
+
+## Images
+
+- [Lithograph](https://tbudin.github.io/papertooth/litho/index.md): Print any picture as a stone lithograph: one ink, two inks by tone, or three stones slightly out of register.
+- [Printer](https://tbudin.github.io/papertooth/printer/index.md): Dither any picture the way a Game Boy Printer or a thermal receipt printer would, with the ink straight on the page.
+- [Frames](https://tbudin.github.io/papertooth/frames/index.md): Mount a picture as an instant print, with photo corners, under tape, or as a postage stamp.
+
+## Planner
+
+- [Day and week](https://tbudin.github.io/papertooth/planner/index.md): A date header and a Monday-first week view, with Saturday blue and Sunday red as on a Japanese calendar.
+- [Habit tracker](https://tbudin.github.io/papertooth/habits/index.md): A habit grid whose circles fill with a quick scribble when tapped, each habit in its own ink.
+- [Bullet journal](https://tbudin.github.io/papertooth/bujo/index.md): The rapid-logging signs of a bullet journal, drawn in whichever ink the page is currently using.
+- [Progress](https://tbudin.github.io/papertooth/progress/index.md): Progress as a bar, boxes, circles or a 正 tally, filling continuously or one unit at a time.
+
+## Forms
+
+- [Checkbox and radio](https://tbudin.github.io/papertooth/checkbox/index.md): Hand-drawn boxes and circles over the native checkbox and radio, so keyboard and screen reader behaviour is unchanged.
+- [Text field](https://tbudin.github.io/papertooth/input/index.md): A text field that is a pencil line on the page until you start writing, when it is inked in.
+
+## Diagrams
+
+- [Flowchart](https://tbudin.github.io/papertooth/flowchart/index.md): Mermaid flowchart syntax drawn by hand, taking its colours and fonts from the CSS variables.
+- [Pie chart](https://tbudin.github.io/papertooth/pie/index.md): Mermaid pie syntax filled in by hand, in the inks the page is already using.
+- [Bar and line chart](https://tbudin.github.io/papertooth/chart/index.md): Mermaid xychart syntax as hatched bars and a pen line drawn through the points.
+
+## Reference
+
+- [Script API](https://tbudin.github.io/papertooth/api/index.md): Every option init() takes and every method on the kit it returns, with what each one is for.
+
+## Releases
+
+- [Changelog](https://tbudin.github.io/papertooth/changelog/index.md): Every released version of papertooth, newest first, with what changed in each — and an Atom feed to follow new ones.
+

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flowchart · papertooth</title>
+<meta name="description" content="Mermaid flowchart syntax drawn by hand, taking its colours and fonts from the CSS variables.">
+<link rel="canonical" href="https://tbudin.github.io/papertooth/flowchart/">
+<meta name="author" content="Thomas Budin">
+<meta name="generator" content="package-site">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta name="theme-color" content="#f4f2ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1f1e1c" media="(prefers-color-scheme: dark)">
+<link rel="prev" href="https://tbudin.github.io/papertooth/input/">
+<link rel="next" href="https://tbudin.github.io/papertooth/pie/">
+<link rel="alternate" type="text/markdown" href="https://tbudin.github.io/papertooth/flowchart/index.md" title="Flowchart as markdown">
+<link rel="alternate" type="text/plain" href="https://tbudin.github.io/papertooth/llms.txt" title="llms.txt">
+<link rel="alternate" type="application/atom+xml" href="https://tbudin.github.io/papertooth/feed.xml" title="papertooth releases">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="papertooth">
+<meta property="og:title" content="Flowchart · papertooth">
+<meta property="og:description" content="Mermaid flowchart syntax drawn by hand, taking its colours and fonts from the CSS variables.">
+<meta property="og:url" content="https://tbudin.github.io/papertooth/flowchart/">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tbudin.github.io/papertooth/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Papertooth: a sheet of dotted paper with a highlighted word, a circled word, a red daruma stamp and a sticky note">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Flowchart · papertooth">
+<meta name="twitter:description" content="Mermaid flowchart syntax drawn by hand, taking its colours and fonts from the CSS variables.">
+<meta name="twitter:image" content="https://tbudin.github.io/papertooth/og.png">
+<meta name="twitter:image:alt" content="Papertooth: a sheet of dotted paper with a highlighted word, a circled word, a red daruma stamp and a sticky note">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23f8f1df'/%3E%3Cpath d='M4 19 C 12 16, 20 17, 28 14 L 28 23 C 20 25, 12 24, 4 27 Z' fill='%23fff04a'/%3E%3Ctext x='16' y='23' font-family='Georgia, serif' font-size='21' text-anchor='middle' fill='%23213c6b'%3Ep%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&amp;family=Courier+Prime:ital,wght@0,400;0,700;1,400&amp;family=Special+Elite&amp;family=Kalam:wght@400;700&amp;family=Nanum+Pen+Script&amp;family=IBM+Plex+Mono:wght@400;700&amp;family=JetBrains+Mono:wght@400;700&amp;family=Space+Mono:wght@400;700&amp;family=Work+Sans:wght@400;700&amp;family=DM+Sans:wght@400;700&amp;family=Archivo:wght@400;700&amp;family=Archivo+Narrow:wght@500;600&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@800&amp;family=Zen+Maru+Gothic:wght@700&amp;display=swap">
+<link rel="stylesheet" href="../assets/chrome.css">
+<link rel="stylesheet" href="../assets/papertooth.min.css">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+:root {
+  --bg: #f4f2ec;
+  --fg: #24262c;
+  --muted: #6c6a64;
+  --line: #dcd8ce;
+  --panel: #ebe8e0;
+  --code: #efece5;
+  --accent: #213c6b;
+  --mark: #fff04a;
+  --f-ui: "Courier Prime", "Courier New", monospace;
+  --f-head: "Special Elite", "Courier Prime", monospace;
+  --f-mono: "Courier Prime", "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1f1e1c;
+    --fg: #e9e6de;
+    --muted: #a29f97;
+    --line: #3a3834;
+    --panel: #2a2926;
+    --code: #262522;
+    --accent: #a9bde6;
+    --mark: #6d6418;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1f1e1c;
+  --fg: #e9e6de;
+  --muted: #a29f97;
+  --line: #3a3834;
+  --panel: #2a2926;
+  --code: #262522;
+  --accent: #a9bde6;
+  --mark: #6d6418;
+}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "papertooth",
+      "item": "https://tbudin.github.io/papertooth/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Flowchart",
+      "item": "https://tbudin.github.io/papertooth/flowchart/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Flowchart",
+  "description": "Mermaid flowchart syntax drawn by hand, taking its colours and fonts from the CSS variables.",
+  "url": "https://tbudin.github.io/papertooth/flowchart/",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "papertooth",
+    "url": "https://tbudin.github.io/papertooth/"
+  },
+  "about": {
+    "@type": "SoftwareSourceCode",
+    "name": "papertooth",
+    "codeRepository": "https://github.com/tbudin/papertooth"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Thomas Budin"
+  }
+}
+</script>
+</head>
+<script>/* before paint, or the page flashes the other theme */try{var t=localStorage.getItem('package-site:theme');if(t&&t!=='system')document.documentElement.dataset.theme=t;}catch(e){}</script>
+<body data-page="flowchart">
+<a class="skip" href="#page">Skip to the page</a>
+
+<header class="top">
+  <button class="btn menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="side">
+    <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Menu</span>
+  </button>
+  <a class="brand" href="../"><b>papertooth</b><span>v0.5.2</span></a>
+  <span class="here" id="here">Flowchart</span>
+<div class="top-ctl" id="settings" role="group" aria-label="Site settings"><label for="g-mode">Writing <select id="g-mode" data-k="mode"><option value="type" selected>typed</option><option value="hand">by hand</option></select></label><label for="g-paper">Paper <select id="g-paper" data-k="paper"><option value="white" selected>white</option><option value="cream">cream</option><option value="washi">washi</option><option value="kraft">kraft</option><option value="recycled">recycled</option><option value="tracing">tracing</option></select></label><label for="g-ruling">Ruling <select id="g-ruling" data-k="ruling"><option value="dot" selected>dot</option><option value="grid">grid</option><option value="graph">graph</option><option value="lined">lined</option><option value="blank">blank</option></select></label><label for="g-tex">Texture <select id="g-tex" data-k="tex"><option value="full" selected>full</option><option value="light">light</option><option value="off">off</option></select></label><button class="switch" type="button" role="switch" id="g-theme" aria-checked="false" aria-label="Dark mode"><span class="switch-track" aria-hidden="true"><span class="switch-knob"></span></span><span class="switch-text">Dark</span></button></div>
+
+</header>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="wrap">
+  <nav class="side" id="side" aria-label="Pages">
+    <div class="side-head"><b>papertooth</b><button class="btn" type="button" id="side-close">Close</button></div>
+    <div class="side-settings" id="side-settings"></div>
+    <label class="find" for="find"><span class="sr">Find a component</span><input type="search" id="find" placeholder="Find a component" autocomplete="off"><kbd>/</kbd></label>
+    <div id="nav-list">
+<div class="nav-group" role="group" aria-labelledby="nav-g0"><p class="nav-group-label" id="nav-g0">Getting started</p><a href="../" data-id="intro" data-words="introduction  getting started ">Introduction</a><a href="../playground/" data-id="playground" data-words="playground  getting started editor sandbox try">Playground</a><a href="../install/" data-id="install" data-words="installation  getting started ">Installation</a><a href="../colours/" data-id="colours" data-words="inks and colours  getting started palette colour scheme inks japanese wisteria fuji pen pencil ballpoint ribbon highlighter stamp paper theme">Inks and colours</a><a href="../theming/" data-id="theming" data-words="theming  getting started ">Theming</a></div><div class="nav-group" role="group" aria-labelledby="nav-g1"><p class="nav-group-label" id="nav-g1">Paper and writing</p><a href="../paper/" data-id="paper" data-words="paper  paper and writing ">Paper</a><a href="../writing/" data-id="writing" data-words="writing  paper and writing ">Writing</a><a href="../typelab/" data-id="typelab" data-words="typewriter on any font  paper and writing ">Typewriter on any font</a></div><div class="nav-group" role="group" aria-labelledby="nav-g2"><p class="nav-group-label" id="nav-g2">Marks</p><a href="../highlighter/" data-id="highlighter" data-words="highlighter  marks ">Highlighter</a><a href="../outline/" data-id="outline" data-words="outlined button  marks ">Outlined button</a><a href="../link/" data-id="link" data-words="link underline  marks ">Link underline</a><a href="../separator/" data-id="separator" data-words="separator  marks ">Separator</a><a href="../marks/" data-id="marks" data-words="marks on text  marks ">Marks on text</a><a href="../stamps/" data-id="stamps" data-words="stamps  marks ">Stamps</a><a href="../datestamps/" data-id="datestamps" data-words="date stamps  marks date stamp week month year day calendar today weekday habit tracker check-in 曜日 日付 カレンダー">Date stamps</a></div><div class="nav-group" role="group" aria-labelledby="nav-g3"><p class="nav-group-label" id="nav-g3">Paper goods</p><a href="../sticky/" data-id="sticky" data-words="sticky notes  paper goods ">Sticky notes</a><a href="../tape/" data-id="tape" data-words="tape  paper goods ">Tape</a><a href="../card/" data-id="card" data-words="cards and clips  paper goods ">Cards and clips</a><a href="../torn/" data-id="torn" data-words="torn and perforated  paper goods ">Torn and perforated</a><a href="../labels/" data-id="labels" data-words="labels and flags  paper goods ">Labels and flags</a></div><div class="nav-group" role="group" aria-labelledby="nav-g4"><p class="nav-group-label" id="nav-g4">Images</p><a href="../litho/" data-id="litho" data-words="lithograph  images ">Lithograph</a><a href="../printer/" data-id="printer" data-words="printer  images ">Printer</a><a href="../frames/" data-id="frames" data-words="frames  images ">Frames</a></div><div class="nav-group" role="group" aria-labelledby="nav-g5"><p class="nav-group-label" id="nav-g5">Planner</p><a href="../planner/" data-id="planner" data-words="day and week  planner ">Day and week</a><a href="../habits/" data-id="habits" data-words="habit tracker  planner ">Habit tracker</a><a href="../bujo/" data-id="bujo" data-words="bullet journal  planner ">Bullet journal</a><a href="../progress/" data-id="progress" data-words="progress  planner ">Progress</a></div><div class="nav-group" role="group" aria-labelledby="nav-g6"><p class="nav-group-label" id="nav-g6">Forms</p><a href="../checkbox/" data-id="checkbox" data-words="checkbox and radio  forms ">Checkbox and radio</a><a href="../input/" data-id="input" data-words="text field  forms ">Text field</a></div><div class="nav-group" role="group" aria-labelledby="nav-g7"><p class="nav-group-label" id="nav-g7">Diagrams</p><a href="../flowchart/" data-id="flowchart" data-words="flowchart  diagrams " aria-current="page">Flowchart</a><a href="../pie/" data-id="pie" data-words="pie chart  diagrams ">Pie chart</a><a href="../chart/" data-id="chart" data-words="bar and line chart  diagrams ">Bar and line chart</a></div><div class="nav-group" role="group" aria-labelledby="nav-g8"><p class="nav-group-label" id="nav-g8">Reference</p><a href="../api/" data-id="api" data-words="script api  reference ">Script API</a></div><div class="nav-group" role="group" aria-labelledby="nav-g9"><p class="nav-group-label" id="nav-g9">Releases</p><a href="../changelog/" data-id="changelog" data-words="changelog changelog releases changelog releases versions history news feed">Changelog</a></div>
+    </div>
+    <div id="results" class="results" hidden></div>
+    <p class="nothing" id="nothing" hidden>Nothing matches. Try “stamp” or “chart”.</p>
+  </nav>
+  <main id="page" class="page" tabindex="-1">
+<ol class="crumb"><li><a href="../">papertooth</a></li><li>Diagrams</li><li aria-current="page">Flowchart</li></ol>
+<p class="sr" id="say" role="status"></p>
+<article>
+<h1 class="title">Flowchart</h1>
+<p class="lead">Write a Mermaid flowchart and it is drawn by hand. Colours and fonts follow the CSS variables, so a change of pen restyles it without drawing it again.</p>
+<div class="seg play-tabs" role="group" aria-label="Show"><button type="button" data-view="preview" aria-pressed="true">Preview</button><button type="button" data-view="settings" aria-pressed="false">Settings</button></div><div class="play" data-view="preview"><div class="stage" id="stage"><div class="stage-tools"><button class="btn" type="button" id="replay">Draw again</button></div><div id="preview" data-pt-draw="off"><div class="pt-sheet" data-paper="white" data-ruling="dot"><pre class="pt-diagram">
+flowchart TD
+  A[Idea] --&gt; B{Worth it?}
+  B --&gt;|yes| C(Sketch it)
+  B --&gt;|no| D([Park it])
+  C --&gt; E[[Build]] --&gt; F((Ship))
+  F -.-&gt; A
+</pre></div></div></div><div class="ctls" role="group" aria-label="Settings"><p class="ctls-head" aria-hidden="true">Settings</p><div class="ctl wide wide" data-k="src"><label for="c-src"><span>Mermaid</span></label><textarea id="c-src" data-k="src" spellcheck="false" rows="8">flowchart TD
+  A[Idea] --&gt; B{Worth it?}
+  B --&gt;|yes| C(Sketch it)
+  B --&gt;|no| D([Park it])
+  C --&gt; E[[Build]] --&gt; F((Ship))
+  F -.-&gt; A</textarea></div><div class="ctl" data-k="example"><label for="c-example"><span>Examples</span></label><select id="c-example" data-k="example"><option value="" selected>choose…</option><option value="td">top down</option><option value="lr">left to right</option><option value="loop">review loop</option></select></div><div class="ctl" data-k="fill"><label for="c-fill"><span>Fill</span></label><select id="c-fill" data-k="fill"><option value="none" selected>none</option><option value="wash">highlighter wash</option><option value="highlight">highlighter fill</option><option value="pencil">pencil shading</option><option value="hatch">hatching</option><option value="cross">cross-hatching</option><option value="scribble">scribble</option><option value="stipple">stipple</option></select></div><div class="ctl" data-k="tool"><label for="c-tool"><span>Drawn with</span></label><select id="c-tool" data-k="tool"><option value="" selected>ink</option><option value="pen">fountain pen</option><option value="ballpoint">ballpoint</option><option value="brush">brush pen</option><option value="marker">felt marker</option><option value="graphite">graphite pencil</option><option value="pencil">coloured pencil</option><option value="type">typewriter</option></select><small>Each instrument has its own ink, set in <a href="../colours/">Inks and colours</a>.</small></div></div></div>
+<h2 id="parameters">Parameters</h2><div class="ref-wrap"><table class="ref"><thead><tr><th>Setting</th><th>Default</th><th>Values</th></tr></thead><tbody><tr><td><code>Shapes</code></td><td></td><td>A[rect] A(round) A([stadium]) A((circle)) A{diamond} A[[subroutine]] A[(cylinder)] A&gt;flag]</td></tr><tr><td><code>Edges</code></td><td></td><td>--&gt; --- -.-&gt; ==&gt; with |label| or -- label --&gt;</td></tr><tr><td><code>Direction</code></td><td>TD</td><td>TD, LR, BT, RL</td></tr><tr><td><code>data-fill</code></td><td>none</td><td>wash, hatch, cross, scribble, stipple</td></tr><tr><td><code>data-tool</code></td><td>ink</td><td>pen, ballpoint, brush, marker, graphite, pencil, type</td></tr><tr><td><code>--pt-diagram-stroke</code></td><td>1.6px</td><td>Line weight</td></tr></tbody></table></div>
+</article>
+<nav class="pager" aria-label="Previous and next page"><a href="../input/"><small>Previous</small>Text field</a><a href="../pie/" style="text-align:right"><small>Next</small>Pie chart</a></nav>
+<footer class="colophon"><span class="nods">MIT · © Plain Matter Pte Ltd · Made by <b>Thomas Budin</b></span><span class="spacer"></span><nav aria-label="Elsewhere"><a href="https://github.com/tbudin/papertooth">GitHub</a><a href="https://www.npmjs.com/package/papertooth">npm</a><a href="index.md">Markdown</a><a href="https://github.com/tbudin/papertooth/edit/main/site/pages.js">Edit</a><a href="../llms.txt">llms.txt</a></nav></footer>
+  </main>
+</div>
+<script type="module" src="../assets/chrome.js"></script>
+</body>
+</html>
