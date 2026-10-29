@@ -16,6 +16,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - run: npm run test:unit
       - run: npm run build
       # dist/ and the docs copies are committed, so they must be what the source builds to
       - name: Built files match the source

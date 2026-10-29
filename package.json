@@ -83,6 +83,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "lint": "oxlint --deny-warnings src tests scripts",
+    "test:unit": "node --test tests/unit/*.test.mjs",
     "check:sizes": "node scripts/check-sizes.mjs",
     "dev": "node scripts/build.mjs && node scripts/serve.mjs",
     "prepublishOnly": "npm run build",
