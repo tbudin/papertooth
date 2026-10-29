@@ -43,7 +43,7 @@ var probe = null;
 function toRgb(c) {
   c = String(c).trim();
   if (/^#[\da-f]{3,8}$/i.test(c)) {
-    const h = c.length < 7 ? c.slice(1, 4).map((x) => x + x).join("") : c.slice(1, 7);
+    const h = c.length < 7 ? Array.from(c.slice(1, 4), (x) => x + x).join("") : c.slice(1, 7);
     return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
   }
   if (/^rgba?\([^%]*\)$/i.test(c)) return c.match(/[\d.]+/g).slice(0, 3).map(Number);

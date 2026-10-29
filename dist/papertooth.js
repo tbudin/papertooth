@@ -24,7 +24,7 @@ import {
   waveD,
   wobblyBox,
   wobblyRing
-} from "./chunks/chunk-NKEOULRF.js";
+} from "./chunks/chunk-QYNW53EL.js";
 import {
   DEFAULTS,
   cssVar,
@@ -41,7 +41,7 @@ import {
   svgDoc,
   toHex,
   typewriterFilter
-} from "./chunks/chunk-KYVSARDL.js";
+} from "./chunks/chunk-G2ASMPT7.js";
 
 // src/js/painter.js
 var repaint = () => {
@@ -57,8 +57,8 @@ var onDemand = (load) => {
     return null;
   };
 };
-var imagesFor = onDemand(() => import("./chunks/images-7YQWDATO.js"));
-var diagramFor = onDemand(() => import("./chunks/diagram-ACV6WDK4.js"));
+var imagesFor = onDemand(() => import("./chunks/images-SEQUITVK.js"));
+var diagramFor = onDemand(() => import("./chunks/diagram-TRBSRCI2.js"));
 var LINE_MARKS = /* @__PURE__ */ new Set(["strike", "under", "cross"]);
 var shiftPath = (d, dx, dy) => d.replace(/(-?[\d.]+) (-?[\d.]+)/g, (_, x, y) => `${f(+x + dx)} ${f(+y + dy)}`);
 var SVGNS = "http://www.w3.org/2000/svg";
