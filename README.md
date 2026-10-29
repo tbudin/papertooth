@@ -4,7 +4,7 @@ The feel of paper, for the web. Paper-makers call the fine grain on a sheet its 
 
 Papertooth is hand-drawn stationery for the web, inspired by Japanese stationery (文房具, bunbougu). Dotted and grid paper, typewriter and fountain-pen text that sits on the grid, highlighters that start light and pool at the end, hand-drawn underlines and outlines, pencil marks, hanko stamps, washi tape, sticky notes and planner pieces.
 
-The CSS (about 14 KB gzipped) works on its own. An optional script (about 28 KB gzipped) adds the ink textures, draws every shape at its element's real size, snaps text to the grid and times the draw-on animations.
+The CSS (about 20 KB gzipped) works on its own. An optional script (about 32 KB gzipped) adds the ink textures, draws every shape at its element's real size, snaps text to the grid and times the draw-on animations.
 
 ## Install
 
@@ -32,7 +32,7 @@ The module does nothing when it is imported, so it is safe to import during serv
 
 ### Only what you use
 
-`papertooth/css` is everything (about 18 KB gzipped). To load less, import `papertooth/css/base` (6.8 KB: settings, inks, paper, writing, instruments, draw-on) and then only the parts the page uses, in any order:
+`papertooth/css` is everything (about 20 KB gzipped). To load less, import `papertooth/css/base` (7.0 KB: settings, inks, paper, writing, instruments, draw-on) and then only the parts the page uses, in any order:
 
 ```js
 import 'papertooth/css/base';
@@ -42,18 +42,18 @@ import 'papertooth/css/marks';       // marks on text and stamps
 
 | Part | What is in it | gzip |
 | --- | --- | --- |
-| `highlight` | `.pt-btn`, `.pt-mark` | 1.6 KB |
-| `lines` | `.pt-link`, `.pt-rule` | 0.8 KB |
+| `highlight` | `.pt-btn`, `.pt-mark` | 1.9 KB |
+| `lines` | `.pt-link`, `.pt-rule` | 1.1 KB |
 | `marks` | `.pt-anno`, `.pt-stamp`, approval boxes | 1.3 KB |
 | `pictures` | picture stamps (`data-pic`), needs `marks` | 2.7 KB |
 | `goods` | sticky notes, tape, flags, tabs, cards, torn memos, tickets | 3.0 KB |
-| `planner` | day headings, weeks, habit trackers, date stamps (date stamps need `marks`, and `highlight` for `data-mark="highlight"`) | 2.0 KB |
+| `planner` | day headings, weeks, habit trackers, date stamps (date stamps need `marks`, and `highlight` for `data-mark="highlight"`) | 2.3 KB |
 | `forms` | checkboxes, radios, to-dos, text fields, ink samples | 1.4 KB |
 | `extras` | photos, postage, labels, bullet journal, progress | 2.6 KB |
 | `images` | lithograph, printer | 0.4 KB |
 | `diagram` | `.pt-diagram` | 0.8 KB |
 
-The script is one module (`import { init } from 'papertooth'`, about 23 KB gzipped); the code for diagrams and the image effects is fetched only the first time a page has one. The browser build for a `<script>` tag (`dist/papertooth.min.js`) is a single file with everything in it.
+The script is one module (`import { init } from 'papertooth'`, about 30 KB gzipped); the code for diagrams and the image effects is fetched only the first time a page has one. The browser build for a `<script>` tag (`dist/papertooth.min.js`) is a single file with everything in it.
 
 A sheet gives the text on it a document's typography: headings, paragraphs and lists, with a grid line between the blocks of text in a `<section>`. These styles weigh as little as one class, so an app's own class wins over them when the app's styles load after papertooth. A `<section>` stays an ordinary block, so an app's panels keep their own layout.
 
