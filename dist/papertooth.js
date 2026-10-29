@@ -24,7 +24,7 @@ import {
   waveD,
   wobblyBox,
   wobblyRing
-} from "./chunks/chunk-446YTACK.js";
+} from "./chunks/chunk-NKEOULRF.js";
 import {
   DEFAULTS,
   cssVar,
@@ -41,7 +41,7 @@ import {
   svgDoc,
   toHex,
   typewriterFilter
-} from "./chunks/chunk-4USTAVRY.js";
+} from "./chunks/chunk-KYVSARDL.js";
 
 // src/js/painter.js
 var repaint = () => {
@@ -57,8 +57,8 @@ var onDemand = (load) => {
     return null;
   };
 };
-var imagesFor = onDemand(() => import("./chunks/images-KVAZK5GA.js"));
-var diagramFor = onDemand(() => import("./chunks/diagram-NA2YOHHU.js"));
+var imagesFor = onDemand(() => import("./chunks/images-7YQWDATO.js"));
+var diagramFor = onDemand(() => import("./chunks/diagram-ACV6WDK4.js"));
 var LINE_MARKS = /* @__PURE__ */ new Set(["strike", "under", "cross"]);
 var shiftPath = (d, dx, dy) => d.replace(/(-?[\d.]+) (-?[\d.]+)/g, (_, x, y) => `${f(+x + dx)} ${f(+y + dy)}`);
 var SVGNS = "http://www.w3.org/2000/svg";
@@ -456,7 +456,7 @@ function firstDayOf(locale) {
     const l = new Intl.Locale(locale || new Intl.DateTimeFormat().resolvedOptions().locale);
     const info = typeof l.getWeekInfo === "function" ? l.getWeekInfo() : l.weekInfo;
     if (info && info.firstDay) return info.firstDay % 7;
-  } catch (e) {
+  } catch {
   }
   return 1;
 }
@@ -648,14 +648,20 @@ function dateStamp(el, date = parseDate(el.dataset.date), opts = {}) {
           cell.dataset.state = c.state;
           if (c.side) cell.dataset.side = "";
           const m = marks ? stampMark(s.part, c.state, mark, past) : {};
-          if (m.cell) Object.assign(cell.dataset, { anno: m.cell, tool: d.pastTool || "graphite" }), cell.classList.add("pt-anno");
+          if (m.cell) {
+            Object.assign(cell.dataset, { anno: m.cell, tool: d.pastTool || "graphite" });
+            cell.classList.add("pt-anno");
+          }
           if (m.label === "highlight") {
             const hl = document.createElement("mark");
             hl.className = "pt-mark";
             hl.append(label);
             cell.append(hl);
           } else {
-            if (m.label) Object.assign(label.dataset, { anno: m.label, tool: d.markTool || "pencil" }), label.classList.add("pt-anno");
+            if (m.label) {
+              Object.assign(label.dataset, { anno: m.label, tool: d.markTool || "pencil" });
+              label.classList.add("pt-anno");
+            }
             cell.append(label);
           }
           const key = marks && cellKey(s.part, c, unit), here = key ? fills.filter((f2) => f2.key === key && f2.row === (c.row || 0)) : [];
@@ -867,7 +873,7 @@ function readTemplates() {
 }
 function resolve(colour, el = document.documentElement) {
   if (!colour) return "";
-  if (/^--/.test(colour)) return cssVar(el, colour);
+  if (colour.startsWith("--")) return cssVar(el, colour);
   if (/^[a-z]+(-[a-z0-9]+)+$/.test(colour)) return cssVar(el, "--pt-" + colour) || colour;
   return colour;
 }
@@ -1023,7 +1029,6 @@ var DEFAULTS2 = {
   ribbon: null,
   highlighter: null
 };
-var DECORATE_SELECTOR = DECORATORS.map((d) => d[0]).join(",");
 function init(options = {}) {
   const o = { ...DEFAULTS2, ...options };
   const root = o.root || document.body;
@@ -1047,7 +1052,7 @@ function init(options = {}) {
       if (sel && !sel.isCollapsed && sel.rangeCount) {
         const range = sel.getRangeAt(0), base = range.commonAncestorContainer;
         const scope = base.nodeType === 1 ? base : base.parentElement;
-        const cands = /* @__PURE__ */ new Set([...scope ? scope.querySelectorAll(SEL_TEXT) : []]);
+        const cands = new Set(scope ? scope.querySelectorAll(SEL_TEXT) : []);
         for (let n = scope; n && n !== document.body; n = n.parentElement) if (n.matches(SEL_TEXT)) cands.add(n);
         cands.forEach((el) => {
           if (sel.containsNode(el, true)) now.push(el);

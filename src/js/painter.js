@@ -1,7 +1,7 @@
 // Draws shapes at each element's real size, only when the element is near the screen,
 // and only again when its size or style changes. Reads and writes are batched per frame.
 import { enc, svgDoc, rng, seedOf, cssVar, f, hoverOf } from './core.js';
-import { HIGHLIGHT, POOL_Y, HEAVY_START, secondPass, gradient, OUTLINE, RULE, ANNO, SWATCH, LINK, STRIKE, WAVE_TILE, WAVE_W, waveD, progressSVG } from './shapes.js';
+import { HIGHLIGHT, POOL_Y, HEAVY_START, secondPass, gradient, OUTLINE, RULE, ANNO, SWATCH, LINK, STRIKE, WAVE_W, waveD, progressSVG } from './shapes.js';
 import { toolOf, toolKey, toolDefs, inkPath, passes } from './tools.js';
 
 // set by the scheduler, so a painter can ask to be called again (for example when an image loads)

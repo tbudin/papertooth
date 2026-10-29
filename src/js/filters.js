@@ -112,7 +112,7 @@ ${p.mode === 'duo' && p.ink2
 /** Every filter the library uses, as SVG markup. */
 export function filtersMarkup(params = {}) {
   const P = {};
-  for (const k in DEFAULTS) P[k] = { ...DEFAULTS[k], ...(params[k] || {}) };
+  for (const k in DEFAULTS) P[k] = { ...DEFAULTS[k], ...params[k] };
   const c = P.colors;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;width:0;height:0" aria-hidden="true" focusable="false" id="pt-filters">
 <filter id="pt-ink-text" x="-4%" y="-12%" width="108%" height="124%">
@@ -159,7 +159,7 @@ ${brushFilter('pt-brush', P.brush)}
 let current = {};
 /** Put the filters into the page, or replace them with new parameters. */
 export function injectFilters(params = {}, doc = document) {
-  for (const k in params) current[k] = { ...(current[k] || {}), ...params[k] };
+  for (const k in params) current[k] = { ...current[k], ...params[k] };
   const markup = filtersMarkup(current);
   const old = doc.getElementById('pt-filters');
   const tpl = doc.createElement('div');

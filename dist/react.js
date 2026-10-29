@@ -61,7 +61,7 @@ function firstDayOf(locale) {
     const l = new Intl.Locale(locale || new Intl.DateTimeFormat().resolvedOptions().locale);
     const info = typeof l.getWeekInfo === "function" ? l.getWeekInfo() : l.weekInfo;
     if (info && info.firstDay) return info.firstDay % 7;
-  } catch (e) {
+  } catch {
   }
   return 1;
 }

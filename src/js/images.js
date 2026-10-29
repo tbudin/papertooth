@@ -152,7 +152,7 @@ export function renderPrint(el, img, p) {
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, 0, 0, w, h);
   let src;
-  try { src = ctx.getImageData(0, 0, w, h); } catch (err) { el.dataset.ptBlocked = ''; return false; }
+  try { src = ctx.getImageData(0, 0, w, h); } catch { el.dataset.ptBlocked = ''; return false; }
   const q = dither(luminance(src.data, w, h, p), w, h, p);
   const out = ctx.createImageData(w, h), d = out.data, max = p.levels - 1;
   const ink = toRgb(p.ink);

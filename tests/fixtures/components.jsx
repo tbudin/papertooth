@@ -1,5 +1,4 @@
 // Components shared by the test pages and the server render (no side effects, so it also loads in Node).
-import { useState } from 'react';
 import { usePapertooth, Btn, Mark, Anno, Wobble, Check, DayHead, Week, Habits, DateStamp } from 'papertooth/react';
 
 /* re-rendered content, also rendered on the server for the hydration test */
@@ -26,7 +25,7 @@ export function Planner({ onToggle }) {
       <DateStamp id="ds" unit="week" date={day} past="x" ink="blue" />
       <Habits id="h" head={['M', 'T', 'W']} habits={[{ name: 'Read', done: [true, false, true] }, { name: 'Run', ink: 'ink-beni', done: [false, false, false] }]} onToggle={onToggle} />
       <Week id="w-box" date={day} mark="box" />
-      <Habits id="hc" head={['M', 'T']} habits={[{ name: 'Run', done: [true, false] }]} cell={({ day, done }) => done ? <span className="own">5k</span> : null} />
+      <Habits id="hc" head={['M', 'T']} habits={[{ name: 'Run', done: [true, false] }]} cell={({ done }) => done ? <span className="own">5k</span> : null} />
     </main>
   );
 }

@@ -19,7 +19,7 @@ function readTemplates() {
 /** Accept a colour or a token name such as "ink-beni" or "--pt-ink-beni". */
 export function resolve(colour, el = document.documentElement) {
   if (!colour) return '';
-  if (/^--/.test(colour)) return cssVar(el, colour);
+  if (colour.startsWith('--')) return cssVar(el, colour);
   if (/^[a-z]+(-[a-z0-9]+)+$/.test(colour)) return cssVar(el, '--pt-' + colour) || colour;
   return colour;
 }

@@ -97,10 +97,10 @@ export function dateStamp(el, date = parseDate(el.dataset.date), opts = {}) {
           cell.dataset.state = c.state;
           if (c.side) cell.dataset.side = '';
           const m = marks ? stampMark(s.part, c.state, mark, past) : {};
-          if (m.cell) Object.assign(cell.dataset, { anno: m.cell, tool: d.pastTool || 'graphite' }), cell.classList.add('pt-anno');
+          if (m.cell) { Object.assign(cell.dataset, { anno: m.cell, tool: d.pastTool || 'graphite' }); cell.classList.add('pt-anno'); }
           if (m.label === 'highlight') { const hl = document.createElement('mark'); hl.className = 'pt-mark'; hl.append(label); cell.append(hl); }
           else {
-            if (m.label) Object.assign(label.dataset, { anno: m.label, tool: d.markTool || 'pencil' }), label.classList.add('pt-anno');
+            if (m.label) { Object.assign(label.dataset, { anno: m.label, tool: d.markTool || 'pencil' }); label.classList.add('pt-anno'); }
             cell.append(label);
           }
           const key = marks && cellKey(s.part, c, unit), here = key ? fills.filter(f => f.key === key && f.row === (c.row || 0)) : [];

@@ -3,7 +3,7 @@ import {
   cssVar,
   lithoFilter,
   toRgb
-} from "./chunk-4USTAVRY.js";
+} from "./chunk-KYVSARDL.js";
 
 // src/js/images.js
 var lithoCache = /* @__PURE__ */ new Map();
@@ -149,7 +149,7 @@ function renderPrint(el, img, p) {
   let src;
   try {
     src = ctx.getImageData(0, 0, w, h);
-  } catch (err) {
+  } catch {
     el.dataset.ptBlocked = "";
     return false;
   }

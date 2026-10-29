@@ -33,8 +33,6 @@ export const DEFAULTS = {
   pen: null, pencil: null, ribbon: null, highlighter: null
 };
 
-const DECORATE_SELECTOR = DECORATORS.map(d => d[0]).join(',');
-
 export function init(options = {}) {
   const o = { ...DEFAULTS, ...options };
   const root = o.root || document.body;
@@ -63,7 +61,7 @@ export function init(options = {}) {
       if (sel && !sel.isCollapsed && sel.rangeCount) {
         const range = sel.getRangeAt(0), base = range.commonAncestorContainer;
         const scope = base.nodeType === 1 ? base : base.parentElement;
-        const cands = new Set([...(scope ? scope.querySelectorAll(SEL_TEXT) : [])]);
+        const cands = new Set((scope ? scope.querySelectorAll(SEL_TEXT) : []));
         for (let n = scope; n && n !== document.body; n = n.parentElement) if (n.matches(SEL_TEXT)) cands.add(n);
         cands.forEach(el => { if (sel.containsNode(el, true)) now.push(el); });
       }

@@ -1,7 +1,7 @@
 // Hand-drawn diagrams from a subset of Mermaid: flowchart / graph, pie and xychart-beta.
 // Output is inline SVG drawn in currentColor, so ink, fonts and paper follow the CSS variables.
 import { f, rng, curve, jit, stroke } from './core.js';
-import { band, hatchD, FILLS, swipesD, swipesAt } from './shapes.js';
+import { band, hatchD, FILLS, swipesD } from './shapes.js';
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const unquote = s => s.trim().replace(/^"(.*)"$/, '$1');
