@@ -19,6 +19,8 @@ jobs:
       # dist/ and the docs copies are committed, so they must be what the source builds to
       - name: Built files match the source
         run: git diff --exit-code -- dist docs/papertooth.min.css docs/papertooth.min.js
+      - name: The README states the sizes dist actually has
+        run: npm run check:sizes
       - run: npx playwright install --with-deps chromium
       - run: npm test
       - uses: actions/upload-artifact@v7

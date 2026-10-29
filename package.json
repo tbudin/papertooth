@@ -82,6 +82,7 @@
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
+    "check:sizes": "node scripts/check-sizes.mjs",
     "dev": "node scripts/build.mjs && node scripts/serve.mjs",
     "prepublishOnly": "npm run build",
     "test": "playwright test"

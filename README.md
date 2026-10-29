@@ -42,9 +42,9 @@ import 'papertooth/css/marks';       // marks on text and stamps
 
 | Part | What is in it | gzip |
 | --- | --- | --- |
-| `highlight` | `.pt-btn`, `.pt-mark` | 1.9 KB |
+| `highlight` | `.pt-btn`, `.pt-mark` | 1.8 KB |
 | `lines` | `.pt-link`, `.pt-rule` | 1.1 KB |
-| `marks` | `.pt-anno`, `.pt-stamp`, approval boxes | 1.3 KB |
+| `marks` | `.pt-anno`, `.pt-stamp`, approval boxes | 1.2 KB |
 | `pictures` | picture stamps (`data-pic`), needs `marks` | 2.7 KB |
 | `goods` | sticky notes, tape, flags, tabs, cards, torn memos, tickets | 3.0 KB |
 | `planner` | day headings, weeks, habit trackers, date stamps (date stamps need `marks`, and `highlight` for `data-mark="highlight"`) | 2.3 KB |
