@@ -176,7 +176,9 @@ test('the docs site runs without errors', async ({ page }) => {
   /* Over http, not file://: the site is a set of ES modules now, and a
      module cannot be imported from a file:// page. The server the other
      tests use already serves the repository. */
-  await page.goto('http://localhost:4317/docs/');
+  /* index.html by name: the test server reads the path it is given and
+     does not resolve a directory to its index. */
+  await page.goto('http://localhost:4317/docs/index.html');
   await expect(page.locator('.brand span')).toHaveText(`v${version}`);
   await expect(page.locator('html')).toHaveAttribute('data-pt-filters', '');
   await expect(page.locator('.pt-btn--outline').first()).toHaveAttribute('style', /--pt-ol/);
