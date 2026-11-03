@@ -22,4 +22,4 @@ Tap a circle and it fills in with a quick scribble. Each habit has its own ink.
 | `--pt-hb` | pen | Ink for a row |
 
 ---
-https://tbudin.github.io/papertooth/habits/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/habits/ · papertooth 0.5.3 · MIT

@@ -13,4 +13,4 @@ A ruled index card, held by tape or a paper clip. The clip sits around the paper
 | `.pt-tape inside .pt-card` |  | Position it with top, left and --pt-rot |
 
 ---
-https://tbudin.github.io/papertooth/card/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/card/ · papertooth 0.5.3 · MIT

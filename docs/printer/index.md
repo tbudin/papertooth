@@ -17,4 +17,4 @@ The picture printed again at low resolution with real dithering, the way a Game 
 | `--pt-print-ink` | #26262a | Ink colour |
 
 ---
-https://tbudin.github.io/papertooth/printer/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/printer/ · papertooth 0.5.3 · MIT

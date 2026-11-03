@@ -24,4 +24,4 @@ Nothing is rotated unless you ask for it. Give any note, stamp, tape, card or ph
 Anything drawn can be drawn with any instrument: fountain pen, ballpoint, brush pen, felt marker, graphite or coloured pencil. Put `data-tool` on it.
 
 ---
-https://tbudin.github.io/papertooth/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/ · papertooth 0.5.3 · MIT

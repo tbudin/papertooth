@@ -13,4 +13,4 @@ A memo torn off a pad, with white fibres along the tear, and an order slip with 
 | `--pt-stub` | 72px | Stub width |
 
 ---
-https://tbudin.github.io/papertooth/torn/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/torn/ · papertooth 0.5.3 · MIT

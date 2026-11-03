@@ -1,11 +1,11 @@
-/*! papertooth v0.5.2 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.5.3 | (c) 2026 Plain Matter Pte Ltd | MIT License | github.com/tbudin/papertooth */
 import {
   brushFilter,
   curve,
   f,
   jit,
   stroke
-} from "./chunk-4RAT2SVN.js";
+} from "./chunk-25B72SWT.js";
 
 // src/js/tools.js
 var TOOLS = ["pen", "ballpoint", "brush", "marker", "graphite", "pencil"];

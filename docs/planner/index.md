@@ -13,4 +13,4 @@ A date header and a week view, Monday first. Saturday is blue and Sunday red, as
 | `kit.planner.dayHead(el, date)` |  | Any date |
 
 ---
-https://tbudin.github.io/papertooth/planner/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/planner/ · papertooth 0.5.3 · MIT

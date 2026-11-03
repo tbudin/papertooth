@@ -2,6 +2,11 @@
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## 0.5.3 - 2026-11-03
+
+### Fixed
+- Corrected the copyright holder to Plain Matter Pte Ltd in the MIT licence, README and distributed CSS/JavaScript notices. Thomas Budin remains the package author.
+
 ## 0.5.2 - 2026-10-29
 
 ### Fixed

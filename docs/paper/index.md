@@ -17,4 +17,4 @@ Two separate choices: the paper itself (its colour and grain) and the ruling pri
 | `.pt-desk` |  | The desk colour, on body or any container. Dark at night, unless .pt-day. |
 
 ---
-https://tbudin.github.io/papertooth/paper/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/paper/ · papertooth 0.5.3 · MIT

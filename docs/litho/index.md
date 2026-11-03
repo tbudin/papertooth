@@ -19,4 +19,4 @@ Any picture printed as a stone lithograph: grainy tones in one ink, two inks by 
 | `--pt-litho-offset` | 1.5 | Misregistration, in px |
 
 ---
-https://tbudin.github.io/papertooth/litho/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/litho/ · papertooth 0.5.3 · MIT

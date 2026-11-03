@@ -15,4 +15,4 @@ Flat along the glue strip at the top. There is no outline: the edge you see is t
 | `--pt-note-paper` |  | Any paper colour |
 
 ---
-https://tbudin.github.io/papertooth/sticky/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/sticky/ · papertooth 0.5.3 · MIT

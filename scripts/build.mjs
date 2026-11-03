@@ -13,7 +13,7 @@ if (!readFileSync('src/js/index.js', 'utf8').includes(`VERSION = '${version}'`))
 }
 // MIT asks for the copyright line to travel with every copy, and the CDN files travel without LICENSE.
 // "/*!" keeps the comment through a user's own minifier.
-const notice = `/*! papertooth v${version} | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */`;
+const notice = `/*! papertooth v${version} | (c) 2026 Plain Matter Pte Ltd | MIT License | github.com/tbudin/papertooth */`;
 const banner = { css: notice, js: notice };
 
 // picture stamps become CSS masks: ink where the drawing is, holes where it is cut out in the paper colour

@@ -11,4 +11,4 @@ Mermaid's pie syntax, filled in by hand.
 | `pie` |  | pie [showData] [title …], then "Label" : value per line |
 
 ---
-https://tbudin.github.io/papertooth/pie/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/pie/ · papertooth 0.5.3 · MIT

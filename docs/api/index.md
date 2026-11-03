@@ -57,4 +57,4 @@ Papertooth.filtersMarkup(params);                         // the filters as SVG 
 - Textures are SVG filters on text only. On long pages, use `.pt-texture-light`, or `.pt-lazy` on sections so the browser can skip them off screen.
 
 ---
-https://tbudin.github.io/papertooth/api/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/api/ · papertooth 0.5.3 · MIT

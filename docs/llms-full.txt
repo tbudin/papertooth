@@ -1,4 +1,4 @@
-# papertooth 0.5.2 — complete documentation
+# papertooth 0.5.3 — complete documentation
 
 > Hand-drawn Japanese stationery for the web: dotted paper, highlighters, ink, pencil, hanko stamps, washi tape and planner pieces, in CSS with an optional script.
 
@@ -34,7 +34,7 @@ Nothing is rotated unless you ask for it. Give any note, stamp, tape, card or ph
 Anything drawn can be drawn with any instrument: fountain pen, ballpoint, brush pen, felt marker, graphite or coloured pencil. Put `data-tool` on it.
 
 ---
-https://tbudin.github.io/papertooth/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -52,7 +52,7 @@ Start from meeting notesa lettera landing sectiona pinboarda blank page
 HTML
 
 ---
-https://tbudin.github.io/papertooth/playground/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/playground/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -110,7 +110,7 @@ Fonts are not bundled. The defaults are Courier Prime, Special Elite and Caveat,
 Everything still renders, with a fixed version of each drawn shape. For the textures, paste `dist/papertooth-filters.svg` into the page and add `class="pt-filters"` to `<html>`. Lithograph, printer and diagrams need the script.
 
 ---
-https://tbudin.github.io/papertooth/install/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/install/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -192,7 +192,7 @@ kit.setPen('ink-ai'); kit.setPencil('pencil-red'); kit.setRibbon('ribbon-black')
 The same list is exported as `PALETTE` from the script, if you need the names and values in JavaScript.
 
 ---
-https://tbudin.github.io/papertooth/colours/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/colours/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -236,7 +236,7 @@ Pens, pencils, ribbons and highlighters: see [Inks and colours](https://tbudin.g
 | `--pt-s-body, -small, -h1, -h2` | 20, 16, 36, 26px | Type sizes. |
 
 ---
-https://tbudin.github.io/papertooth/theming/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/theming/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -260,7 +260,7 @@ Two separate choices: the paper itself (its colour and grain) and the ruling pri
 | `.pt-desk` |  | The desk colour, on body or any container. Dark at night, unless .pt-day. |
 
 ---
-https://tbudin.github.io/papertooth/paper/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/paper/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -282,7 +282,7 @@ Typed or handwritten, in ribbon, pen or pencil. The texture varies the ink a lit
 | `--pt-wobble` | 1 | 0 to 2 |
 
 ---
-https://tbudin.github.io/papertooth/writing/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/writing/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -312,7 +312,7 @@ Code
 ```
 
 ---
-https://tbudin.github.io/papertooth/typelab/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/typelab/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -338,7 +338,7 @@ A felt-tip swipe. Most styles start light where the nib lands and fill in toward
 | `kit.setFilters({ smudge })` | { drag: 4.2, blur: 3.4, strength: .78 } | How far and how strongly the ink drags |
 
 ---
-https://tbudin.github.io/papertooth/highlighter/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/highlighter/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -361,7 +361,7 @@ A drawn outline at rest, the highlighter on hover. Boxes, a loop, corners, or br
 | `:disabled, aria-disabled` |  | Faded, with no hover |
 
 ---
-https://tbudin.github.io/papertooth/outline/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/outline/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -386,7 +386,7 @@ A pen stroke under each line of a link. Hover adds a second stroke, or circles t
 | `.pt-links-mix` |  | On a container: a natural mix of styles |
 
 ---
-https://tbudin.github.io/papertooth/link/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/link/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -405,7 +405,7 @@ A line drawn across the page, at its real width, so no two repeat.
 | `data-tool` | ribbon ink | pen, ballpoint, brush, marker, graphite, pencil |
 
 ---
-https://tbudin.github.io/papertooth/separator/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/separator/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -426,7 +426,7 @@ Circle, box, underline, strike or cross out a word. The teacher's hanamaru is fo
 | `--pt-anno` |  | Any colour |
 
 ---
-https://tbudin.github.io/papertooth/marks/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/marks/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -472,7 +472,7 @@ The 承認 / 確認 / 作成 boxes found on Japanese office documents.
 | `kit.setFilters({ stamp })` | { wear: .55, edge: .5, mottle: .5, rough: 1.3 } | Texture |
 
 ---
-https://tbudin.github.io/papertooth/stamps/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/stamps/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -502,7 +502,7 @@ The calendar stamps of Japanese stationery: a week strip to fill in, a month cal
 | `<DateStamp>` |  | The same in papertooth/react |
 
 ---
-https://tbudin.github.io/papertooth/datestamps/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/datestamps/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -524,7 +524,7 @@ Flat along the glue strip at the top. There is no outline: the edge you see is t
 | `--pt-note-paper` |  | Any paper colour |
 
 ---
-https://tbudin.github.io/papertooth/sticky/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/sticky/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -544,7 +544,7 @@ Masking, kraft and washi tape are opaque, as they are in real life. Only clear t
 | `--pt-rot` | 0deg | Rotation |
 
 ---
-https://tbudin.github.io/papertooth/tape/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/tape/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -564,7 +564,7 @@ A ruled index card, held by tape or a paper clip. The clip sits around the paper
 | `.pt-tape inside .pt-card` |  | Position it with top, left and --pt-rot |
 
 ---
-https://tbudin.github.io/papertooth/card/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/card/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -584,7 +584,7 @@ A memo torn off a pad, with white fibres along the tear, and an order slip with 
 | `--pt-stub` | 72px | Stub width |
 
 ---
-https://tbudin.github.io/papertooth/torn/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/torn/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -605,7 +605,7 @@ Printed label tape, embossed plastic labels and film flags.
 | `.pt-tabs > .pt-tab` |  | Index tabs on the edge of a sheet |
 
 ---
-https://tbudin.github.io/papertooth/labels/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/labels/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -631,7 +631,7 @@ Any picture printed as a stone lithograph: grainy tones in one ink, two inks by 
 | `--pt-litho-offset` | 1.5 | Misregistration, in px |
 
 ---
-https://tbudin.github.io/papertooth/litho/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/litho/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -655,7 +655,7 @@ The picture printed again at low resolution with real dithering, the way a Game 
 | `--pt-print-ink` | #26262a | Ink colour |
 
 ---
-https://tbudin.github.io/papertooth/printer/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/printer/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -678,7 +678,7 @@ Ways to mount a picture: an instant print, photo corners, tape or a postage stam
 | `--pt-rot` | 0deg | Rotation |
 
 ---
-https://tbudin.github.io/papertooth/frames/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/frames/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -698,7 +698,7 @@ A date header and a week view, Monday first. Saturday is blue and Sunday red, as
 | `kit.planner.dayHead(el, date)` |  | Any date |
 
 ---
-https://tbudin.github.io/papertooth/planner/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/planner/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -727,7 +727,7 @@ Tap a circle and it fills in with a quick scribble. Each habit has its own ink.
 | `--pt-hb` | pen | Ink for a row |
 
 ---
-https://tbudin.github.io/papertooth/habits/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/habits/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -745,7 +745,7 @@ The rapid-logging signs, drawn in the current ink.
 | `data-sign` |  | task, done, migrated, scheduled, event, note, priority |
 
 ---
-https://tbudin.github.io/papertooth/bujo/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/bujo/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -770,7 +770,7 @@ Pick the shape, then what it is filled with. A bar fills continuously; boxes and
 | `--pt-hl` | yellow | Highlighter colour |
 
 ---
-https://tbudin.github.io/papertooth/progress/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/progress/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -792,7 +792,7 @@ Hand-drawn boxes and circles over the native controls, so keyboards and screen r
 | `data-ul` | wobble | Underline style when data-strike="under" |
 
 ---
-https://tbudin.github.io/papertooth/checkbox/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/checkbox/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -813,7 +813,7 @@ A line on the page to write on: dotted in pencil like a printed form, inked in w
 | `--pt-input-line` | pencil | Colour of the dotted line |
 
 ---
-https://tbudin.github.io/papertooth/input/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/input/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -836,7 +836,7 @@ Write a Mermaid flowchart and it is drawn by hand. Colours and fonts follow the 
 | `--pt-diagram-stroke` | 1.6px | Line weight |
 
 ---
-https://tbudin.github.io/papertooth/flowchart/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/flowchart/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -854,7 +854,7 @@ Mermaid's pie syntax, filled in by hand.
 | `pie` |  | pie [showData] [title …], then "Label" : value per line |
 
 ---
-https://tbudin.github.io/papertooth/pie/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/pie/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -872,7 +872,7 @@ Mermaid's xychart syntax: hatched bars and a pen line through the points.
 | `xychart-beta` |  | title, x-axis [labels], y-axis "label" min --> max, bar [values], line [values] |
 
 ---
-https://tbudin.github.io/papertooth/chart/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/chart/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -936,7 +936,7 @@ Papertooth.filtersMarkup(params);                         // the filters as SVG 
 - Textures are SVG filters on text only. On long pages, use `.pt-texture-light`, or `.pt-lazy` on sections so the browser can skip them off screen.
 
 ---
-https://tbudin.github.io/papertooth/api/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/api/ · papertooth 0.5.3 · MIT
 
 
 ---
@@ -946,6 +946,12 @@ https://tbudin.github.io/papertooth/api/ · papertooth 0.5.2 · MIT
 *papertooth · Releases*
 
 Newest first. [Follow by feed](../feed.xml).
+
+## 0.5.3 - 2026-11-03 3 November 2026
+
+### Fixed
+
+- Corrected the copyright holder to Plain Matter Pte Ltd in the MIT licence, README and distributed CSS/JavaScript notices. Thomas Budin remains the package author.
 
 ## 0.5.2 - 2026-10-29 29 October 2026
 
@@ -1134,4 +1140,4 @@ Newest first. [Follow by feed](../feed.xml).
 First public release.
 
 ---
-https://tbudin.github.io/papertooth/changelog/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/changelog/ · papertooth 0.5.3 · MIT

@@ -18,4 +18,4 @@ Pick the shape, then what it is filled with. A bar fills continuously; boxes and
 | `--pt-hl` | yellow | Highlighter colour |
 
 ---
-https://tbudin.github.io/papertooth/progress/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/progress/ · papertooth 0.5.3 · MIT

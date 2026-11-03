@@ -15,4 +15,4 @@ Hand-drawn boxes and circles over the native controls, so keyboards and screen r
 | `data-ul` | wobble | Underline style when data-strike="under" |
 
 ---
-https://tbudin.github.io/papertooth/checkbox/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/checkbox/ · papertooth 0.5.3 · MIT

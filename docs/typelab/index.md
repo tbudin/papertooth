@@ -23,4 +23,4 @@ Code
 ```
 
 ---
-https://tbudin.github.io/papertooth/typelab/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/typelab/ · papertooth 0.5.3 · MIT

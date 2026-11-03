@@ -14,4 +14,4 @@ Circle, box, underline, strike or cross out a word. The teacher's hanamaru is fo
 | `--pt-anno` |  | Any colour |
 
 ---
-https://tbudin.github.io/papertooth/marks/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/marks/ · papertooth 0.5.3 · MIT

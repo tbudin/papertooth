@@ -16,4 +16,4 @@ Ways to mount a picture: an instant print, photo corners, tape or a postage stam
 | `--pt-rot` | 0deg | Rotation |
 
 ---
-https://tbudin.github.io/papertooth/frames/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/frames/ · papertooth 0.5.3 · MIT

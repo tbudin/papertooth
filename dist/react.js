@@ -1,4 +1,4 @@
-/*! papertooth v0.5.2 | (c) 2026 Thomas Budin | MIT License | github.com/tbudin/papertooth */
+/*! papertooth v0.5.3 | (c) 2026 Plain Matter Pte Ltd | MIT License | github.com/tbudin/papertooth */
 "use client";
 
 // src/react/index.js

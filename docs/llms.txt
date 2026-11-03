@@ -4,7 +4,7 @@
 
 Hand-drawn stationery for the web: dotted and ruled paper, fountain-pen and pencil ink, highlighters, hanko stamps, washi tape, planner pieces and Mermaid diagrams drawn by hand. The CSS works on its own; a small optional script adds the textures, the shapes drawn at each element's real size and the diagrams.
 
-- Version 0.5.2, MIT, © Plain Matter Pte Ltd.
+- Version 0.5.3, MIT, © Plain Matter Pte Ltd.
 - Install: `npm i papertooth`
 - Source: https://github.com/tbudin/papertooth
 - Every page below is also available as markdown at its URL plus `index.md`.

@@ -14,4 +14,4 @@ Printed label tape, embossed plastic labels and film flags.
 | `.pt-tabs > .pt-tab` |  | Index tabs on the edge of a sheet |
 
 ---
-https://tbudin.github.io/papertooth/labels/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/labels/ · papertooth 0.5.3 · MIT

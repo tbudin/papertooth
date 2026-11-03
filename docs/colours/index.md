@@ -75,4 +75,4 @@ kit.setPen('ink-ai'); kit.setPencil('pencil-red'); kit.setRibbon('ribbon-black')
 The same list is exported as `PALETTE` from the script, if you need the names and values in JavaScript.
 
 ---
-https://tbudin.github.io/papertooth/colours/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/colours/ · papertooth 0.5.3 · MIT

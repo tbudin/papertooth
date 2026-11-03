@@ -23,4 +23,4 @@ The calendar stamps of Japanese stationery: a week strip to fill in, a month cal
 | `<DateStamp>` |  | The same in papertooth/react |
 
 ---
-https://tbudin.github.io/papertooth/datestamps/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/datestamps/ · papertooth 0.5.3 · MIT

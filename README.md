@@ -341,6 +341,6 @@ To release: bump the version in `package.json` and `src/js/index.js` (the build 
 
 ## Licence
 
-[MIT](LICENSE) © 2026 Thomas Budin.
+[MIT](LICENSE) © 2026 Plain Matter Pte Ltd.
 
 The fonts named above are not part of the package; each comes with its own licence (SIL Open Font License, or Apache 2.0 for Special Elite).

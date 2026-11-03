@@ -11,4 +11,4 @@ Mermaid's xychart syntax: hatched bars and a pen line through the points.
 | `xychart-beta` |  | title, x-axis [labels], y-axis "label" min --> max, bar [values], line [values] |
 
 ---
-https://tbudin.github.io/papertooth/chart/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/chart/ · papertooth 0.5.3 · MIT

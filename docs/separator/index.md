@@ -12,4 +12,4 @@ A line drawn across the page, at its real width, so no two repeat.
 | `data-tool` | ribbon ink | pen, ballpoint, brush, marker, graphite, pencil |
 
 ---
-https://tbudin.github.io/papertooth/separator/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/separator/ · papertooth 0.5.3 · MIT

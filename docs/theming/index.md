@@ -37,4 +37,4 @@ Pens, pencils, ribbons and highlighters: see [Inks and colours](https://tbudin.g
 | `--pt-s-body, -small, -h1, -h2` | 20, 16, 36, 26px | Type sizes. |
 
 ---
-https://tbudin.github.io/papertooth/theming/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/theming/ · papertooth 0.5.3 · MIT

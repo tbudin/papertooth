@@ -16,4 +16,4 @@ A drawn outline at rest, the highlighter on hover. Boxes, a loop, corners, or br
 | `:disabled, aria-disabled` |  | Faded, with no hover |
 
 ---
-https://tbudin.github.io/papertooth/outline/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/outline/ · papertooth 0.5.3 · MIT

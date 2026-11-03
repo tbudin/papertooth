@@ -39,4 +39,4 @@ The 承認 / 確認 / 作成 boxes found on Japanese office documents.
 | `kit.setFilters({ stamp })` | { wear: .55, edge: .5, mottle: .5, rough: 1.3 } | Texture |
 
 ---
-https://tbudin.github.io/papertooth/stamps/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/stamps/ · papertooth 0.5.3 · MIT

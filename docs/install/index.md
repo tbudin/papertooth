@@ -51,4 +51,4 @@ Fonts are not bundled. The defaults are Courier Prime, Special Elite and Caveat,
 Everything still renders, with a fixed version of each drawn shape. For the textures, paste `dist/papertooth-filters.svg` into the page and add `class="pt-filters"` to `<html>`. Lithograph, printer and diagrams need the script.
 
 ---
-https://tbudin.github.io/papertooth/install/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/install/ · papertooth 0.5.3 · MIT

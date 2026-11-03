@@ -16,4 +16,4 @@ Write a Mermaid flowchart and it is drawn by hand. Colours and fonts follow the 
 | `--pt-diagram-stroke` | 1.6px | Line weight |
 
 ---
-https://tbudin.github.io/papertooth/flowchart/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/flowchart/ · papertooth 0.5.3 · MIT

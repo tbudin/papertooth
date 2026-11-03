@@ -11,4 +11,4 @@ Start from meeting notesa lettera landing sectiona pinboarda blank page
 HTML
 
 ---
-https://tbudin.github.io/papertooth/playground/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/playground/ · papertooth 0.5.3 · MIT

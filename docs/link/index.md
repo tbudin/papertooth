@@ -18,4 +18,4 @@ A pen stroke under each line of a link. Hover adds a second stroke, or circles t
 | `.pt-links-mix` |  | On a container: a natural mix of styles |
 
 ---
-https://tbudin.github.io/papertooth/link/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/link/ · papertooth 0.5.3 · MIT

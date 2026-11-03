@@ -19,4 +19,4 @@ A felt-tip swipe. Most styles start light where the nib lands and fill in toward
 | `kit.setFilters({ smudge })` | { drag: 4.2, blur: 3.4, strength: .78 } | How far and how strongly the ink drags |
 
 ---
-https://tbudin.github.io/papertooth/highlighter/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/highlighter/ · papertooth 0.5.3 · MIT

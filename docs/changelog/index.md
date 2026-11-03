@@ -4,6 +4,12 @@
 
 Newest first. [Follow by feed](../feed.xml).
 
+## 0.5.3 - 2026-11-03 3 November 2026
+
+### Fixed
+
+- Corrected the copyright holder to Plain Matter Pte Ltd in the MIT licence, README and distributed CSS/JavaScript notices. Thomas Budin remains the package author.
+
 ## 0.5.2 - 2026-10-29 29 October 2026
 
 ### Fixed
@@ -191,4 +197,4 @@ Newest first. [Follow by feed](../feed.xml).
 First public release.
 
 ---
-https://tbudin.github.io/papertooth/changelog/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/changelog/ · papertooth 0.5.3 · MIT

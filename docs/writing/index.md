@@ -15,4 +15,4 @@ Typed or handwritten, in ribbon, pen or pencil. The texture varies the ink a lit
 | `--pt-wobble` | 1 | 0 to 2 |
 
 ---
-https://tbudin.github.io/papertooth/writing/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/writing/ · papertooth 0.5.3 · MIT

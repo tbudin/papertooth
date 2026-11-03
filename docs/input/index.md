@@ -14,4 +14,4 @@ A line on the page to write on: dotted in pencil like a printed form, inked in w
 | `--pt-input-line` | pencil | Colour of the dotted line |
 
 ---
-https://tbudin.github.io/papertooth/input/ · papertooth 0.5.2 · MIT
+https://tbudin.github.io/papertooth/input/ · papertooth 0.5.3 · MIT
